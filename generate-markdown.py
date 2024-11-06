@@ -3,29 +3,27 @@ from collections import defaultdict
 import subprocess
 
 
-def extract_metadata(file_path):
+def extract_metadata(file_path: str) -> list[str]:
     with open(file_path, 'r') as file:
         lines = file.readlines()
-        description = None
         tags = None
         for line in lines:
-            if line.startswith("# Description:"):
-                description = line.strip().replace("# Description:", "").strip()
-            elif line.startswith("# Tags:"):
+            if line.startswith("# Tags:"):
                 tags = line.strip().replace("# Tags:", "").strip().split(", ")
-            if description and tags:
+            if tags:
                 break
-        return description, tags
+
+        return tags
 
 
-def generate_markdown(folder_path):
+def generate_markdown(folder_path: str) -> None:
     tag_dict = defaultdict(list)
 
     for root, _, files in os.walk(folder_path):
         for file in files:
             if file.endswith('.py'):
                 file_path = os.path.join(root, file)
-                description, tags = extract_metadata(file_path)
+                tags = extract_metadata(file_path)
                 if tags:
                     for tag in tags:
                         tag_dict[tag].append(file_path)
