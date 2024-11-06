@@ -1,5 +1,5 @@
 # Description: This script modifies a list of numbers by setting elements greater than a threshold to zero.
-# Tags: Lab, Python, List Modification, Threshold
+# Tags: List Modification, Threshold
 
 def modify_list(numbers, threshold):
     for i in range(len(numbers)):

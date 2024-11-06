@@ -1,5 +1,5 @@
 # Description: This script creates a list and a dictionary with reversed elements based on user input.
-# Tags: Lab, Python, List, Dictionary
+# Tags: List, Dictionary
 
 n = int(input("Въведете цяло число: "))
 

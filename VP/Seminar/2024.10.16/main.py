@@ -1,5 +1,5 @@
-# Description: This script performs various tasks based on user input, including unit conversion, greeting, and financial calculations.
-# Tags: Lab, Python, User Input, Unit Conversion, Financial Calculations
+# Description: This script performs various tasks based on including unit conversion, greeting, and financial calculations.
+# Tags: Unit Conversion, Financial Calculations
 
 def task_1():
     inch = float(input())

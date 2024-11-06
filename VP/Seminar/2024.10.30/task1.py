@@ -1,5 +1,5 @@
 # Description: This script calculates the multiplication of all numbers in a range that are divisible by 3 or 4.
-# Tags: Lab, Python, Multiplication, Range
+# Tags: Multiplication, Range
 
 def find_multiplication(m, n):
     result = 1

@@ -1,5 +1,5 @@
 # Description: This script interacts with the Gemini LLM API to generate responses based on user prompts.
-# Tags: Lab, Python, API, Gemini LLM, Logging
+# Tags: API, Gemini LLM, Logging
 
 import requests
 import json

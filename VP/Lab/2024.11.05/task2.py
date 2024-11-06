@@ -1,5 +1,5 @@
 # Description: This script checks if a given number is a palindrome.
-# Tags: Lab, Python, Palindrome, User Input
+# Tags: Palindrome
 
 def is_palindrome(number):
     num_str = str(number)

@@ -1,5 +1,5 @@
 # Description: This script solves a given Sudoku puzzle using a backtracking algorithm.
-# Tags: Lab, Python, Sudoku, Backtracking
+# Tags: Sudoku, Backtracking
 
 def print_board(board: list[list]) -> None:
     for i in board:

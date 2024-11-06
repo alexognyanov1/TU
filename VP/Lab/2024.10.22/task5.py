@@ -1,5 +1,5 @@
 # Description: This script manages orders, prints the number of unique products, and lists usernames for a product.
-# Tags: Lab, Python, Orders, List Operations
+# Tags: Orders, List Operations
 
 class OrderManager:
     orders = []

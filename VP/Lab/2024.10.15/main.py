@@ -1,5 +1,5 @@
-# Description: This script collects user input, determines if numbers are even or odd, and calculates the average and count of numbers greater than 10.
-# Tags: Lab, Python, User Input, Number Analysis
+# Description: This script collects determines if numbers are even or odd, and calculates the average and count of numbers greater than 10.
+# Tags: Number Analysis
 
 numbers = []
 moreThan10 = 0

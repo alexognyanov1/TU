@@ -1,5 +1,5 @@
-# Description: This script validates user input, forms tuples of digits in normal and reverse order.
-# Tags: Lab, Python, User Input, Tuples
+# Description: This script validates forms tuples of digits in normal and reverse order.
+# Tags: Tuples
 
 def validate_input():
     while True:

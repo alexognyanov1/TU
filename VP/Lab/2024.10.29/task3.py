@@ -1,5 +1,5 @@
 # Description: This script generates a visual representation of a directory structure.
-# Tags: Lab, Python, Directory Tree, File Sizes
+# Tags: Directory Tree, File Sizes
 
 import os
 import argparse

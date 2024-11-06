@@ -1,5 +1,5 @@
 # Description: This script finds the most valuable currency based on given exchange rates using a graph traversal algorithm.
-# Tags: Lab, Python, Currency Exchange, Graph Traversal
+# Tags: Currency Exchange, Graph Traversal
 
 from collections import defaultdict
 

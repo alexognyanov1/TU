@@ -1,6 +1,6 @@
 # Georgi Georgiev
 # Description: This script converts a temperature from Celsius to Fahrenheit.
-# Tags: Lab, Python, Temperature Conversion, User Input
+# Tags: Temperature Conversion
 
 C = float(input("C: "))
 

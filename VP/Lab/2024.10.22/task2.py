@@ -1,5 +1,5 @@
 # Description: This script generates a random list and inserts sums between elements.
-# Tags: Lab, Python, Random List, List Modification
+# Tags: Random List, List Modification
 
 import random
 

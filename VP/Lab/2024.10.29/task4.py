@@ -1,5 +1,5 @@
 # Description: This script backs up files from a source directory to a destination directory, logging the process.
-# Tags: Lab, Python, File Backup, Logging
+# Tags: File Backup, Logging
 
 import os
 import shutil

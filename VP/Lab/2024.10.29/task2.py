@@ -1,5 +1,5 @@
 # Description: This script generates random files, organizes them by extension, and logs their information.
-# Tags: Lab, Python, File Generation, Directory Traversal, Logging
+# Tags: File Generation, Directory Traversal, Logging
 
 import os
 import random
