@@ -1,3 +1,6 @@
+# Description: This script implements a Caesar cipher for text encryption.
+# Tags: Lab, Python, Caesar Cipher, Encryption
+
 def ceasar_cipher(text: str, shift: int) -> str:
     result = ""
     for i in range(len(text)):

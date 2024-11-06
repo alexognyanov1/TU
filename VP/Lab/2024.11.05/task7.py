@@ -1,3 +1,6 @@
+# Description: This script generates Pascal's triangle up to a specified number of rows.
+# Tags: Lab, Python, Pascal's Triangle, Mathematics
+
 def pascal_triangle(rows):
     triangle = []
     for i in range(rows):

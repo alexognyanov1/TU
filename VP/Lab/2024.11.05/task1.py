@@ -1,3 +1,6 @@
+# Description: This script calculates the area of different geometric shapes based on user input.
+# Tags: Lab, Python, Geometry, User Input
+
 def square_area(side):
     return side * side
 

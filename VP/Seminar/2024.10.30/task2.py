@@ -1,3 +1,6 @@
+# Description: This script finds the minimum, maximum, and average of a list of numbers.
+# Tags: Lab, Python, List Operations, Statistics
+
 n = int(input())
 
 numbers = []

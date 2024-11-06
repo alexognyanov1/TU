@@ -1,3 +1,6 @@
+# Description: This script creates a list and a dictionary with reversed elements based on user input.
+# Tags: Lab, Python, List, Dictionary
+
 n = int(input("Въведете цяло число: "))
 
 number_list = list(range(1, n + 1))
