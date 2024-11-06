@@ -1,4 +1,4 @@
-# Description: This script backs up files from a source directory to a destination directory, logging the process.
+# Description: This script backs up files from a source directory to a destination directory, specifying file types to include in the backup. It logs information about the backup process, including successful and failed file copies, directory creation attempts, and errors.
 # Tags: File Backup, Logging
 
 import os

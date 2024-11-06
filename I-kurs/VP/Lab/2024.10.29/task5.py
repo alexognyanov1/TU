@@ -1,8 +1,6 @@
 # Description: This script interacts with the Gemini LLM API to generate responses based on user prompts.
 # Tags: API, Gemini LLM, Logging
 
-import requests
-import json
 import logging
 from dotenv import load_dotenv
 import os
