@@ -1,3 +1,6 @@
+# Description: This script defines a Person class that stores information about a person, including their first name, last name, age, and nationality. It then creates two instances of the Person class and prints their information.
+# Tags: Object-Oriented
+
 class Person:
     def __init__(self, first_name, last_name, age, nationality):
         self.first_name = first_name

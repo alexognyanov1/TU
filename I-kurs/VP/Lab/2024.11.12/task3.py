@@ -1,3 +1,6 @@
+# Description: This script defines classes for Person, Student, and Lecturer, inheriting from Person. It creates an instance of the Lecturer class and prints its information.
+# Tags: Object-Oriented Programming, Inheritance, Class Definition, Instance Creation
+
 class Person:
     def __init__(self, first_name, last_name, age, nationality):
         self.first_name = first_name

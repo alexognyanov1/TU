@@ -1,3 +1,6 @@
+# Description: This script simulates a simple text-based RPG battle between a player character and an enemy. The player can choose from three classes: Warrior, Mage, and Archer, each with unique abilities. The script handles combat mechanics, damage calculation, and character health.
+# Tags: RPG, Text-Based, Combat, Game, Simulation
+
 import random
 
 

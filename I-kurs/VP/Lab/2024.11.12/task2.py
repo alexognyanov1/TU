@@ -1,3 +1,6 @@
+# Description: This script defines two classes, Person and Student, where Student inherits from Person. It initializes instances of both classes and uses the print methods to display information about them.
+# Tags: Object-Oriented Programming, Inheritance, Class Definition
+
 class Person:
     def __init__(self, first_name, last_name, age, nationality):
         self.first_name = first_name
