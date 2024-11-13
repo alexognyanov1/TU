@@ -53,20 +53,29 @@ def find_files_without_tags_or_description(folder_path):
     return files_to_update
 
 
-def generate_tags_and_description(file_path, needs_description, needs_tags):
+def generate_tags_and_description(file_path):
     with open(file_path, 'r') as f:
         content = f.read()
     prompt = f"Write a description and tags following this pattern: \"# Description: This script <does something>.\n# Tags: File Backup, Logging\" for the following Python script:\n\n{content}. Separate the description and tags with a newline. Do not include any tags that describe which language and libraries are used."
     return send_prompt(prompt)
 
 
-def update_file_with_tags_and_description(file_path, tags_and_description, needs_description, needs_tags):
-    split_new_content = tags_and_description.splitlines()
-    print(split_new_content)
+def get_tags_and_description(split_new_content):
     new_description = next((line for line in split_new_content if line.startswith(
         '# Description')), split_new_content[0])
+
     new_tags = next((line for line in split_new_content if line.startswith(
         '# Tags')), split_new_content[1])
+
+    return (new_description, new_tags)
+
+
+def update_file_with_tags_and_description(file_path, tags_and_description, needs_description, needs_tags):
+    split_new_content = tags_and_description.splitlines()
+    new_description, new_tags = get_tags_and_description(split_new_content)
+
+    print(new_description)
+    print(new_tags)
 
     with open(file_path, 'r') as f:
         content = f.read()
@@ -79,7 +88,7 @@ def update_file_with_tags_and_description(file_path, tags_and_description, needs
     if needs_tags:
         nc = new_content.splitlines()
 
-        new_content = f"{nc[0]}\n{new_tags}\n" + '\n'.join(nc[1:])
+        new_content = f"{nc[0]}\n{new_tags}\n\n" + '\n'.join(nc[1:])
 
     with open(file_path, 'w') as f:
         f.write(new_content)
@@ -94,7 +103,7 @@ def main():
         print("Needs description: ", needs_description)
         print("Needs tags: ", needs_tags)
         tags_and_description = generate_tags_and_description(
-            file_path, not needs_description, not needs_tags)
+            file_path)
 
         if tags_and_description:
             update_file_with_tags_and_description(
