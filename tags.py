@@ -94,8 +94,7 @@ def update_file_with_tags_and_description(file_path, tags_and_description, needs
         f.write(new_content)
 
 
-def main():
-    folder_path = "."
+def generate_tags(folder_path="."):
     files_to_update = find_files_without_tags_or_description(folder_path)
 
     for file_path, needs_description, needs_tags in files_to_update:
@@ -114,4 +113,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    generate_tags()

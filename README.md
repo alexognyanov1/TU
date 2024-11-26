@@ -5,8 +5,10 @@
 | API | [I-kurs/VP/Lab/2024.10.29/task5.py](I-kurs/VP/Lab/2024.10.29/task5.py) |
 | Access Point Placement | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py) |
 | Algorithm | [I-kurs/VP/Seminar/2024.11.13/task3.py](I-kurs/VP/Seminar/2024.11.13/task3.py) |
+| Animal Management | [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
 | Array Manipulation | [I-kurs/VP/Seminar/2024.11.13/task4.py](I-kurs/VP/Seminar/2024.11.13/task4.py) |
 | Backtracking | [I-kurs/VP/Lab/2024.11.05/task8.py](I-kurs/VP/Lab/2024.11.05/task8.py) |
+| Book Tracking | [I-kurs/VP/Lab/2024.11.26/task1.py](I-kurs/VP/Lab/2024.11.26/task1.py) |
 | Caesar Cipher | [I-kurs/VP/Lab/2024.11.05/task6.py](I-kurs/VP/Lab/2024.11.05/task6.py), [I-kurs/VP/Lab/2024.11.05/task5.py](I-kurs/VP/Lab/2024.11.05/task5.py) |
 | Character Count | [I-kurs/VP/Lab/2024.10.22/task3.py](I-kurs/VP/Lab/2024.10.22/task3.py) |
 | Class Definition | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py) |
@@ -22,6 +24,7 @@
 | Directory Traversal | [I-kurs/VP/Lab/2024.10.29/task2.py](I-kurs/VP/Lab/2024.10.29/task2.py) |
 | Directory Tree | [I-kurs/VP/Lab/2024.10.29/task3.py](I-kurs/VP/Lab/2024.10.29/task3.py) |
 | Element Removal | [I-kurs/VP/Seminar/2024.11.13/task5.py](I-kurs/VP/Seminar/2024.11.13/task5.py) |
+| Enclosure Management | [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
 | Encryption | [I-kurs/VP/Lab/2024.11.05/task6.py](I-kurs/VP/Lab/2024.11.05/task6.py), [I-kurs/VP/Lab/2024.11.05/task5.py](I-kurs/VP/Lab/2024.11.05/task5.py) |
 | File Backup | [I-kurs/VP/Lab/2024.10.29/task4.py](I-kurs/VP/Lab/2024.10.29/task4.py) |
 | File Generation | [I-kurs/VP/Lab/2024.10.29/task2.py](I-kurs/VP/Lab/2024.10.29/task2.py) |
@@ -36,8 +39,10 @@
 | Inheritance | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py) |
 | Instance Creation | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py) |
 | Intersection | [I-kurs/VP/Seminar/2024.11.13/task5.py](I-kurs/VP/Seminar/2024.11.13/task5.py) |
+| Inventory Management | [I-kurs/VP/Lab/2024.11.26/task1.py](I-kurs/VP/Lab/2024.11.26/task1.py) |
 | Language Learning | [I-kurs/VP/Seminar/2024.11.13/task6.py](I-kurs/VP/Seminar/2024.11.13/task6.py) |
 | Leap Year | [I-kurs/VP/Seminar/2024.10.30/task4.py](I-kurs/VP/Seminar/2024.10.30/task4.py) |
+| Library Management | [I-kurs/VP/Lab/2024.11.26/task1.py](I-kurs/VP/Lab/2024.11.26/task1.py) |
 | List | [I-kurs/VP/Lab/2024.10.22/task4.py](I-kurs/VP/Lab/2024.10.22/task4.py) |
 | List Modification | [I-kurs/VP/Lab/2024.10.22/task2.py](I-kurs/VP/Lab/2024.10.22/task2.py), [I-kurs/VP/Lab/2024.11.05/task3.py](I-kurs/VP/Lab/2024.11.05/task3.py), [I-kurs/VP/Lab/2024.11.05/task4.py](I-kurs/VP/Lab/2024.11.05/task4.py) |
 | List Operations | [I-kurs/VP/Lab/2024.10.22/task5.py](I-kurs/VP/Lab/2024.10.22/task5.py), [I-kurs/VP/Seminar/2024.10.30/task2.py](I-kurs/VP/Seminar/2024.10.30/task2.py) |
@@ -47,7 +52,7 @@
 | Multiplication | [I-kurs/VP/Seminar/2024.10.30/task1.py](I-kurs/VP/Seminar/2024.10.30/task1.py) |
 | Number Analysis | [I-kurs/VP/Lab/2024.10.15/main.py](I-kurs/VP/Lab/2024.10.15/main.py) |
 | Object-Oriented | [I-kurs/VP/Lab/2024.11.12/task1.py](I-kurs/VP/Lab/2024.11.12/task1.py) |
-| Object-Oriented Programming | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py) |
+| Object-Oriented Programming | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py), [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
 | Optimization | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py), [I-kurs/OIP/Lab/2024.11.26/task1.py](I-kurs/OIP/Lab/2024.11.26/task1.py) |
 | Orders | [I-kurs/VP/Lab/2024.10.22/task5.py](I-kurs/VP/Lab/2024.10.22/task5.py) |
 | Palindrome | [I-kurs/VP/Lab/2024.11.05/task2.py](I-kurs/VP/Lab/2024.11.05/task2.py) |
@@ -77,6 +82,7 @@
 | Visualization | [I-kurs/OIP/Lab/2024.11.26/task1.py](I-kurs/OIP/Lab/2024.11.26/task1.py) |
 | Wi-Fi Placement | [I-kurs/OIP/Lab/2024.11.26/task1.py](I-kurs/OIP/Lab/2024.11.26/task1.py) |
 | Word Processing | [I-kurs/VP/Seminar/2024.11.13/task2.py](I-kurs/VP/Seminar/2024.11.13/task2.py) |
+| Zoo Simulation | [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
 
 ## Directory Structure
 
@@ -116,11 +122,14 @@
 │       │   │   ├── task6.py
 │       │   │   ├── task7.py
 │       │   │   └── task8.py
-│       │   └── 2024.11.12
+│       │   ├── 2024.11.12
+│       │   │   ├── task1.py
+│       │   │   ├── task2.py
+│       │   │   ├── task3.py
+│       │   │   └── task4.py
+│       │   └── 2024.11.26
 │       │       ├── task1.py
-│       │       ├── task2.py
-│       │       ├── task3.py
-│       │       └── task4.py
+│       │       └── task2.py
 │       ├── Personal
 │       │   ├── LinkedList
 │       │   │   └── main.c
@@ -145,9 +154,13 @@
 │               ├── task5.py
 │               └── task6.py
 ├── README.md
+├── __pycache__
+│   ├── markdown.cpython-311.pyc
+│   └── tags.cpython-311.pyc
 ├── gemini_api.log
-├── generate-markdown.py
-└── generate-tags.py
+├── markdown.py
+├── tags.py
+└── update.py
 
-22 directories, 45 files
+24 directories, 50 files
 ```
