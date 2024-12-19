@@ -1,3 +1,6 @@
+# Description: This script calculates the area of a square or a circle based on user input.  It handles potential errors such as invalid shape type or incorrect input format.
+# Tags: Area Calculation, Geometry, Shape, Square, Circle, User Input, Error Handling
+
 import math
 
 

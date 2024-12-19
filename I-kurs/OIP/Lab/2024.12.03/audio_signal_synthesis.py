@@ -1,3 +1,6 @@
+# Description: This script generates and visualizes different types of audio signals (sine, rectangular, asymmetric triangular, and symmetric triangular waves). It then saves these signals as WAV files.  The script uses matplotlib for visualization and scipy for WAV file I/O.
+# Tags: Audio Signal Generation, Waveform Visualization, WAV File, Signal Processing, Spectrum Analysis
+
 import numpy as np
 from scipy.io import wavfile
 import matplotlib.pyplot as plt

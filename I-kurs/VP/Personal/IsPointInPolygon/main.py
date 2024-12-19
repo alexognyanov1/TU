@@ -1,3 +1,6 @@
+# Description: This script loads geospatial data from a JSON file, displays it graphically, and identifies the region clicked by the user.  It uses matplotlib to create an interactive map where clicking a polygon prints the name of that polygon to the console.
+# Tags: Geospatial Data, Interactive Map, Point-in-Polygon, JSON, Click Event
+
 import json
 import matplotlib.pyplot as plt
 

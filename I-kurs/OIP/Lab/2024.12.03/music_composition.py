@@ -1,3 +1,6 @@
+# Description: This script generates a simple musical composition based on a list of notes and saves it as a WAV file.  The music is created using sine waves for each note, and the script supports specifying frequency and duration for each note.
+# Tags: Audio Generation, Music Composition, WAV, Sound Synthesis
+
 import numpy as np
 from scipy.io import wavfile
 

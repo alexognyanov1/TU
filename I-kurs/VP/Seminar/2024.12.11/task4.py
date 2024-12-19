@@ -1,3 +1,6 @@
+# Description: This script calculates the total calories of multiple recipes.  The user inputs the number of recipes (between 5 and 14), the name of each recipe, and the nutritional information (carbs, protein, fat) for each ingredient in each recipe. The script then outputs the name and total calorie count for each recipe.  It includes error handling for invalid recipe number input.
+# Tags: Recipe Calculator, Calorie Counter, Food Nutrition
+
 class Food:
     def __init__(self, carbs, protein, fat):
         self.carbs = carbs

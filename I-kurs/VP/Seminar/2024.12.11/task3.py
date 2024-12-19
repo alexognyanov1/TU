@@ -1,3 +1,6 @@
+# Description: This script checks if three given side lengths can form a triangle. It handles invalid inputs such as non-numeric values and sides with lengths less than or equal to zero.  The script then applies the triangle inequality theorem to determine if a triangle can be constructed.
+# Tags: Triangle Inequality Theorem, Geometry, Validation, Input Checking
+
 class TriangleChecker:
     def __init__(self, a, b, c):
         self.sides = [a, b, c]

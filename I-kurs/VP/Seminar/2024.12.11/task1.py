@@ -1,3 +1,6 @@
+# Description: This script creates a class `NumericList` that filters a list to keep only numeric values (integers and floats). It then provides methods to display the filtered list and calculate its average.  The script demonstrates its usage with sample data.
+# Tags: List Filtering, Numeric Operations, Average Calculation
+
 class NumericList:
     def __init__(self, input_list):
         self.numeric_list = [

@@ -1,3 +1,6 @@
+# Description: This script defines classes for Employees, Managers, and Developers, allowing for the creation of a company with different employee types. It calculates bonuses based on employee type and programming languages, and displays employee information and total salary expenses.
+# Tags: Employee Management, Object-Oriented Programming, Salary Calculation, Bonus Calculation
+
 class Employee:
     def __init__(self, name, position, salary):
         self.name = name
