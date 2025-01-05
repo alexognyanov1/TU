@@ -2,7 +2,7 @@
 
 | Tag | Files |
 | --- | ----- |
-| API | [I-kurs/VP/Lab/2024.10.29/task5.py](I-kurs/VP/Lab/2024.10.29/task5.py) |
+| API | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py), [I-kurs/VP/Lab/2024.10.29/task5.py](I-kurs/VP/Lab/2024.10.29/task5.py) |
 | Access Point Placement | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py) |
 | Algorithm | [I-kurs/VP/Seminar/2024.11.13/task3.py](I-kurs/VP/Seminar/2024.11.13/task3.py) |
 | Animal Management | [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
@@ -19,10 +19,12 @@
 | Character Count | [I-kurs/VP/Lab/2024.10.22/task3.py](I-kurs/VP/Lab/2024.10.22/task3.py) |
 | Circle | [I-kurs/VP/Seminar/2024.12.11/task2.py](I-kurs/VP/Seminar/2024.12.11/task2.py) |
 | Class Definition | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py) |
-| Click Event | [I-kurs/VP/Personal/IsPointInPolygon/main.py](I-kurs/VP/Personal/IsPointInPolygon/main.py) |
+| Click Event | [Personal/IsPointInPolygon/main.py](Personal/IsPointInPolygon/main.py) |
 | Combat | [I-kurs/VP/Lab/2024.11.12/task4.py](I-kurs/VP/Lab/2024.11.12/task4.py) |
+| Cost of Living | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py) |
 | Coverage | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py) |
-| Currency Exchange | [I-kurs/VP/Personal/MostValuableCurrency/main.py](I-kurs/VP/Personal/MostValuableCurrency/main.py) |
+| Currency Exchange | [Personal/MostValuableCurrency/main.py](Personal/MostValuableCurrency/main.py) |
+| Data Extraction | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py) |
 | Data Management | [I-kurs/VP/Seminar/2024.11.13/task6.py](I-kurs/VP/Seminar/2024.11.13/task6.py) |
 | Data Organization | [I-kurs/VP/Lab/2024.10.29/task1.py](I-kurs/VP/Lab/2024.10.29/task1.py) |
 | Date Calculation | [I-kurs/VP/Seminar/2024.10.30/task4.py](I-kurs/VP/Seminar/2024.10.30/task4.py) |
@@ -45,16 +47,16 @@
 | Gemini LLM | [I-kurs/VP/Lab/2024.10.29/task5.py](I-kurs/VP/Lab/2024.10.29/task5.py) |
 | Genetic Algorithm | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py), [I-kurs/OIP/Lab/2024.11.26/task1.py](I-kurs/OIP/Lab/2024.11.26/task1.py) |
 | Geometry | [I-kurs/VP/Lab/2024.11.05/task1.py](I-kurs/VP/Lab/2024.11.05/task1.py), [I-kurs/VP/Seminar/2024.12.11/task3.py](I-kurs/VP/Seminar/2024.12.11/task3.py), [I-kurs/VP/Seminar/2024.12.11/task2.py](I-kurs/VP/Seminar/2024.12.11/task2.py), [I-kurs/VP/Seminar/2024.10.30/task3.py](I-kurs/VP/Seminar/2024.10.30/task3.py) |
-| Geospatial Data | [I-kurs/VP/Personal/IsPointInPolygon/main.py](I-kurs/VP/Personal/IsPointInPolygon/main.py) |
-| Graph Traversal | [I-kurs/VP/Personal/MostValuableCurrency/main.py](I-kurs/VP/Personal/MostValuableCurrency/main.py) |
+| Geospatial Data | [Personal/IsPointInPolygon/main.py](Personal/IsPointInPolygon/main.py) |
+| Graph Traversal | [Personal/MostValuableCurrency/main.py](Personal/MostValuableCurrency/main.py) |
 | Heatmap | [I-kurs/OIP/Lab/2024.11.26/task2.py](I-kurs/OIP/Lab/2024.11.26/task2.py) |
 | Inheritance | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py), [I-kurs/VP/Lab/2024.11.12/task2.py](I-kurs/VP/Lab/2024.11.12/task2.py) |
 | Input Checking | [I-kurs/VP/Seminar/2024.12.11/task3.py](I-kurs/VP/Seminar/2024.12.11/task3.py) |
 | Instance Creation | [I-kurs/VP/Lab/2024.11.12/task3.py](I-kurs/VP/Lab/2024.11.12/task3.py) |
-| Interactive Map | [I-kurs/VP/Personal/IsPointInPolygon/main.py](I-kurs/VP/Personal/IsPointInPolygon/main.py) |
+| Interactive Map | [Personal/IsPointInPolygon/main.py](Personal/IsPointInPolygon/main.py) |
 | Intersection | [I-kurs/VP/Seminar/2024.11.13/task5.py](I-kurs/VP/Seminar/2024.11.13/task5.py) |
 | Inventory Management | [I-kurs/VP/Lab/2024.11.26/task1.py](I-kurs/VP/Lab/2024.11.26/task1.py) |
-| JSON | [I-kurs/VP/Personal/IsPointInPolygon/main.py](I-kurs/VP/Personal/IsPointInPolygon/main.py) |
+| JSON | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py), [Personal/IsPointInPolygon/main.py](Personal/IsPointInPolygon/main.py) |
 | Language Learning | [I-kurs/VP/Seminar/2024.11.13/task6.py](I-kurs/VP/Seminar/2024.11.13/task6.py) |
 | Leap Year | [I-kurs/VP/Seminar/2024.10.30/task4.py](I-kurs/VP/Seminar/2024.10.30/task4.py) |
 | Library Management | [I-kurs/VP/Lab/2024.11.26/task1.py](I-kurs/VP/Lab/2024.11.26/task1.py) |
@@ -67,6 +69,7 @@
 | Matrix Operations | [I-kurs/VP/Seminar/2024.11.13/task4.py](I-kurs/VP/Seminar/2024.11.13/task4.py) |
 | Multiplication | [I-kurs/VP/Seminar/2024.10.30/task1.py](I-kurs/VP/Seminar/2024.10.30/task1.py) |
 | Music Composition | [I-kurs/OIP/Lab/2024.12.03/music_composition.py](I-kurs/OIP/Lab/2024.12.03/music_composition.py) |
+| Numbeo | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py) |
 | Number Analysis | [I-kurs/VP/Lab/2024.10.15/main.py](I-kurs/VP/Lab/2024.10.15/main.py) |
 | Numeric Operations | [I-kurs/VP/Seminar/2024.12.11/task1.py](I-kurs/VP/Seminar/2024.12.11/task1.py) |
 | Object-Oriented | [I-kurs/VP/Lab/2024.11.12/task1.py](I-kurs/VP/Lab/2024.11.12/task1.py) |
@@ -75,7 +78,7 @@
 | Orders | [I-kurs/VP/Lab/2024.10.22/task5.py](I-kurs/VP/Lab/2024.10.22/task5.py) |
 | Palindrome | [I-kurs/VP/Lab/2024.11.05/task2.py](I-kurs/VP/Lab/2024.11.05/task2.py) |
 | Pascal's Triangle | [I-kurs/VP/Lab/2024.11.05/task7.py](I-kurs/VP/Lab/2024.11.05/task7.py) |
-| Point-in-Polygon | [I-kurs/VP/Personal/IsPointInPolygon/main.py](I-kurs/VP/Personal/IsPointInPolygon/main.py) |
+| Point-in-Polygon | [Personal/IsPointInPolygon/main.py](Personal/IsPointInPolygon/main.py) |
 | PrettyTable | [I-kurs/VP/Lab/2024.10.29/task1.py](I-kurs/VP/Lab/2024.10.29/task1.py) |
 | Prime Numbers | [I-kurs/VP/Seminar/2024.10.30/task5.py](I-kurs/VP/Seminar/2024.10.30/task5.py) |
 | RPG | [I-kurs/VP/Lab/2024.11.12/task4.py](I-kurs/VP/Lab/2024.11.12/task4.py) |
@@ -112,6 +115,7 @@
 | WAV | [I-kurs/OIP/Lab/2024.12.03/music_composition.py](I-kurs/OIP/Lab/2024.12.03/music_composition.py) |
 | WAV File | [I-kurs/OIP/Lab/2024.12.03/kur.py](I-kurs/OIP/Lab/2024.12.03/kur.py), [I-kurs/OIP/Lab/2024.12.03/audio_signal_synthesis.py](I-kurs/OIP/Lab/2024.12.03/audio_signal_synthesis.py) |
 | Waveform Visualization | [I-kurs/OIP/Lab/2024.12.03/kur.py](I-kurs/OIP/Lab/2024.12.03/kur.py), [I-kurs/OIP/Lab/2024.12.03/audio_signal_synthesis.py](I-kurs/OIP/Lab/2024.12.03/audio_signal_synthesis.py) |
+| Web Scraping | [Personal/CountryAutoCompare/main.py](Personal/CountryAutoCompare/main.py) |
 | Wi-Fi Placement | [I-kurs/OIP/Lab/2024.11.26/task1.py](I-kurs/OIP/Lab/2024.11.26/task1.py) |
 | Word Processing | [I-kurs/VP/Seminar/2024.11.13/task2.py](I-kurs/VP/Seminar/2024.11.13/task2.py) |
 | Zoo Simulation | [I-kurs/VP/Lab/2024.11.26/task2.py](I-kurs/VP/Lab/2024.11.26/task2.py) |
@@ -173,16 +177,6 @@
 │       │   └── 2024.11.26
 │       │       ├── task1.py
 │       │       └── task2.py
-│       ├── Personal
-│       │   ├── IsPointInPolygon
-│       │   │   ├── data.json
-│       │   │   └── main.py
-│       │   ├── LinkedList
-│       │   │   └── main.c
-│       │   ├── MostValuableCurrency
-│       │   │   └── main.py
-│       │   └── RepeatingString
-│       │       └── main.c
 │       └── Seminar
 │           ├── 2024.10.16
 │           │   └── main.py
@@ -205,6 +199,18 @@
 │               ├── task3.py
 │               ├── task4.py
 │               └── task5.py
+├── Personal
+│   ├── CountryAutoCompare
+│   │   └── main.py
+│   ├── IsPointInPolygon
+│   │   ├── data.json
+│   │   └── main.py
+│   ├── LinkedList
+│   │   └── main.c
+│   ├── MostValuableCurrency
+│   │   └── main.py
+│   └── RepeatingString
+│       └── main.c
 ├── README.md
 ├── __pycache__
 │   ├── markdown.cpython-311.pyc
@@ -214,5 +220,5 @@
 ├── tags.py
 └── update.py
 
-27 directories, 67 files
+28 directories, 68 files
 ```
