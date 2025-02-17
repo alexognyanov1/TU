@@ -1,3 +1,6 @@
+# Description: This script defines a `Car` class to represent car information (brand, model, price, color, year) and provides functions to sort cars by price, list cars by brand, search cars by color, and find the newest cars.  The main function demonstrates the usage of these functions with a sample list of cars.
+# Tags: Car Inventory, Data Management, Object-Oriented Programming, Sorting, Searching
+
 class Car:
     def __init__(self, car_brand, car_model, car_price, car_color, manifacture_year):
         self.car_brand = car_brand

@@ -1,3 +1,6 @@
+# Description: This script generates a random array of integers, then performs several operations on it: calculates the sum of elements at odd indices, counts elements with units digits divisible by 2, finds the product of negative even numbers, filters elements greater than a user-specified value, finds the difference between the maximum and minimum elements, prints odd numbers and their count, and finally deletes the minimum element.  The script takes user input to determine the size of the initial array.
+# Tags: Array Manipulation, Random Number Generation, Data Filtering, Statistical Calculation
+
 import random
 
 

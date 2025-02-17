@@ -2,3 +2,4 @@
 *.log
 __pycache__/
 I-kurs/VP/ExampleTest/.DS_Store
+*.out

@@ -1,3 +1,6 @@
+# Description: This script creates a list of integers based on user input, performs various operations on the list such as counting elements based on specific criteria, finding indices of minimum elements, creating a second list based on conditions, calculating averages, removing elements, and adding a new element based on existing odd numbers.  The script then prints the results of each operation.
+# Tags: List Manipulation, Integer Processing, Data Filtering, List Modification
+
 def get_list_length():
     while True:
         try:

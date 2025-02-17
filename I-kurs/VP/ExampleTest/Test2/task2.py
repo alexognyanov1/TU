@@ -1,3 +1,6 @@
+# Description: This script defines a `Worker` class to represent employee information, including methods to calculate salary bonuses and search for workers based on various criteria. It also includes functions to add and remove workers from a list.  The `main` function demonstrates the usage of these classes and functions.
+# Tags: Employee Management, Worker Information, Search, Add, Remove
+
 class Worker:
     def __init__(self, worker_num, fname, lname, work_experience_company, total_years_experience, salary, age):
         self.worker_num = worker_num
