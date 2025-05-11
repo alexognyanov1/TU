@@ -91,6 +91,8 @@ void readFromFile(char author[31]) {
   if (count == 0) {
     printf("No matching pictures found!\n");
   }
+
+  fclose(f);
 }
 
 int main() {
