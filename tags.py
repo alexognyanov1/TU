@@ -17,7 +17,7 @@ logging.basicConfig(filename='gemini_api.log', level=logging.ERROR,
 
 def send_prompt(prompt, max_tokens=5000, temperature=0.3, top_p=0.2):
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     conf = {
         'max_output_tokens': max_tokens,

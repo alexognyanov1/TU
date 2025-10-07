@@ -1,3 +1,6 @@
+# Description: This script provides a web application that embeds a YouTube video, allowing its ID, dimensions, and player parameters to be configured and persisted through a web interface.
+# Tags: Web Application, Video Embedding, Configuration Management, Data Persistence
+
 from flask import Flask, render_template_string, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import json
