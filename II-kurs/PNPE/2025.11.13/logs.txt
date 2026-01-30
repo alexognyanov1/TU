@@ -1,0 +1,6 @@
+REPORT
+APPEND: asdfasdf
+REPLACE: asdf test
+report
+history
+END

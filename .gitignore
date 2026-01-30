@@ -5,3 +5,4 @@ I-kurs/VP/ExampleTest/.DS_Store
 *.out
 .vscode/
 *.bin
+*.env
