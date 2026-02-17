@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Side Menu with Submenu</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+    }
+
+    .menu-wrapper {
+      position: relative;
+    }
+
+    .menu {
+      list-style: none;
+      width: 240px;
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      overflow: visible;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .menu-item {
+      position: relative;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-button {
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      color: inherit;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .menu-button:hover {
+      background: #1f2937;
+    }
+
+    .menu-button.has-submenu::after {
+      content: "▸";
+      float: right;
+      color: #94a3b8;
+    }
+
+    .submenu {
+      list-style: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 220px;
+      background: #0b1220;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      transform: translateX(-8px);
+      pointer-events: none;
+      transition: 0.2s ease;
+    }
+
+    .menu-item:hover>.submenu {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .menu-item.keep-open>.submenu {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .menu.lock-submenu>.menu-item:not(.keep-open):hover>.submenu {
+      opacity: 0;
+      transform: translateX(-8px);
+      pointer-events: none;
+    }
+
+    .menu.lock-submenu>.menu-item.keep-open>.submenu {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="menu-wrapper">
+    <ul class="menu" id="main-menu">
+      <li class="menu-item">
+        <button class="menu-button has-submenu">Products</button>
+        <ul class="submenu" role="menu">
+          <li class="menu-item"><button class="menu-button">Laptops</button></li>
+          <li class="menu-item"><button class="menu-button">Phones</button></li>
+          <li class="menu-item"><button class="menu-button">Accessories</button></li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <button class="menu-button has-submenu">Services</button>
+        <ul class="submenu" role="menu">
+          <li class="menu-item"><button class="menu-button">Consulting</button></li>
+          <li class="menu-item"><button class="menu-button">Support</button></li>
+          <li class="menu-item"><button class="menu-button">Training</button></li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <button class="menu-button has-submenu">Account</button>
+        <ul class="submenu" role="menu">
+          <li class="menu-item"><button class="menu-button">Profile</button></li>
+          <li class="menu-item"><button class="menu-button">Settings</button></li>
+          <li class="menu-item"><button class="menu-button">Billing</button></li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <button class="menu-button has-submenu">Help</button>
+        <ul class="submenu" role="menu">
+          <li class="menu-item"><button class="menu-button">Docs</button></li>
+          <li class="menu-item"><button class="menu-button">Community</button></li>
+          <li class="menu-item"><button class="menu-button">Contact Support</button></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    function isPointOnSegment(point, start, end, epsilon = 1e-9) {
+      const cross = (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);
+      if (Math.abs(cross) > epsilon) {
+        return false;
+      }
+
+      const dot = (point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y);
+      if (dot < -epsilon) {
+        return false;
+      }
+
+      const lengthSquared = (end.x - start.x) ** 2 + (end.y - start.y) ** 2;
+      return dot <= lengthSquared + epsilon;
+    }
+
+    function isPointInTriangle(point, a, b, c) {
+      // Returns true for points inside OR on triangle edges.
+      if (
+        isPointOnSegment(point, a, b) ||
+        isPointOnSegment(point, b, c) ||
+        isPointOnSegment(point, c, a)
+      ) {
+        return true;
+      }
+
+      const sign = (p1, p2, p3) =>
+        (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+
+      const d1 = sign(point, a, b);
+      const d2 = sign(point, b, c);
+      const d3 = sign(point, c, a);
+
+      const hasNeg = d1 < 0 || d2 < 0 || d3 < 0;
+      const hasPos = d1 > 0 || d2 > 0 || d3 > 0;
+
+      return !(hasNeg && hasPos);
+    }
+
+    let lastMousePos = null;
+    let activeSafeItem = null;
+
+    const menu = document.getElementById('main-menu');
+    const topLevelItems = document.querySelectorAll('#main-menu > .menu-item');
+
+    topLevelItems.forEach((item) => {
+      item.addEventListener('mouseenter', () => {
+        if (menu.classList.contains('lock-submenu') && activeSafeItem && activeSafeItem !== item) {
+          return;
+        }
+
+        if (activeSafeItem && activeSafeItem !== item) {
+          activeSafeItem.classList.remove('keep-open');
+        }
+
+        activeSafeItem = item;
+      });
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      if (lastMousePos && activeSafeItem) {
+        const submenu = activeSafeItem.querySelector(':scope > .submenu');
+        if (!submenu) {
+          menu.classList.remove('lock-submenu');
+          lastMousePos = { x: event.clientX, y: event.clientY };
+          return;
+        }
+
+        const coordinates = getSubmenuCoordinates(submenu);
+        if (!coordinates) {
+          menu.classList.remove('lock-submenu');
+          lastMousePos = { x: event.clientX, y: event.clientY };
+          return;
+        }
+
+        const submenuTopLeft = { x: coordinates.left, y: coordinates.top };
+        const submenuBottomLeft = { x: coordinates.left, y: coordinates.bottom };
+
+        const inside = isPointInTriangle(
+          { x: event.clientX, y: event.clientY },
+          { x: lastMousePos.x, y: lastMousePos.y },
+          submenuTopLeft,
+          submenuBottomLeft
+        );
+
+        const hoveringActiveZone = activeSafeItem.matches(':hover') || submenu.matches(':hover');
+        menu.classList.toggle('lock-submenu', inside);
+
+        if (inside || hoveringActiveZone) {
+          activeSafeItem.classList.add('keep-open');
+        } else {
+          activeSafeItem.classList.remove('keep-open');
+          if (!activeSafeItem.matches(':hover')) {
+            activeSafeItem = null;
+          }
+        }
+      } else if (activeSafeItem && !activeSafeItem.matches(':hover')) {
+        activeSafeItem.classList.remove('keep-open');
+        activeSafeItem = null;
+        menu.classList.remove('lock-submenu');
+      } else {
+        menu.classList.remove('lock-submenu');
+      }
+
+      lastMousePos = { x: event.clientX, y: event.clientY };
+    });
+
+    function getSubmenuCoordinates(submenu) {
+      if (!submenu) {
+        return null;
+      }
+
+      const rect = submenu.getBoundingClientRect();
+
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+        pageX: rect.left + window.scrollX,
+        pageY: rect.top + window.scrollY
+      };
+    }
+
+    function getOpenSideMenuCoordinates() {
+      const submenus = [...document.querySelectorAll('.submenu')];
+
+      const openSubmenu = submenus.find((submenu) => {
+        const styles = window.getComputedStyle(submenu);
+        return styles.pointerEvents !== 'none' && parseFloat(styles.opacity) > 0;
+      });
+
+      if (!openSubmenu) {
+        return null;
+      }
+
+      return getSubmenuCoordinates(openSubmenu);
+    }
+
+    window.getOpenSideMenuCoordinates = getOpenSideMenuCoordinates;
+    window.isPointInTriangle = isPointInTriangle;
+  </script>
+</body>
+
+</html>
