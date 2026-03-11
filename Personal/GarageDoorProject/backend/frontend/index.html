@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage — Control</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 3rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 2rem; color: #1a1a1a; }
+
+    /* Big round trigger button */
+    #triggerBtn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: none;
+      background: #4f7df0;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(79,125,240,0.4);
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    }
+    #triggerBtn:hover  { background: #3a68da; box-shadow: 0 8px 28px rgba(79,125,240,0.5); }
+    #triggerBtn:active { transform: scale(0.96); }
+    #triggerBtn:disabled { background: #a0b4f0; box-shadow: none; cursor: not-allowed; }
+
+    .status {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #666;
+      min-height: 1.2em;
+    }
+    .status.success { color: #27ae60; }
+    .status.error   { color: #c0392b; }
+
+    .logout {
+      margin-top: 2rem;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .logout:hover { color: #888; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏠 Garage Door</h1>
+
+    <button id="triggerBtn">Trigger</button>
+
+    <p class="status" id="statusMsg"></p>
+
+    <button class="logout" id="logoutBtn">Log out</button>
+  </div>
+
+  <script>
+    // Redirect to login if not authenticated
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+    }
+
+    const triggerBtn = document.getElementById("triggerBtn");
+    const statusMsg  = document.getElementById("statusMsg");
+
+    function showStatus(message, type) {
+      statusMsg.textContent = message;
+      statusMsg.className = `status ${type}`;
+    }
+
+    triggerBtn.addEventListener("click", async () => {
+      triggerBtn.disabled = true;
+      triggerBtn.textContent = "Sending…";
+      showStatus("", "");
+
+      try {
+        const response = await fetch("/door/trigger", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+
+        if (response.status === 401) {
+          // Token expired — send back to login
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Server error (${response.status})`);
+        }
+
+        showStatus("Command sent!", "success");
+
+      } catch (err) {
+        showStatus(err.message || "Failed to send command.", "error");
+
+      } finally {
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = "Trigger";
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    });
+  </script>
+</body>
+</html>

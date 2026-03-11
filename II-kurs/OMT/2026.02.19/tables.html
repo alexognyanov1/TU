@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tables</title>
+</head>
+
+<body style="margin: 0; background-color: #f4f7ff; font-family: Arial, sans-serif; color: #222;">
+  <div style="max-width: 900px; margin: 0 auto; padding: 24px;">
+    <nav style="padding-bottom: 10px; margin-bottom: 16px; border-bottom: 1px solid #cfd6e4; font-size: 14px;">
+      <a href="index.html" style="color: #0b5ed7;">Home</a> |
+      <a href="lists.html" style="color: #0b5ed7;">Lists</a> |
+      <a href="tables.html" style="color: #0b5ed7;">Tables</a> |
+      <a href="images.html" style="color: #0b5ed7;">Images</a> |
+      <a href="links.html" style="color: #0b5ed7;">Links</a> |
+      <a href="forms.html" style="color: #0b5ed7;">Forms</a>
+    </nav>
+
+    <h1 style="color: #0b5ed7; margin-top: 0;">Tables</h1>
+    <p style="color: #444;">Simple table examples with headers and data rows.</p>
+
+    <h2 style="color: #198754;">Student Scores</h2>
+    <table border="1" cellpadding="8" cellspacing="0"
+      style="border-collapse: collapse; background-color: #fff; width: 100%;">
+      <tr style="background-color: #dbe9ff;">
+        <th>Name</th>
+        <th>Subject</th>
+        <th>Score</th>
+      </tr>
+      <tr>
+        <td>Alice</td>
+        <td>Math</td>
+        <td>5.75</td>
+      </tr>
+      <tr>
+        <td>Bob</td>
+        <td>Programming</td>
+        <td>6.00</td>
+      </tr>
+      <tr>
+        <td>Chris</td>
+        <td>English</td>
+        <td>5.25</td>
+      </tr>
+    </table>
+
+    <h2 style="color: #198754;">Weekly Plan</h2>
+    <table border="1" cellpadding="8" cellspacing="0"
+      style="border-collapse: collapse; background-color: #fff; width: 100%;">
+      <tr style="background-color: #e9f7ef;">
+        <th>Day</th>
+        <th>Task</th>
+      </tr>
+      <tr>
+        <td>Monday</td>
+        <td>Read chapter 1</td>
+      </tr>
+      <tr>
+        <td>Wednesday</td>
+        <td>Complete exercises</td>
+      </tr>
+      <tr>
+        <td>Friday</td>
+        <td>Review notes</td>
+      </tr>
+    </table>
+
+    <h2 style="color: #198754;">Photo Gallery Table</h2>
+    <table border="1" cellpadding="8" cellspacing="0"
+      style="border-collapse: collapse; background-color: #fff; width: 100%;">
+      <tr style="background-color: #fff3cd;">
+        <th>ID</th>
+        <th>Title</th>
+        <th>Image (click to enlarge)</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Mountain</td>
+        <td>
+          <img src="https://picsum.photos/id/1018/120/80" alt="Mountain"
+            data-large="https://picsum.photos/id/1018/1000/700" onclick="openImage(this.getAttribute('data-large'))"
+            style="width: 120px; height: 80px; object-fit: cover; cursor: zoom-in;">
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Bridge</td>
+        <td>
+          <img src="https://picsum.photos/id/1043/120/80" alt="Bridge"
+            data-large="https://picsum.photos/id/1043/1000/700" onclick="openImage(this.getAttribute('data-large'))"
+            style="width: 120px; height: 80px; object-fit: cover; cursor: zoom-in;">
+        </td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>City</td>
+        <td>
+          <img src="https://picsum.photos/id/1011/120/80" alt="City" data-large="https://picsum.photos/id/1011/1000/700"
+            onclick="openImage(this.getAttribute('data-large'))"
+            style="width: 120px; height: 80px; object-fit: cover; cursor: zoom-in;">
+        </td>
+      </tr>
+    </table>
+
+    <br>
+
+    <h2 style="color: #198754;">Weekly Temperatures</h2>
+    <table border="1" cellpadding="8" cellspacing="0"
+      style="border-collapse: collapse; background-color: #fff; width: 100%;">
+      <tr>
+        <td></td>
+        <th colspan="3">Средни месечни температури</th>
+      </tr>
+
+      <tr>
+        <td rowspan="8" align="center"><b>Април</b></td>
+        <th colspan="3">1-ва седмица</th>
+      </tr>
+      <tr>
+        <td align="center">6</td>
+        <td align="center">12</td>
+        <td align="center">8</td>
+      </tr>
+
+      <tr>
+        <th colspan="3">2-ра седмица</th>
+      </tr>
+      <tr>
+        <td align="center">9</td>
+        <td align="center">16</td>
+        <td align="center">11</td>
+      </tr>
+
+      <tr>
+        <th colspan="3">3-та седмица</th>
+      </tr>
+      <tr>
+        <td align="center">12</td>
+        <td align="center">18</td>
+        <td align="center">13</td>
+      </tr>
+
+      <tr>
+        <th colspan="3">4-та седмица</th>
+      </tr>
+      <tr>
+        <td align="center">18</td>
+        <td align="center">19</td>
+        <td align="center">16</td>
+      </tr>
+    </table>
+
+    <div id="imageOverlay" onclick="closeImage()"
+      style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); align-items: center; justify-content: center; padding: 20px; z-index: 1000; cursor: zoom-out;">
+      <img id="overlayImage" src="" alt="Enlarged image" onclick="event.stopPropagation()"
+        style="max-width: 90vw; max-height: 90vh; border: 3px solid #fff; border-radius: 8px;">
+    </div>
+
+    <p><a href="index.html" style="color: #0b5ed7;">← Back to Home</a></p>
+  </div>
+
+  <script>
+    function openImage(src) {
+      var overlay = document.getElementById('imageOverlay');
+      var image = document.getElementById('overlayImage');
+      image.src = src;
+      overlay.style.display = 'flex';
+    }
+
+    function closeImage() {
+      var overlay = document.getElementById('imageOverlay');
+      var image = document.getElementById('overlayImage');
+      overlay.style.display = 'none';
+      image.src = '';
+    }
+  </script>
+</body>
+
+</html>

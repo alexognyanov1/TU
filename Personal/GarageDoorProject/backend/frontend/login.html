@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage — Login</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 360px;
+    }
+
+    h1 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; color: #1a1a1a; }
+
+    label { display: block; font-size: 0.875rem; color: #555; margin-bottom: 0.3rem; }
+
+    input {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #4f7df0; }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #4f7df0;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #3a68da; }
+    button:disabled { background: #a0b4f0; cursor: not-allowed; }
+
+    .error {
+      color: #c0392b;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏠 Garage Door</h1>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" id="username" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" autocomplete="current-password" required />
+
+      <button type="submit" id="submitBtn">Log in</button>
+      <p class="error" id="errorMsg">Invalid username or password.</p>
+    </form>
+  </div>
+
+  <script>
+    // If already logged in, skip straight to the control page.
+    if (localStorage.getItem("token")) {
+      window.location.href = "/";
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const submitBtn = document.getElementById("submitBtn");
+      const errorMsg  = document.getElementById("errorMsg");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Logging in…";
+      errorMsg.style.display = "none";
+
+      try {
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Unauthorised");
+        }
+
+        const data = await response.json();
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "/";
+
+      } catch {
+        errorMsg.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Log in";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -6,3 +6,5 @@ I-kurs/VP/ExampleTest/.DS_Store
 .vscode/
 *.bin
 *.env
+*.DS_Store
+.DS_Store
