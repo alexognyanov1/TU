@@ -6,5 +6,6 @@ __pycache__/
 # Secrets
 backend/.env
 embedded/config.json
+embedded/GarageDoor/config.h
 *.pem
 *.key

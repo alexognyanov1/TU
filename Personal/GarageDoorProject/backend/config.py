@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     mqtt_username: str = ""
     mqtt_password: str = ""
     mqtt_command_topic: str = "garage/command"
+    mqtt_status_topic: str = "garage/status"
     # "tcp" for a direct connection on port 1883 (local/dev)
     # "websockets" when connecting through nginx on port 443
     mqtt_transport: str = "tcp"

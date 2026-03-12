@@ -29,6 +29,24 @@
 
     h1 { font-size: 1.5rem; margin-bottom: 2rem; color: #1a1a1a; }
 
+    /* Door state badge */
+    .state-badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.75rem;
+      transition: background 0.3s, color 0.3s;
+    }
+    .state-open    { background: #d4edda; color: #155724; }
+    .state-closed  { background: #f8d7da; color: #721c24; }
+    .state-opening { background: #fff3cd; color: #856404; }
+    .state-closing { background: #fff3cd; color: #856404; }
+    .state-unknown { background: #e2e3e5; color: #383d41; }
+
     /* Big round trigger button */
     #triggerBtn {
       width: 160px;
@@ -71,6 +89,8 @@
 <body>
   <div class="card">
     <h1>🏠 Garage Door</h1>
+
+    <span class="state-badge state-unknown" id="stateBadge">Unknown</span>
 
     <button id="triggerBtn">Trigger</button>
 
@@ -131,6 +151,45 @@
       localStorage.removeItem("token");
       window.location.href = "/login";
     });
+
+    // ---- Door state polling ----
+    const stateBadge = document.getElementById("stateBadge");
+
+    const STATE_LABELS = {
+      open:    "Open",
+      closed:  "Closed",
+      opening: "Opening…",
+      closing: "Closing…",
+      unknown: "Unknown",
+    };
+
+    function updateStateBadge(state) {
+      const label = STATE_LABELS[state] ?? "Unknown";
+      stateBadge.textContent = label;
+      stateBadge.className = `state-badge state-${state in STATE_LABELS ? state : "unknown"}`;
+    }
+
+    async function pollState() {
+      try {
+        const res = await fetch("/door/state", {
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          updateStateBadge(data.state);
+        }
+      } catch (_) {
+        // network error — keep last known state
+      }
+    }
+
+    pollState();
+    setInterval(pollState, 2000);
   </script>
 </body>
 </html>
