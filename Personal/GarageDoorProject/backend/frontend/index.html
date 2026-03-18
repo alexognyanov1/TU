@@ -27,25 +27,66 @@
       max-width: 360px;
     }
 
-    h1 { font-size: 1.5rem; margin-bottom: 2rem; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; margin-bottom: 1.25rem; color: #1a1a1a; }
 
-    /* Door state badge */
-    .state-badge {
-      display: inline-block;
-      padding: 0.35rem 1rem;
+    /* ESP32 connection indicator */
+    .esp-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 1.25rem;
+    }
+    .esp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .esp-dot.online  { background: #27ae60; }
+    .esp-dot.offline { background: #e74c3c; }
+
+    /* State badges row */
+    .badges {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.85rem;
       border-radius: 999px;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      margin-bottom: 1.75rem;
       transition: background 0.3s, color 0.3s;
     }
-    .state-open    { background: #d4edda; color: #155724; }
-    .state-closed  { background: #f8d7da; color: #721c24; }
-    .state-opening { background: #fff3cd; color: #856404; }
-    .state-closing { background: #fff3cd; color: #856404; }
-    .state-unknown { background: #e2e3e5; color: #383d41; }
+    .badge-label {
+      font-weight: 400;
+      opacity: 0.65;
+      font-size: 0.72rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* Door state colours */
+    .door-open    { background: #d4edda; color: #155724; }
+    .door-closed  { background: #f8d7da; color: #721c24; }
+    .door-unknown { background: #e2e3e5; color: #383d41; }
+
+    /* Motor state colours */
+    .motor-idle   { background: #e2e3e5; color: #383d41; }
+    .motor-moving { background: #fff3cd; color: #856404; }
 
     /* Big round trigger button */
     #triggerBtn {
@@ -88,11 +129,25 @@
 </head>
 <body>
   <div class="card">
-    <h1>🏠 Garage Door</h1>
+    <h1>&#127968; Garage Door</h1>
 
-    <span class="state-badge state-unknown" id="stateBadge">Unknown</span>
+    <div class="esp-status">
+      <span class="esp-dot" id="espDot"></span>
+      <span id="espLabel">Connecting…</span>
+    </div>
 
-    <button id="triggerBtn">Trigger</button>
+    <div class="badges">
+      <span class="badge door-unknown" id="doorBadge">
+        <span class="badge-label">Door</span>
+        <span id="doorText">Unknown</span>
+      </span>
+      <span class="badge motor-idle" id="motorBadge">
+        <span class="badge-label">Motor</span>
+        <span id="motorText">Idle</span>
+      </span>
+    </div>
+
+    <button id="triggerBtn" disabled>Trigger</button>
 
     <p class="status" id="statusMsg"></p>
 
@@ -100,22 +155,60 @@
   </div>
 
   <script>
-    // Redirect to login if not authenticated
     const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-    }
+    if (!token) window.location.href = "/login";
 
     const triggerBtn = document.getElementById("triggerBtn");
     const statusMsg  = document.getElementById("statusMsg");
+    const espDot     = document.getElementById("espDot");
+    const espLabel   = document.getElementById("espLabel");
+    const doorBadge  = document.getElementById("doorBadge");
+    const doorText   = document.getElementById("doorText");
+    const motorBadge = document.getElementById("motorBadge");
+    const motorText  = document.getElementById("motorText");
+
+    const DOOR_LABELS  = { open: "Open", closed: "Closed", unknown: "Unknown" };
+    const MOTOR_LABELS = { idle: "Idle", moving: "Moving…" };
+
+    // Trigger button label depends on door state
+    const TRIGGER_LABELS = { open: "Close", closed: "Open", unknown: "Trigger" };
+
+    let espConnected = false;
+    let doorState    = "unknown";
+    let motorState   = "idle";
+
+    function applyState(data) {
+      if (data.esp_connected !== undefined) espConnected = data.esp_connected;
+      if (data.door  !== undefined) doorState  = data.door;
+      if (data.motor !== undefined) motorState = data.motor;
+
+      // ESP dot
+      espDot.className = "esp-dot " + (espConnected ? "online" : "offline");
+      espLabel.textContent = espConnected ? "Device online" : "Device offline";
+
+      // Door badge
+      doorBadge.className = "badge door-" + (doorState in DOOR_LABELS ? doorState : "unknown");
+      doorText.textContent = DOOR_LABELS[doorState] ?? "Unknown";
+
+      // Motor badge
+      motorBadge.className = "badge motor-" + (motorState in MOTOR_LABELS ? motorState : "idle");
+      motorText.textContent = MOTOR_LABELS[motorState] ?? "Idle";
+
+      // Trigger button
+      const busy = motorState === "moving";
+      triggerBtn.disabled = !espConnected || busy;
+      triggerBtn.textContent = busy ? "Moving…" : (TRIGGER_LABELS[doorState] ?? "Trigger");
+    }
 
     function showStatus(message, type) {
       statusMsg.textContent = message;
       statusMsg.className = `status ${type}`;
     }
 
+    // ---- Trigger ----
     triggerBtn.addEventListener("click", async () => {
       triggerBtn.disabled = true;
+      const prevLabel = triggerBtn.textContent;
       triggerBtn.textContent = "Sending…";
       showStatus("", "");
 
@@ -126,25 +219,24 @@
         });
 
         if (response.status === 401) {
-          // Token expired — send back to login
           localStorage.removeItem("token");
           window.location.href = "/login";
           return;
         }
 
         if (!response.ok) {
-          throw new Error(`Server error (${response.status})`);
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.detail || `Server error (${response.status})`);
         }
 
         showStatus("Command sent!", "success");
 
       } catch (err) {
         showStatus(err.message || "Failed to send command.", "error");
-
-      } finally {
-        triggerBtn.disabled = false;
-        triggerBtn.textContent = "Trigger";
+        triggerBtn.disabled = !espConnected || motorState === "moving";
+        triggerBtn.textContent = prevLabel;
       }
+      // On success the ESP pushes motor=moving via WS which re-renders the button.
     });
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -152,44 +244,29 @@
       window.location.href = "/login";
     });
 
-    // ---- Door state polling ----
-    const stateBadge = document.getElementById("stateBadge");
+    // ---- WebSocket to backend for live state updates ----
+    let ws;
+    let wsReconnectDelay = 1000;
 
-    const STATE_LABELS = {
-      open:    "Open",
-      closed:  "Closed",
-      opening: "Opening…",
-      closing: "Closing…",
-      unknown: "Unknown",
-    };
+    function connectWS() {
+      const proto = location.protocol === "https:" ? "wss" : "ws";
+      ws = new WebSocket(`${proto}://${location.host}/ws/ui?token=${encodeURIComponent(token)}`);
 
-    function updateStateBadge(state) {
-      const label = STATE_LABELS[state] ?? "Unknown";
-      stateBadge.textContent = label;
-      stateBadge.className = `state-badge state-${state in STATE_LABELS ? state : "unknown"}`;
+      ws.onopen = () => { wsReconnectDelay = 1000; };
+
+      ws.onmessage = (event) => {
+        try { applyState(JSON.parse(event.data)); } catch (_) {}
+      };
+
+      ws.onclose = () => {
+        setTimeout(() => {
+          wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+          connectWS();
+        }, wsReconnectDelay);
+      };
     }
 
-    async function pollState() {
-      try {
-        const res = await fetch("/door/state", {
-          headers: { "Authorization": `Bearer ${token}` },
-        });
-        if (res.status === 401) {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-          return;
-        }
-        if (res.ok) {
-          const data = await res.json();
-          updateStateBadge(data.state);
-        }
-      } catch (_) {
-        // network error — keep last known state
-      }
-    }
-
-    pollState();
-    setInterval(pollState, 2000);
+    connectWS();
   </script>
 </body>
 </html>
