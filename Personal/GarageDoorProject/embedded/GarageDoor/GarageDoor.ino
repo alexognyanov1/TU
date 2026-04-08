@@ -18,46 +18,79 @@ const int MOTOR_PIN1 = 27;
 const int MOTOR_PIN2 = 26;
 const int ENABLE_PIN = 14;
 
-const int PWM_FREQ       = 30000;
-const int PWM_CHANNEL    = 0;
+const int PWM_FREQ = 30000;
+const int PWM_CHANNEL = 0;
 const int PWM_RESOLUTION = 8;
-const int DUTY_CYCLE     = 200;
+const int DUTY_CYCLE = 200;
 
-#define FORWARD  1
+#define FORWARD 1
 #define BACKWARD 0
 
 // --- WiFi AP (setup mode) ----------------------------------------------------
-const char *AP_SSID     = "GarageDoor-Setup";
-const char *AP_PASSWORD = "setup1234";  // min 8 chars for WPA2
-const int   WIFI_TIMEOUT_MS = 15000;
+const char *AP_SSID = "GarageDoor-Setup";
+const char *AP_PASSWORD = "setup1234"; // min 8 chars for WPA2
+const int WIFI_TIMEOUT_MS = 15000;
+
+// --- Reset button ------------------------------------------------------------
+// Wire a push button between this pin and GND.
+// Hold it down while powering on (or pressing RST) to clear all stored data.
+const int RESET_BTN_PIN = 0; // GPIO0 is the BOOT button on most ESP32 devkits
+const int RESET_HOLD_MS = 3000; // hold for 3 s to confirm
 
 // --- Globals -----------------------------------------------------------------
 struct Config {
   String wifiSSID;
   String wifiPass;
-  String wsHost;   // backend hostname or IP, e.g. garagedoor.amai.bg or 192.168.1.50
-  int    wsPort;   // 443 for wss (production), 8000 for ws (local)
-  String wsToken;  // shared secret matching ESP_WS_TOKEN in backend .env
+  // Full WebSocket base URL, e.g. wss://garage.amai.bg or
+  // ws://192.168.1.50:8000
+  String wsUrl;
+  String wsToken; // shared secret matching ESP_WS_TOKEN in backend .env
 };
 
-Preferences      prefs;
-WebServer        server(80);
+Preferences prefs;
+WebServer server(80);
 WebsocketsClient wsClient;
 
 Config currentConfig;
-bool   motorBusy      = false;
-bool   configReceived = false;
+bool motorBusy = false;
+bool configReceived = false;
 Config pendingConfig;
 
 // Persisted across reboots. Values: "open", "closed", "unknown".
 String doorState = "unknown";
+
+// --- Factory reset -----------------------------------------------------------
+void checkFactoryReset() {
+  pinMode(RESET_BTN_PIN, INPUT_PULLUP);
+
+  if (digitalRead(RESET_BTN_PIN) != LOW)
+    return;
+
+  Serial.println("Reset button held - hold for 3 s to clear all data...");
+
+  unsigned long start = millis();
+  while (digitalRead(RESET_BTN_PIN) == LOW) {
+    if (millis() - start >= RESET_HOLD_MS) {
+      Serial.println("Clearing NVS...");
+      prefs.begin("garage", false);
+      prefs.clear();
+      prefs.end();
+      Serial.println("Restarting...");
+      delay(500);
+      ESP.restart();
+    }
+    delay(50);
+  }
+  Serial.println("Reset cancelled (released too early)");
+}
 
 // --- Door state persistence --------------------------------------------------
 String loadDoorState() {
   prefs.begin("garage", true);
   String s = prefs.getString("door", "closed");
   prefs.end();
-  if (s == "unknown") s = "closed";
+  if (s == "unknown")
+    s = "closed";
   return s;
 }
 
@@ -68,7 +101,6 @@ void saveDoorState(const String &s) {
 }
 
 // --- State reporting ---------------------------------------------------------
-// Sends both door and motor state to the backend in a single message.
 void sendState() {
   if (wsClient.available()) {
     String msg = "{\"door\":\"";
@@ -77,8 +109,8 @@ void sendState() {
     msg += motorBusy ? "moving" : "idle";
     msg += "\"}";
     wsClient.send(msg);
-    Serial.printf("State sent: door=%s motor=%s\n",
-                  doorState.c_str(), motorBusy ? "moving" : "idle");
+    Serial.printf("State sent: door=%s motor=%s\n", doorState.c_str(),
+                  motorBusy ? "moving" : "idle");
   }
 }
 
@@ -90,42 +122,35 @@ void stopMotor(const String &newDoorState) {
   motorBusy = false;
   Serial.println("Motor stopped");
 
-  // Update and persist the new door position.
   doorState = newDoorState;
   saveDoorState(doorState);
   sendState();
 }
 
-// Triggers the motor. Direction and resulting door state are derived from
-// the current doorState. If unknown, we default to FORWARD.
 void triggerMotor() {
   if (motorBusy) {
     Serial.println("Motor busy - ignoring command");
     return;
   }
 
-  // Pick direction and the state the door will be in after this run.
-  int    direction    = FORWARD;
+  int direction = FORWARD;
   String nextDoorState = "unknown";
 
   if (doorState == "closed") {
-    direction     = FORWARD;   // open the door
+    direction = FORWARD;
     nextDoorState = "open";
   } else if (doorState == "open") {
-    direction     = BACKWARD;  // close the door
+    direction = BACKWARD;
     nextDoorState = "closed";
   } else {
-    // Unknown - default to FORWARD, door state stays unknown.
-    direction     = FORWARD;
+    direction = FORWARD;
     nextDoorState = "unknown";
   }
 
   motorBusy = true;
-  sendState();  // broadcast motor=moving before blocking
+  sendState();
 
-  Serial.printf("Rotating %s (door: %s -> %s)\n",
-                direction == FORWARD ? "FORWARD" : "BACKWARD",
-                doorState.c_str(), nextDoorState.c_str());
+  Serial.printf("Motor: %s -> %s\n", doorState.c_str(), nextDoorState.c_str());
 
   if (direction == FORWARD) {
     digitalWrite(MOTOR_PIN1, LOW);
@@ -141,24 +166,22 @@ void triggerMotor() {
 
 // --- Flash (NVS) config helpers ----------------------------------------------
 Config loadConfig() {
-  prefs.begin("garage", true);  // read-only
+  prefs.begin("garage", true);
   Config c;
-  c.wifiSSID = prefs.getString("ssid",     "");
+  c.wifiSSID = prefs.getString("ssid", "");
   c.wifiPass = prefs.getString("wifiPass", "");
-  c.wsHost   = prefs.getString("wsHost",   "");
-  c.wsPort   = prefs.getInt   ("wsPort",   443);
-  c.wsToken  = prefs.getString("wsToken",  "");
+  c.wsUrl = prefs.getString("wsUrl", "");
+  c.wsToken = prefs.getString("wsToken", "");
   prefs.end();
   return c;
 }
 
 void saveConfig(const Config &c) {
-  prefs.begin("garage", false);  // read-write
-  prefs.putString("ssid",     c.wifiSSID);
+  prefs.begin("garage", false);
+  prefs.putString("ssid", c.wifiSSID);
   prefs.putString("wifiPass", c.wifiPass);
-  prefs.putString("wsHost",   c.wsHost);
-  prefs.putInt   ("wsPort",   c.wsPort);
-  prefs.putString("wsToken",  c.wsToken);
+  prefs.putString("wsUrl", c.wsUrl);
+  prefs.putString("wsToken", c.wsToken);
   prefs.end();
 }
 
@@ -215,23 +238,9 @@ static const char SETUP_HTML[] PROGMEM = R"rawliteral(
       width: 100%;
       max-width: 420px;
     }
-    .logo {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 0.25rem;
-    }
-    h2 {
-      text-align: center;
-      margin: 0 0 0.25rem;
-      color: #1a1a1a;
-      font-size: 1.3rem;
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #999;
-      margin-bottom: 1.5rem;
-    }
+    .logo { text-align: center; font-size: 2.5rem; margin-bottom: 0.25rem; }
+    h2 { text-align: center; margin: 0 0 0.25rem; color: #1a1a1a; font-size: 1.3rem; }
+    .subtitle { text-align: center; font-size: 0.8rem; color: #999; margin-bottom: 1.5rem; }
     .section {
       background: #f8f9fb;
       border-radius: 8px;
@@ -246,13 +255,7 @@ static const char SETUP_HTML[] PROGMEM = R"rawliteral(
       color: #4f7df0;
       margin-bottom: 0.75rem;
     }
-    label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #444;
-      margin-bottom: 0.2rem;
-    }
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 0.2rem; }
     input {
       width: 100%;
       padding: 0.6rem 0.85rem;
@@ -264,17 +267,8 @@ static const char SETUP_HTML[] PROGMEM = R"rawliteral(
       transition: border-color 0.2s, box-shadow 0.2s;
       margin-bottom: 0.85rem;
     }
-    input:focus {
-      border-color: #4f7df0;
-      box-shadow: 0 0 0 3px rgba(79,125,240,0.15);
-    }
-    .hint {
-      font-size: 0.73rem;
-      color: #aaa;
-      margin-top: -0.65rem;
-      margin-bottom: 0.85rem;
-      line-height: 1.4;
-    }
+    input:focus { border-color: #4f7df0; box-shadow: 0 0 0 3px rgba(79,125,240,0.15); }
+    .hint { font-size: 0.73rem; color: #aaa; margin-top: -0.65rem; margin-bottom: 0.85rem; line-height: 1.4; }
     button {
       width: 100%;
       padding: 0.8rem;
@@ -308,12 +302,9 @@ static const char SETUP_HTML[] PROGMEM = R"rawliteral(
 
       <div class="section">
         <p class="section-title">Backend</p>
-        <label>Hostname / IP</label>
-        <input name="wsHost" required placeholder="garagedoor.amai.bg or 192.168.1.50">
-        <p class="hint">Domain name or local IP - no https:// prefix</p>
-        <label>Port</label>
-        <input name="wsPort" type="number" value="443" min="1" max="65535">
-        <p class="hint">443 for production (wss), 8000 for local network (ws)</p>
+        <label>Backend URL</label>
+        <input name="wsUrl" required placeholder="wss://garage.amai.bg">
+        <p class="hint">Use wss:// for a secure connection (production) or ws:// for a local network. Do not include a trailing slash.</p>
         <label>Device token</label>
         <input name="wsToken" type="password" required placeholder="Shared secret">
         <p class="hint">Must match ESP_WS_TOKEN in the backend .env file</p>
@@ -375,10 +366,12 @@ void handleRoot() { server.send_P(200, "text/html", SETUP_HTML); }
 void handleSave() {
   pendingConfig.wifiSSID = server.arg("ssid");
   pendingConfig.wifiPass = server.arg("wifiPass");
-  pendingConfig.wsHost   = server.arg("wsHost");
-  pendingConfig.wsPort   = server.arg("wsPort").toInt();
-  if (pendingConfig.wsPort <= 0) pendingConfig.wsPort = 443;
-  pendingConfig.wsToken  = server.arg("wsToken");
+  pendingConfig.wsUrl = server.arg("wsUrl");
+  pendingConfig.wsToken = server.arg("wsToken");
+
+  // Strip trailing slash if present.
+  if (pendingConfig.wsUrl.endsWith("/"))
+    pendingConfig.wsUrl.remove(pendingConfig.wsUrl.length() - 1);
 
   saveConfig(pendingConfig);
   server.send_P(200, "text/html", SAVED_HTML);
@@ -387,14 +380,12 @@ void handleSave() {
 
 // Blocks until the user submits the setup form, then returns.
 void runSetupMode() {
-  Serial.printf("Entering setup mode. Connect to AP \"%s\" (pw: %s)\n",
-                AP_SSID, AP_PASSWORD);
+  Serial.printf("Setup mode: AP \"%s\"\n", AP_SSID);
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASSWORD);
-  Serial.printf("Portal IP: %s\n", WiFi.softAPIP().toString().c_str());
 
-  server.on("/",     HTTP_GET,  handleRoot);
+  server.on("/", HTTP_GET, handleRoot);
   server.on("/save", HTTP_POST, handleSave);
   server.begin();
 
@@ -411,11 +402,8 @@ void runSetupMode() {
 
 // --- Internet connectivity check ---------------------------------------------
 bool hasInternet() {
-  Serial.println("Pinging 8.8.8.8...");
-  if (Ping.ping(IPAddress(8, 8, 8, 8), 3)) return true;
-  Serial.println("Pinging 1.1.1.1...");
-  if (Ping.ping(IPAddress(1, 1, 1, 1), 3)) return true;
-  return false;
+  return Ping.ping(IPAddress(8, 8, 8, 8), 3) ||
+         Ping.ping(IPAddress(1, 1, 1, 1), 3);
 }
 
 // --- WebSocket ---------------------------------------------------------------
@@ -437,17 +425,17 @@ void onWsMessage(WebsocketsMessage msg) {
 void onWsEvent(WebsocketsEvent event, String data) {
   if (event == WebsocketsEvent::ConnectionOpened) {
     Serial.println("WebSocket connected");
-    // Report current state so the backend syncs immediately on (re)connect.
     sendState();
   } else if (event == WebsocketsEvent::ConnectionClosed) {
-    Serial.println("WebSocket disconnected");
+    Serial.printf("WebSocket disconnected. Reason: %s\n",
+                  data.isEmpty() ? "(no reason given)" : data.c_str());
   } else if (event == WebsocketsEvent::GotPing) {
     wsClient.pong();
   }
 }
 
 bool connectWS() {
-  if (currentConfig.wsHost.isEmpty() || currentConfig.wsToken.isEmpty()) {
+  if (currentConfig.wsUrl.isEmpty() || currentConfig.wsToken.isEmpty()) {
     Serial.println("No WebSocket config - skipping");
     return false;
   }
@@ -455,22 +443,36 @@ bool connectWS() {
   wsClient.onMessage(onWsMessage);
   wsClient.onEvent(onWsEvent);
 
-  bool useTls = (currentConfig.wsPort == 443);
+  // Parse wsUrl into components so we can use the host/port/path overloads,
+  // which are more reliable than passing a full URL string to the library.
+  bool useTls = currentConfig.wsUrl.startsWith("wss://");
+  String hostPart =
+      currentConfig.wsUrl.substring(useTls ? 6 : 5); // strip scheme
+  String host;
+  int port;
+  int colonIdx = hostPart.indexOf(':');
+  if (colonIdx >= 0) {
+    host = hostPart.substring(0, colonIdx);
+    port = hostPart.substring(colonIdx + 1).toInt();
+  } else {
+    host = hostPart;
+    port = useTls ? 443 : 80;
+  }
+  String path = "/ws/esp?token=" + currentConfig.wsToken;
+
+  Serial.printf("Connecting to %s://%s:%d%s\n", useTls ? "wss" : "ws",
+                host.c_str(), port, path.c_str());
+
+  bool ok;
   if (useTls) {
-    // Skip CA verification - acceptable for a home device without a trust store.
-    // The shared token still ensures only this device connects.
     wsClient.setInsecure();
+    ok = wsClient.connectSecure(host, port, path);
+  } else {
+    ok = wsClient.connect(host, port, path);
   }
 
-  String scheme = useTls ? "wss" : "ws";
-  String url = scheme + "://" + currentConfig.wsHost + ":" +
-               String(currentConfig.wsPort) + "/ws/esp?token=" + currentConfig.wsToken;
-  Serial.printf("Connecting to %s\n", url.c_str());
-
-  bool ok = wsClient.connect(url);
-  if (!ok) {
+  if (!ok)
     Serial.println("WebSocket connection failed");
-  }
   return ok;
 }
 
@@ -478,47 +480,42 @@ bool connectWS() {
 void setup() {
   Serial.begin(115200);
 
-  // Motor init
+  checkFactoryReset();
+
   pinMode(MOTOR_PIN1, OUTPUT);
   pinMode(MOTOR_PIN2, OUTPUT);
   pinMode(ENABLE_PIN, OUTPUT);
   ledcAttachChannel(ENABLE_PIN, PWM_FREQ, PWM_RESOLUTION, PWM_CHANNEL);
 
-  // Stop motor and load persisted door state before anything else.
   digitalWrite(MOTOR_PIN1, LOW);
   digitalWrite(MOTOR_PIN2, LOW);
   ledcWrite(ENABLE_PIN, 0);
   doorState = loadDoorState();
-  Serial.printf("Loaded door state: %s\n", doorState.c_str());
 
-  // WiFi init: try stored credentials; on failure run setup portal and retry
   while (true) {
     currentConfig = loadConfig();
-    if (connectWiFi(currentConfig)) break;
+    if (connectWiFi(currentConfig))
+      break;
     runSetupMode();
   }
 
-  if (hasInternet()) {
-    Serial.println("Internet: OK");
+  if (hasInternet())
     connectWS();
-  } else {
-    Serial.println("Internet: unreachable - WebSocket skipped");
-  }
+  else
+    Serial.println("No internet - WebSocket skipped");
 }
 
 // Exponential backoff state for WebSocket reconnection
-unsigned long wsNextRetryMs  = 0;
-unsigned long wsRetryDelayMs = 2000;          // starts at 2 s
-const unsigned long WS_RETRY_MAX_MS = 60000;  // caps at 60 s
+unsigned long wsNextRetryMs = 0;
+unsigned long wsRetryDelayMs = 2000;
+const unsigned long WS_RETRY_MAX_MS = 60000;
 
 void loop() {
-  if (!currentConfig.wsHost.isEmpty() && !wsClient.available()) {
+  if (!currentConfig.wsUrl.isEmpty() && !wsClient.available()) {
     unsigned long now = millis();
     if (now >= wsNextRetryMs) {
-      Serial.printf("WebSocket disconnected - retrying in %lu s...\n",
-                    wsRetryDelayMs / 1000);
       if (connectWS()) {
-        wsRetryDelayMs = 2000;  // reset on success
+        wsRetryDelayMs = 2000;
       } else {
         wsRetryDelayMs = min(wsRetryDelayMs * 2, WS_RETRY_MAX_MS);
       }
