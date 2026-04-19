@@ -1,17 +1,19 @@
-// Required libraries (install via Arduino Library Manager):
-//   ArduinoWebsockets  - Gil Maimon  (search "ArduinoWebsockets")
-//   ArduinoJson        - Benoit Blanchon
-//   ESP32Ping          - marian-craciunescu
+// Required library (install via Arduino Library Manager):
+//   NimBLE-Arduino  - h2zero  (tested with v2.2.x)
+//
+// Direct BLE control. No WiFi, no backend, no cloud.
+// Pair via the Web Bluetooth page at frontend/ble.html (or the GitHub Pages copy).
+//
+// Security model:
+//   - "Just Works" link-layer (no bonding, setSecurityAuth(false,false,false))
+//   - App-layer password: client writes GARAGE_PASSWORD to Auth char after
+//     connecting. Without that, commands are silently rejected.
+//   - Per-connection auth flag. 5 bad attempts -> disconnect.
 
-#include <ArduinoJson.h>
-#include <ArduinoWebsockets.h>
-#include <ESPping.h>
+#include <Arduino.h>
+#include <NimBLEDevice.h>
 #include <Preferences.h>
-#include <WebServer.h>
-#include <WiFi.h>
-#include <WiFiClientSecure.h>
-
-using namespace websockets;
+#include <map>
 
 // --- Motor pins --------------------------------------------------------------
 const int MOTOR_PIN1 = 27;
@@ -26,38 +28,46 @@ const int DUTY_CYCLE = 200;
 #define FORWARD 1
 #define BACKWARD 0
 
-// --- WiFi AP (setup mode) ----------------------------------------------------
-const char *AP_SSID = "GarageDoor-Setup";
-const char *AP_PASSWORD = "setup1234"; // min 8 chars for WPA2
-const int WIFI_TIMEOUT_MS = 15000;
-
 // --- Reset button ------------------------------------------------------------
-// Wire a push button between this pin and GND.
-// Hold it down while powering on (or pressing RST) to clear all stored data.
-const int RESET_BTN_PIN = 0; // GPIO0 is the BOOT button on most ESP32 devkits
-const int RESET_HOLD_MS = 3000; // hold for 3 s to confirm
+// Wire a push button between this pin and GND (or use the onboard BOOT button).
+// Hold during/after power-on for 3 s to clear all stored data and bonds.
+const int RESET_BTN_PIN = 0;
+const int RESET_HOLD_MS = 3000;
+
+// --- Onboard LED (demo feedback) ---------------------------------------------
+const int LED_PIN = 2;
+
+// --- BLE UUIDs (regenerate with `uuidgen` for unique devices) ----------------
+#define SERVICE_UUID "6a4e3200-667b-11ee-b962-0242ac120002"
+#define AUTH_UUID    "6a4e3201-667b-11ee-b962-0242ac120002"
+#define CMD_UUID     "6a4e3202-667b-11ee-b962-0242ac120002"
+#define STATE_UUID   "6a4e3203-667b-11ee-b962-0242ac120002"
+#define INFO_UUID    "6a4e3204-667b-11ee-b962-0242ac120002"
+
+// --- Hardcoded BLE password --------------------------------------------------
+// CHANGE THIS to rotate. The same string must be set in the GARAGE_PASSWORD
+// constant in frontend/ble.html. Reflash + redeploy the page after changing.
+#define GARAGE_PASSWORD "garage-demo-2026"
+
+const int MAX_AUTH_ATTEMPTS = 5;
 
 // --- Globals -----------------------------------------------------------------
-struct Config {
-  String wifiSSID;
-  String wifiPass;
-  // Full WebSocket base URL, e.g. wss://garage.amai.bg or
-  // ws://192.168.1.50:8000
-  String wsUrl;
-  String wsToken; // shared secret matching ESP_WS_TOKEN in backend .env
-};
-
 Preferences prefs;
-WebServer server(80);
-WebsocketsClient wsClient;
 
-Config currentConfig;
+String doorState = "unknown"; // persisted: "open", "closed", "unknown"
 bool motorBusy = false;
-bool configReceived = false;
-Config pendingConfig;
 
-// Persisted across reboots. Values: "open", "closed", "unknown".
-String doorState = "unknown";
+NimBLEServer* bleServer = nullptr;
+NimBLECharacteristic* stateChar = nullptr;
+
+struct ConnState {
+  bool authed = false;
+  uint8_t authAttempts = 0;
+};
+std::map<uint16_t, ConnState> conns;
+
+volatile bool pendingClearBonds = false;
+volatile bool pendingTrigger = false;
 
 // --- Factory reset -----------------------------------------------------------
 void checkFactoryReset() {
@@ -71,10 +81,14 @@ void checkFactoryReset() {
   unsigned long start = millis();
   while (digitalRead(RESET_BTN_PIN) == LOW) {
     if (millis() - start >= RESET_HOLD_MS) {
-      Serial.println("Clearing NVS...");
+      Serial.println("Clearing NVS and BLE bonds...");
       prefs.begin("garage", false);
       prefs.clear();
       prefs.end();
+      // Temporarily bring up NimBLE so we can purge its bond storage in NVS.
+      NimBLEDevice::init("");
+      NimBLEDevice::deleteAllBonds();
+      NimBLEDevice::deinit(true);
       Serial.println("Restarting...");
       delay(500);
       ESP.restart();
@@ -100,18 +114,38 @@ void saveDoorState(const String &s) {
   prefs.end();
 }
 
-// --- State reporting ---------------------------------------------------------
+// --- State broadcasting ------------------------------------------------------
+static void sendStateTo(uint16_t connHandle, bool authed) {
+  if (!stateChar)
+    return;
+  char json[128];
+  snprintf(json, sizeof(json),
+           "{\"door\":\"%s\",\"motor\":\"%s\",\"authed\":%s}",
+           doorState.c_str(),
+           motorBusy ? "moving" : "idle",
+           authed ? "true" : "false");
+  stateChar->setValue((uint8_t *)json, strlen(json));
+  stateChar->notify(connHandle);
+}
+
+// Per-subscriber broadcast (each client sees its own authed flag).
 void sendState() {
-  if (wsClient.available()) {
-    String msg = "{\"door\":\"";
-    msg += doorState;
-    msg += "\",\"motor\":\"";
-    msg += motorBusy ? "moving" : "idle";
-    msg += "\"}";
-    wsClient.send(msg);
-    Serial.printf("State sent: door=%s motor=%s\n", doorState.c_str(),
-                  motorBusy ? "moving" : "idle");
+  if (!stateChar)
+    return;
+
+  char generic[96];
+  snprintf(generic, sizeof(generic),
+           "{\"door\":\"%s\",\"motor\":\"%s\"}",
+           doorState.c_str(),
+           motorBusy ? "moving" : "idle");
+  stateChar->setValue((uint8_t *)generic, strlen(generic));
+
+  for (auto &p : conns) {
+    sendStateTo(p.first, p.second.authed);
   }
+  Serial.printf("State: door=%s motor=%s subscribers=%u\n",
+                doorState.c_str(), motorBusy ? "moving" : "idle",
+                (unsigned)conns.size());
 }
 
 // --- Motor control -----------------------------------------------------------
@@ -164,323 +198,121 @@ void triggerMotor() {
   stopMotor(nextDoorState);
 }
 
-// --- Flash (NVS) config helpers ----------------------------------------------
-Config loadConfig() {
-  prefs.begin("garage", true);
-  Config c;
-  c.wifiSSID = prefs.getString("ssid", "");
-  c.wifiPass = prefs.getString("wifiPass", "");
-  c.wsUrl = prefs.getString("wsUrl", "");
-  c.wsToken = prefs.getString("wsToken", "");
-  prefs.end();
-  return c;
-}
-
-void saveConfig(const Config &c) {
-  prefs.begin("garage", false);
-  prefs.putString("ssid", c.wifiSSID);
-  prefs.putString("wifiPass", c.wifiPass);
-  prefs.putString("wsUrl", c.wsUrl);
-  prefs.putString("wsToken", c.wsToken);
-  prefs.end();
-}
-
-// --- WiFi connection ---------------------------------------------------------
-bool connectWiFi(const Config &c) {
-  if (c.wifiSSID.isEmpty()) {
-    Serial.println("No WiFi credentials stored");
+// --- Auth helpers ------------------------------------------------------------
+static bool constantTimeEquals(const uint8_t *a, size_t alen, const char *b) {
+  size_t blen = strlen(b);
+  if (alen != blen)
     return false;
-  }
-
-  Serial.printf("Connecting to WiFi: %s\n", c.wifiSSID.c_str());
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(c.wifiSSID.c_str(), c.wifiPass.c_str());
-
-  unsigned long start = millis();
-  while (WiFi.status() != WL_CONNECTED) {
-    if (millis() - start > WIFI_TIMEOUT_MS) {
-      Serial.println("\nWiFi timed out");
-      WiFi.disconnect(true);
-      return false;
-    }
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.printf("\nConnected. IP: %s\n", WiFi.localIP().toString().c_str());
-  return true;
+  uint8_t diff = 0;
+  for (size_t i = 0; i < alen; i++)
+    diff |= a[i] ^ (uint8_t)b[i];
+  return diff == 0;
 }
 
-// --- Setup-mode captive portal -----------------------------------------------
-static const char SETUP_HTML[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Garage Door Setup</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 16px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 2rem 1.75rem;
-      width: 100%;
-      max-width: 420px;
-    }
-    .logo { text-align: center; font-size: 2.5rem; margin-bottom: 0.25rem; }
-    h2 { text-align: center; margin: 0 0 0.25rem; color: #1a1a1a; font-size: 1.3rem; }
-    .subtitle { text-align: center; font-size: 0.8rem; color: #999; margin-bottom: 1.5rem; }
-    .section {
-      background: #f8f9fb;
-      border-radius: 8px;
-      padding: 1rem 1rem 0.15rem;
-      margin-bottom: 1rem;
-    }
-    .section-title {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #4f7df0;
-      margin-bottom: 0.75rem;
-    }
-    label { display: block; font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 0.2rem; }
-    input {
-      width: 100%;
-      padding: 0.6rem 0.85rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      background: #fff;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      margin-bottom: 0.85rem;
-    }
-    input:focus { border-color: #4f7df0; box-shadow: 0 0 0 3px rgba(79,125,240,0.15); }
-    .hint { font-size: 0.73rem; color: #aaa; margin-top: -0.65rem; margin-bottom: 0.85rem; line-height: 1.4; }
-    button {
-      width: 100%;
-      padding: 0.8rem;
-      background: #4f7df0;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    button:hover  { background: #3a68da; }
-    button:active { transform: scale(0.98); }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="logo">&#127968;</div>
-    <h2>Garage Door Setup</h2>
-    <p class="subtitle">Configure WiFi and backend connection</p>
-
-    <form method="POST" action="/save">
-      <div class="section">
-        <p class="section-title">WiFi Network</p>
-        <label>Network name (SSID)</label>
-        <input name="ssid" required placeholder="Your WiFi network">
-        <label>Password</label>
-        <input name="wifiPass" type="password" placeholder="Leave blank for open network">
-      </div>
-
-      <div class="section">
-        <p class="section-title">Backend</p>
-        <label>Backend URL</label>
-        <input name="wsUrl" required placeholder="wss://garage.amai.bg">
-        <p class="hint">Use wss:// for a secure connection (production) or ws:// for a local network. Do not include a trailing slash.</p>
-        <label>Device token</label>
-        <input name="wsToken" type="password" required placeholder="Shared secret">
-        <p class="hint">Must match ESP_WS_TOKEN in the backend .env file</p>
-      </div>
-
-      <button type="submit">Save &amp; Connect</button>
-    </form>
-  </div>
-</body>
-</html>
-)rawliteral";
-
-static const char SAVED_HTML[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Saved</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 16px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 2.5rem 2rem;
-      text-align: center;
-      max-width: 360px;
-      width: 100%;
-    }
-    .icon { font-size: 3rem; margin-bottom: 0.75rem; }
-    h2 { color: #27ae60; margin-bottom: 0.75rem; font-size: 1.3rem; }
-    p { color: #666; line-height: 1.6; font-size: 0.9rem; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="icon">&#10003;</div>
-    <h2>Credentials saved!</h2>
-    <p>The device is now connecting to your WiFi and backend server.<br><br>
-       This setup access point will disappear shortly.</p>
-  </div>
-</body>
-</html>
-)rawliteral";
-
-void handleRoot() { server.send_P(200, "text/html", SETUP_HTML); }
-
-void handleSave() {
-  pendingConfig.wifiSSID = server.arg("ssid");
-  pendingConfig.wifiPass = server.arg("wifiPass");
-  pendingConfig.wsUrl = server.arg("wsUrl");
-  pendingConfig.wsToken = server.arg("wsToken");
-
-  // Strip trailing slash if present.
-  if (pendingConfig.wsUrl.endsWith("/"))
-    pendingConfig.wsUrl.remove(pendingConfig.wsUrl.length() - 1);
-
-  saveConfig(pendingConfig);
-  server.send_P(200, "text/html", SAVED_HTML);
-  configReceived = true;
-}
-
-// Blocks until the user submits the setup form, then returns.
-void runSetupMode() {
-  Serial.printf("Setup mode: AP \"%s\"\n", AP_SSID);
-
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(AP_SSID, AP_PASSWORD);
-
-  server.on("/", HTTP_GET, handleRoot);
-  server.on("/save", HTTP_POST, handleSave);
-  server.begin();
-
-  configReceived = false;
-  while (!configReceived) {
-    server.handleClient();
-    delay(10);
+// --- BLE callbacks -----------------------------------------------------------
+class ServerCallback : public NimBLEServerCallbacks {
+  void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo) override {
+    uint16_t h = connInfo.getConnHandle();
+    conns[h] = ConnState{};
+    digitalWrite(LED_PIN, HIGH);
+    Serial.printf("[BLE] Client connected: conn=%u\n", h);
   }
 
-  server.stop();
-  WiFi.softAPdisconnect(true);
-  delay(500);
-}
-
-// --- Internet connectivity check ---------------------------------------------
-bool hasInternet() {
-  return Ping.ping(IPAddress(8, 8, 8, 8), 3) ||
-         Ping.ping(IPAddress(1, 1, 1, 1), 3);
-}
-
-// --- WebSocket ---------------------------------------------------------------
-void onWsMessage(WebsocketsMessage msg) {
-  Serial.printf("WS recv: %s\n", msg.data().c_str());
-
-  StaticJsonDocument<128> doc;
-  if (deserializeJson(doc, msg.data()) != DeserializationError::Ok) {
-    Serial.println("JSON parse error - ignoring");
-    return;
+  void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo,
+                    int reason) override {
+    uint16_t h = connInfo.getConnHandle();
+    conns.erase(h);
+    if (conns.empty())
+      digitalWrite(LED_PIN, LOW);
+    Serial.printf("[BLE] Client disconnected: conn=%u reason=%d\n", h, reason);
+    NimBLEDevice::startAdvertising();
   }
+};
 
-  const char *action = doc["action"];
-  if (action && strcmp(action, "trigger") == 0) {
-    triggerMotor();
+class AuthCallback : public NimBLECharacteristicCallbacks {
+  void onWrite(NimBLECharacteristic *pChr,
+               NimBLEConnInfo &connInfo) override {
+    uint16_t h = connInfo.getConnHandle();
+    auto it = conns.find(h);
+    if (it == conns.end())
+      return;
+
+    std::string v = pChr->getValue();
+    bool ok = constantTimeEquals((const uint8_t *)v.data(), v.size(),
+                                 GARAGE_PASSWORD);
+
+    if (ok) {
+      it->second.authed = true;
+      it->second.authAttempts = 0;
+      Serial.printf("[BLE] Auth success conn=%u\n", h);
+      sendStateTo(h, true);
+      // 4 quick blinks = authed OK
+      for (int i = 0; i < 4; i++) {
+        digitalWrite(LED_PIN, LOW);
+        delay(70);
+        digitalWrite(LED_PIN, HIGH);
+        delay(70);
+      }
+    } else {
+      it->second.authAttempts++;
+      Serial.printf("[BLE] Auth failed conn=%u attempts=%u\n", h,
+                    it->second.authAttempts);
+      sendStateTo(h, false);
+      if (it->second.authAttempts >= MAX_AUTH_ATTEMPTS) {
+        Serial.printf("[BLE] Disconnecting conn=%u after %d failures\n", h,
+                      MAX_AUTH_ATTEMPTS);
+        bleServer->disconnect(h);
+      }
+    }
   }
-}
+};
 
-void onWsEvent(WebsocketsEvent event, String data) {
-  if (event == WebsocketsEvent::ConnectionOpened) {
-    Serial.println("WebSocket connected");
-    sendState();
-  } else if (event == WebsocketsEvent::ConnectionClosed) {
-    Serial.printf("WebSocket disconnected. Reason: %s\n",
-                  data.isEmpty() ? "(no reason given)" : data.c_str());
-  } else if (event == WebsocketsEvent::GotPing) {
-    wsClient.pong();
+class CommandCallback : public NimBLECharacteristicCallbacks {
+  void onWrite(NimBLECharacteristic *pChr,
+               NimBLEConnInfo &connInfo) override {
+    uint16_t h = connInfo.getConnHandle();
+    auto it = conns.find(h);
+    if (it == conns.end() || !it->second.authed) {
+      Serial.printf("[BLE] Command from unauthed conn=%u -- rejected\n", h);
+      return;
+    }
+    std::string cmd = pChr->getValue();
+    Serial.printf("[BLE] Command: %s\n", cmd.c_str());
+
+    if (cmd == "trigger") {
+      // Defer the motor run to loop() so the 2 s blocking delay doesn't
+      // stall the BLE host task and hold up the write response.
+      if (motorBusy) {
+        Serial.println("[BLE] Motor busy - ignoring trigger");
+      } else {
+        pendingTrigger = true;
+      }
+    } else if (cmd == "clear_bonds") {
+      Serial.println("[BLE] clear_bonds requested - deferring to loop()");
+      pendingClearBonds = true;
+    } else {
+      Serial.printf("[BLE] Unknown command: %s\n", cmd.c_str());
+    }
   }
-}
+};
 
-bool connectWS() {
-  if (currentConfig.wsUrl.isEmpty() || currentConfig.wsToken.isEmpty()) {
-    Serial.println("No WebSocket config - skipping");
-    return false;
-  }
-
-  wsClient.onMessage(onWsMessage);
-  wsClient.onEvent(onWsEvent);
-
-  // Parse wsUrl into components so we can use the host/port/path overloads,
-  // which are more reliable than passing a full URL string to the library.
-  bool useTls = currentConfig.wsUrl.startsWith("wss://");
-  String hostPart =
-      currentConfig.wsUrl.substring(useTls ? 6 : 5); // strip scheme
-  String host;
-  int port;
-  int colonIdx = hostPart.indexOf(':');
-  if (colonIdx >= 0) {
-    host = hostPart.substring(0, colonIdx);
-    port = hostPart.substring(colonIdx + 1).toInt();
-  } else {
-    host = hostPart;
-    port = useTls ? 443 : 80;
-  }
-  String path = "/ws/esp?token=" + currentConfig.wsToken;
-
-  Serial.printf("Connecting to %s://%s:%d%s\n", useTls ? "wss" : "ws",
-                host.c_str(), port, path.c_str());
-
-  bool ok;
-  if (useTls) {
-    wsClient.setInsecure();
-    ok = wsClient.connectSecure(host, port, path);
-  } else {
-    ok = wsClient.connect(host, port, path);
-  }
-
-  if (!ok)
-    Serial.println("WebSocket connection failed");
-  return ok;
+// --- Device name from chip MAC ----------------------------------------------
+static String makeDeviceName() {
+  uint64_t mac = ESP.getEfuseMac();
+  char buf[24];
+  snprintf(buf, sizeof(buf), "GarageDoor-%04X", (uint16_t)(mac >> 32));
+  return String(buf);
 }
 
 // --- setup / loop ------------------------------------------------------------
 void setup() {
   Serial.begin(115200);
+  delay(100);
 
   checkFactoryReset();
+
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 
   pinMode(MOTOR_PIN1, OUTPUT);
   pinMode(MOTOR_PIN2, OUTPUT);
@@ -490,37 +322,84 @@ void setup() {
   digitalWrite(MOTOR_PIN1, LOW);
   digitalWrite(MOTOR_PIN2, LOW);
   ledcWrite(ENABLE_PIN, 0);
+
   doorState = loadDoorState();
+  Serial.printf("Door state loaded: %s\n", doorState.c_str());
 
-  while (true) {
-    currentConfig = loadConfig();
-    if (connectWiFi(currentConfig))
-      break;
-    runSetupMode();
-  }
+  String name = makeDeviceName();
+  Serial.printf("Starting BLE as '%s'\n", name.c_str());
 
-  if (hasInternet())
-    connectWS();
-  else
-    Serial.println("No internet - WebSocket skipped");
+  NimBLEDevice::init(name.c_str());
+  NimBLEDevice::setSecurityAuth(false, false, false); // no bond / no MITM / no SC
+  NimBLEDevice::setMTU(185);
+
+  bleServer = NimBLEDevice::createServer();
+  bleServer->setCallbacks(new ServerCallback());
+
+  NimBLEService *svc = bleServer->createService(SERVICE_UUID);
+
+  NimBLECharacteristic *authChar =
+      svc->createCharacteristic(AUTH_UUID, NIMBLE_PROPERTY::WRITE);
+  authChar->setCallbacks(new AuthCallback());
+
+  NimBLECharacteristic *cmdChar =
+      svc->createCharacteristic(CMD_UUID, NIMBLE_PROPERTY::WRITE);
+  cmdChar->setCallbacks(new CommandCallback());
+
+  stateChar = svc->createCharacteristic(
+      STATE_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+
+  NimBLECharacteristic *infoChar =
+      svc->createCharacteristic(INFO_UUID, NIMBLE_PROPERTY::READ);
+  char info[96];
+  snprintf(info, sizeof(info),
+           "{\"firmware\":\"1.0.0-ble\",\"name\":\"%s\"}", name.c_str());
+  infoChar->setValue((uint8_t *)info, strlen(info));
+
+  svc->start();
+
+  // Seed the State char so a READ before the first Notify returns something.
+  char initial[96];
+  snprintf(initial, sizeof(initial),
+           "{\"door\":\"%s\",\"motor\":\"idle\"}", doorState.c_str());
+  stateChar->setValue((uint8_t *)initial, strlen(initial));
+
+  // Flags (3B) + 128-bit service UUID (18B) + 15-char name (17B) = 38B, which
+  // overflows the 31-byte advertising PDU. Split: service UUID in the main
+  // packet, name in the scan response. Both fit comfortably under 31B each.
+  NimBLEAdvertising *adv = NimBLEDevice::getAdvertising();
+
+  NimBLEAdvertisementData advData;
+  advData.setFlags(0x06); // LE General Discoverable + BR/EDR Not Supported
+  advData.addServiceUUID(SERVICE_UUID);
+  adv->setAdvertisementData(advData);
+
+  NimBLEAdvertisementData scanData;
+  scanData.setName(name.c_str());
+  adv->setScanResponseData(scanData);
+
+  adv->setMinInterval(0x20); // 20 ms
+  adv->setMaxInterval(0x40); // 40 ms
+  adv->start();
+
+  Serial.println("BLE advertising started. Waiting for a client...");
 }
 
-// Exponential backoff state for WebSocket reconnection
-unsigned long wsNextRetryMs = 0;
-unsigned long wsRetryDelayMs = 2000;
-const unsigned long WS_RETRY_MAX_MS = 60000;
-
 void loop() {
-  if (!currentConfig.wsUrl.isEmpty() && !wsClient.available()) {
-    unsigned long now = millis();
-    if (now >= wsNextRetryMs) {
-      if (connectWS()) {
-        wsRetryDelayMs = 2000;
-      } else {
-        wsRetryDelayMs = min(wsRetryDelayMs * 2, WS_RETRY_MAX_MS);
-      }
-      wsNextRetryMs = millis() + wsRetryDelayMs;
+  if (pendingClearBonds) {
+    pendingClearBonds = false;
+    Serial.println("[BLE] Clearing bonds and restarting...");
+    for (auto &p : conns) {
+      bleServer->disconnect(p.first);
     }
+    delay(200);
+    NimBLEDevice::deleteAllBonds();
+    delay(300);
+    ESP.restart();
   }
-  wsClient.poll();
+  if (pendingTrigger) {
+    pendingTrigger = false;
+    triggerMotor();
+  }
+  delay(20);
 }
