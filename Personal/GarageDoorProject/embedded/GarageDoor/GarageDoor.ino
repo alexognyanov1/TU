@@ -25,6 +25,10 @@ const int PWM_CHANNEL = 0;
 const int PWM_RESOLUTION = 8;
 const int DUTY_CYCLE = 200;
 
+// How long the motor runs for each direction (milliseconds).
+const unsigned long OPEN_TIME_MS = 2000;
+const unsigned long CLOSE_TIME_MS = 2000;
+
 #define FORWARD 1
 #define BACKWARD 0
 
@@ -169,16 +173,20 @@ void triggerMotor() {
 
   int direction = FORWARD;
   String nextDoorState = "unknown";
+  unsigned long runTime = OPEN_TIME_MS;
 
   if (doorState == "closed") {
     direction = FORWARD;
     nextDoorState = "open";
+    runTime = OPEN_TIME_MS;
   } else if (doorState == "open") {
     direction = BACKWARD;
     nextDoorState = "closed";
+    runTime = CLOSE_TIME_MS;
   } else {
     direction = FORWARD;
     nextDoorState = "unknown";
+    runTime = OPEN_TIME_MS;
   }
 
   motorBusy = true;
@@ -194,7 +202,7 @@ void triggerMotor() {
     digitalWrite(MOTOR_PIN2, LOW);
   }
   ledcWrite(ENABLE_PIN, DUTY_CYCLE);
-  delay(2000);
+  delay(runTime);
   stopMotor(nextDoorState);
 }
 
