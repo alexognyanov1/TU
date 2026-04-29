@@ -22,8 +22,8 @@ def generate_plots():
     R22 = (A2**2 / (2 * a2)) * np.exp(-a2 * np.abs(tau))
     R21 = np.where(
         tau >= 0,
-        (A1 * A2 / (a1 + a2)) * np.exp(-a1 * tau),
-        (A1 * A2 / (a1 + a2)) * np.exp(a2 * tau),
+        (A1 * A2 / (a1 + a2)) * np.exp(-a2 * tau),
+        (A1 * A2 / (a1 + a2)) * np.exp(a1 * tau),
     )
 
     fig, axes = plt.subplots(3, 1, figsize=(8, 10))
@@ -209,10 +209,10 @@ def build_document(plot_path, signals_path):
     add_paragraph(doc, '1. Използвани математически зависимости', bold=True, size=13, space_after=Pt(8), space_before=Pt(12))
 
     add_paragraph(doc, 'Автокорелационна функция на енергиен сигнал s(t):', size=12, space_after=Pt(4))
-    add_formula(doc, 'Rss(τ) = ∫₋∞^∞  s(t) · s(t + τ) dt')
+    add_formula(doc, 'Rss(τ) = ∫₋∞^∞  s(t) · s(t − τ) dt')
 
     add_paragraph(doc, 'Взаимнокорелационна функция на два енергийни сигнала:', size=12, space_after=Pt(4))
-    add_formula(doc, 'R₂₁(τ) = ∫₋∞^∞  s₂(t) · s₁(t + τ) dt')
+    add_formula(doc, 'R₂₁(τ) = ∫₋∞^∞  s₂(t) · s₁(t − τ) dt')
 
     add_paragraph(doc, 'където τ е времевото изместване, а s₁ е сигналът, който се измества.', size=12, space_after=Pt(4))
 
@@ -227,29 +227,28 @@ def build_document(plot_path, signals_path):
     add_formula(doc, 'S₁(t) = A₁ · e^(-a₁t),    t ≥ 0    (иначе S₁(t) = 0)')
 
     add_paragraph(doc, 'Прилагаме дефиницията за автокорелационна функция:', size=12, space_after=Pt(4))
-    add_formula(doc, 'R₁₁(τ) = ∫₋∞^∞  S₁(t) · S₁(t + τ) dt')
+    add_formula(doc, 'R₁₁(τ) = ∫₋∞^∞  S₁(t) · S₁(t − τ) dt')
 
     add_paragraph(doc, 'Интегрантът е ненулев само когато и двата аргумента са в областта на определение:', size=12, space_after=Pt(4))
     add_paragraph(doc, '• S₁(t) ≠ 0  ⟹  t ≥ 0', size=12, space_after=Pt(2))
-    add_paragraph(doc, '• S₁(t + τ) ≠ 0  ⟹  t + τ ≥ 0  ⟹  t ≥ -τ', size=12, space_after=Pt(8))
+    add_paragraph(doc, '• S₁(t − τ) ≠ 0  ⟹  t − τ ≥ 0  ⟹  t ≥ τ', size=12, space_after=Pt(8))
 
     # Case tau >= 0
     add_paragraph(doc, 'Случай 1: τ ≥ 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Когато τ ≥ 0, условието t ≥ -τ е автоматично изпълнено за t ≥ 0, така че долната граница е 0:', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Когато τ ≥ 0, долната граница е max(0, τ) = τ:', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₁₁(τ) = ∫₀^∞  A₁·e^(-a₁t) · A₁·e^(-a₁(t+τ)) dt')
-    add_formula(doc, '= A₁² · e^(-a₁τ) · ∫₀^∞  e^(-2a₁t) dt')
-    add_formula(doc, '= A₁² · e^(-a₁τ) · 1/(2a₁)')
+    add_formula(doc, 'R₁₁(τ) = ∫_τ^∞  A₁·e^(-a₁t) · A₁·e^(-a₁(t−τ)) dt')
+    add_formula(doc, '= A₁² · e^(a₁τ) · ∫_τ^∞  e^(-2a₁t) dt')
+    add_formula(doc, '= A₁² · e^(a₁τ) · e^(-2a₁τ) / (2a₁)')
     add_formula(doc, '= A₁² / (2a₁) · e^(-a₁τ)')
 
     # Case tau < 0
     add_paragraph(doc, 'Случай 2: τ < 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Когато τ < 0, имаме -τ > 0, така че долната граница е -τ:', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Когато τ < 0, условието t ≥ τ е автоматично изпълнено за t ≥ 0, така че долната граница е 0:', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₁₁(τ) = ∫₋τ^∞  A₁·e^(-a₁t) · A₁·e^(-a₁(t+τ)) dt')
-    add_formula(doc, '= A₁² · e^(-a₁τ) · ∫₋τ^∞  e^(-2a₁t) dt')
-    add_formula(doc, '= A₁² · e^(-a₁τ) · e^(-2a₁·(-τ)) / (2a₁)')
-    add_formula(doc, '= A₁² · e^(-a₁τ) · e^(2a₁τ) / (2a₁)')
+    add_formula(doc, 'R₁₁(τ) = ∫₀^∞  A₁·e^(-a₁t) · A₁·e^(-a₁(t−τ)) dt')
+    add_formula(doc, '= A₁² · e^(a₁τ) · ∫₀^∞  e^(-2a₁t) dt')
+    add_formula(doc, '= A₁² · e^(a₁τ) · 1/(2a₁)')
     add_formula(doc, '= A₁² / (2a₁) · e^(a₁τ)')
 
     add_paragraph(doc, 'Тъй като за τ ≥ 0 имаме e^(-a₁τ), а за τ < 0 имаме e^(a₁τ), и двата случая се обединяват в:', size=12, space_after=Pt(4))
@@ -272,22 +271,22 @@ def build_document(plot_path, signals_path):
     add_formula(doc, 'S₂(t) = A₂ · e^(-a₂t),    t ≥ 0    (иначе S₂(t) = 0)')
 
     add_paragraph(doc, 'Процедурата е аналогична на задача а). Прилагаме дефиницията:', size=12, space_after=Pt(4))
-    add_formula(doc, 'R₂₂(τ) = ∫₋∞^∞  S₂(t) · S₂(t + τ) dt')
+    add_formula(doc, 'R₂₂(τ) = ∫₋∞^∞  S₂(t) · S₂(t − τ) dt')
 
     add_paragraph(doc, 'Случай 1: τ ≥ 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Долната граница на интегриране е 0:', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Долната граница на интегриране е max(0, τ) = τ:', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₂₂(τ) = ∫₀^∞  A₂·e^(-a₂t) · A₂·e^(-a₂(t+τ)) dt')
-    add_formula(doc, '= A₂² · e^(-a₂τ) · ∫₀^∞  e^(-2a₂t) dt')
-    add_formula(doc, '= A₂² · e^(-a₂τ) · 1/(2a₂)')
+    add_formula(doc, 'R₂₂(τ) = ∫_τ^∞  A₂·e^(-a₂t) · A₂·e^(-a₂(t−τ)) dt')
+    add_formula(doc, '= A₂² · e^(a₂τ) · ∫_τ^∞  e^(-2a₂t) dt')
+    add_formula(doc, '= A₂² · e^(a₂τ) · e^(-2a₂τ) / (2a₂)')
     add_formula(doc, '= A₂² / (2a₂) · e^(-a₂τ)')
 
     add_paragraph(doc, 'Случай 2: τ < 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Долната граница на интегриране е -τ:', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Условието t ≥ τ е автоматично изпълнено за t ≥ 0, така че долната граница е 0:', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₂₂(τ) = ∫₋τ^∞  A₂·e^(-a₂t) · A₂·e^(-a₂(t+τ)) dt')
-    add_formula(doc, '= A₂² · e^(-a₂τ) · ∫₋τ^∞  e^(-2a₂t) dt')
-    add_formula(doc, '= A₂² · e^(-a₂τ) · e^(2a₂τ) / (2a₂)')
+    add_formula(doc, 'R₂₂(τ) = ∫₀^∞  A₂·e^(-a₂t) · A₂·e^(-a₂(t−τ)) dt')
+    add_formula(doc, '= A₂² · e^(a₂τ) · ∫₀^∞  e^(-2a₂t) dt')
+    add_formula(doc, '= A₂² · e^(a₂τ) · 1/(2a₂)')
     add_formula(doc, '= A₂² / (2a₂) · e^(a₂τ)')
 
     add_paragraph(doc, 'Обединявайки двата случая:', size=12, space_after=Pt(4))
@@ -307,34 +306,33 @@ def build_document(plot_path, signals_path):
     add_paragraph(doc, '4. Задача в) — Взаимнокорелационна функция R₂₁(τ)', bold=True, size=13, space_after=Pt(8), space_before=Pt(16))
 
     add_paragraph(doc, 'Търсим взаимнокорелационната функция на S₂(t) и S₁(t), където S₁ е сигналът, който се измества във времето:', size=12, space_after=Pt(4))
-    add_formula(doc, 'R₂₁(τ) = ∫₋∞^∞  S₂(t) · S₁(t + τ) dt')
+    add_formula(doc, 'R₂₁(τ) = ∫₋∞^∞  S₂(t) · S₁(t − τ) dt')
 
     add_paragraph(doc, 'Условия за ненулев интегрант:', size=12, space_after=Pt(4))
     add_paragraph(doc, '• S₂(t) ≠ 0  ⟹  t ≥ 0', size=12, space_after=Pt(2))
-    add_paragraph(doc, '• S₁(t + τ) ≠ 0  ⟹  t ≥ -τ', size=12, space_after=Pt(8))
+    add_paragraph(doc, '• S₁(t − τ) ≠ 0  ⟹  t ≥ τ', size=12, space_after=Pt(8))
 
     add_paragraph(doc, 'Случай 1: τ ≥ 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Долната граница е max(0, -τ) = 0:', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Долната граница е max(0, τ) = τ:', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₂₁(τ) = ∫₀^∞  A₂·e^(-a₂t) · A₁·e^(-a₁(t+τ)) dt')
-    add_formula(doc, '= A₁·A₂ · e^(-a₁τ) · ∫₀^∞  e^(-(a₁+a₂)t) dt')
-    add_formula(doc, '= A₁·A₂ · e^(-a₁τ) · 1/(a₁ + a₂)')
-    add_formula(doc, '= A₁·A₂ / (a₁ + a₂) · e^(-a₁τ)')
+    add_formula(doc, 'R₂₁(τ) = ∫_τ^∞  A₂·e^(-a₂t) · A₁·e^(-a₁(t−τ)) dt')
+    add_formula(doc, '= A₁·A₂ · e^(a₁τ) · ∫_τ^∞  e^(-(a₁+a₂)t) dt')
+    add_formula(doc, '= A₁·A₂ · e^(a₁τ) · e^(-(a₁+a₂)τ) / (a₁ + a₂)')
+    add_formula(doc, '= A₁·A₂ / (a₁ + a₂) · e^(-a₂τ)')
 
     add_paragraph(doc, 'Случай 2: τ < 0', bold=True, size=12, space_after=Pt(4), space_before=Pt(8))
-    add_paragraph(doc, 'Долната граница е max(0, -τ) = -τ (тъй като -τ > 0):', size=12, space_after=Pt(4))
+    add_paragraph(doc, 'Долната граница е max(0, τ) = 0 (тъй като τ < 0):', size=12, space_after=Pt(4))
 
-    add_formula(doc, 'R₂₁(τ) = ∫₋τ^∞  A₂·e^(-a₂t) · A₁·e^(-a₁(t+τ)) dt')
-    add_formula(doc, '= A₁·A₂ · e^(-a₁τ) · ∫₋τ^∞  e^(-(a₁+a₂)t) dt')
-    add_formula(doc, '= A₁·A₂ · e^(-a₁τ) · e^(-(a₁+a₂)·(-τ)) / (a₁ + a₂)')
-    add_formula(doc, '= A₁·A₂ · e^(-a₁τ) · e^((a₁+a₂)τ) / (a₁ + a₂)')
-    add_formula(doc, '= A₁·A₂ / (a₁ + a₂) · e^(a₂τ)')
+    add_formula(doc, 'R₂₁(τ) = ∫₀^∞  A₂·e^(-a₂t) · A₁·e^(-a₁(t−τ)) dt')
+    add_formula(doc, '= A₁·A₂ · e^(a₁τ) · ∫₀^∞  e^(-(a₁+a₂)t) dt')
+    add_formula(doc, '= A₁·A₂ · e^(a₁τ) · 1/(a₁ + a₂)')
+    add_formula(doc, '= A₁·A₂ / (a₁ + a₂) · e^(a₁τ)')
 
     add_paragraph(doc, 'Крайният резултат:', size=12, space_after=Pt(4))
 
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(-a₁τ),    τ ≥ 0')
+    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(-a₂τ),    τ ≥ 0')
     run.bold = True
     run.italic = True
     run.font.size = Pt(13)
@@ -344,7 +342,7 @@ def build_document(plot_path, signals_path):
 
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(a₂τ),     τ < 0')
+    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(a₁τ),     τ < 0')
     run.bold = True
     run.italic = True
     run.font.size = Pt(13)
@@ -352,7 +350,7 @@ def build_document(plot_path, signals_path):
     p.paragraph_format.space_after = Pt(12)
     p.paragraph_format.space_before = Pt(4)
 
-    add_paragraph(doc, 'Забележка: За разлика от автокорелационните функции, взаимнокорелационната функция НЕ е четна. Тя е непрекъсната в τ = 0, където стойността е R₂₁(0) = A₁·A₂/(a₁+a₂), но скоростта на спадане е различна за положителни и отрицателни τ (определя се от a₁ и a₂ съответно).', size=11, italic=True, space_after=Pt(12))
+    add_paragraph(doc, 'Забележка: За разлика от автокорелационните функции, взаимнокорелационната функция НЕ е четна. Тя е непрекъсната в τ = 0, където стойността е R₂₁(0) = A₁·A₂/(a₁+a₂), но скоростта на спадане е различна за положителни и отрицателни τ (определя се от a₂ и a₁ съответно).', size=11, italic=True, space_after=Pt(12))
 
     # --- Task d) Plots ---
     doc.add_page_break()
@@ -373,7 +371,7 @@ def build_document(plot_path, signals_path):
 
     add_paragraph(doc, 'От графиките се наблюдава:', size=12, space_after=Pt(4))
     add_paragraph(doc, '• Автокорелационните функции R₁₁(τ) и R₂₂(τ) са четни (симетрични спрямо τ = 0) и имат максимум при τ = 0, което е характерно свойство на автокорелационните функции.', size=12, space_after=Pt(2))
-    add_paragraph(doc, '• Взаимнокорелационната функция R₂₁(τ) НЕ е четна — скоростта на спадане е различна за τ > 0 (определя се от a₁) и за τ < 0 (определя се от a₂).', size=12, space_after=Pt(2))
+    add_paragraph(doc, '• Взаимнокорелационната функция R₂₁(τ) НЕ е четна — скоростта на спадане е различна за τ > 0 (определя се от a₂) и за τ < 0 (определя се от a₁).', size=12, space_after=Pt(2))
     add_paragraph(doc, '• Всички корелационни функции спадат експоненциално към нула за |τ| → ∞.', size=12, space_after=Pt(12))
 
     # --- Appendix: Source code ---
@@ -399,8 +397,8 @@ R22 = (A2**2 / (2*a2)) * np.exp(-a2 * np.abs(tau))
 # Cross-correlation R21
 R21 = np.where(
     tau >= 0,
-    (A1*A2 / (a1+a2)) * np.exp(-a1 * tau),
-    (A1*A2 / (a1+a2)) * np.exp(a2 * tau),
+    (A1*A2 / (a1+a2)) * np.exp(-a2 * tau),
+    (A1*A2 / (a1+a2)) * np.exp(a1 * tau),
 )
 
 fig, axes = plt.subplots(3, 1, figsize=(8, 10))
