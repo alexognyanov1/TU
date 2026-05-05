@@ -6,6 +6,8 @@ from docx import Document
 from docx.shared import Pt, Cm, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_ORIENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 import os
 
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -117,16 +119,177 @@ def add_paragraph(doc, text, bold=False, italic=False, size=12, alignment=None, 
     return p
 
 
-def add_formula(doc, text, size=12):
+def _math_run(text, bold=False, size=None):
+    r = OxmlElement('m:r')
+    wrpr = OxmlElement('w:rPr')
+    rfonts = OxmlElement('w:rFonts')
+    rfonts.set(qn('w:ascii'), 'Cambria Math')
+    rfonts.set(qn('w:hAnsi'), 'Cambria Math')
+    wrpr.append(rfonts)
+    if bold:
+        wrpr.append(OxmlElement('w:b'))
+    if size:
+        sz = OxmlElement('w:sz')
+        sz.set(qn('w:val'), str(int(size * 2)))
+        wrpr.append(sz)
+    r.append(wrpr)
+    t = OxmlElement('m:t')
+    t.set(qn('xml:space'), 'preserve')
+    t.text = text
+    r.append(t)
+    return r
+
+
+def _math_nary(sub_text, sup_text, body_elements=None, op='∫', bold=False, size=None):
+    nary = OxmlElement('m:nary')
+    naryPr = OxmlElement('m:naryPr')
+    chr_el = OxmlElement('m:chr')
+    chr_el.set(qn('m:val'), op)
+    naryPr.append(chr_el)
+    limLoc = OxmlElement('m:limLoc')
+    limLoc.set(qn('m:val'), 'subSup')
+    naryPr.append(limLoc)
+    nary.append(naryPr)
+    sub_el = OxmlElement('m:sub')
+    sub_el.append(_math_run(sub_text, bold=bold, size=size))
+    nary.append(sub_el)
+    sup_el = OxmlElement('m:sup')
+    sup_el.append(_math_run(sup_text, bold=bold, size=size))
+    nary.append(sup_el)
+    e_el = OxmlElement('m:e')
+    if body_elements:
+        for be in body_elements:
+            e_el.append(be)
+    nary.append(e_el)
+    return nary
+
+
+def _math_sSup(base_text, sup_text, bold=False, size=None):
+    sSup = OxmlElement('m:sSup')
+    e_el = OxmlElement('m:e')
+    e_el.append(_math_run(base_text, bold=bold, size=size))
+    sSup.append(e_el)
+    sup_el = OxmlElement('m:sup')
+    sup_el.append(_math_run(sup_text, bold=bold, size=size))
+    sSup.append(sup_el)
+    return sSup
+
+
+_UNI_SUB = {'₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5',
+            '₆': '6', '₇': '7', '₈': '8', '₉': '9', '₊': '+', '₋': '-'}
+
+
+def _parse_math(s, bold=False, size=None):
+    elements = []
+    i = 0
+    n = len(s)
+    text_buf = ['']
+
+    def flush():
+        if text_buf[0]:
+            elements.append(_math_run(text_buf[0], bold=bold, size=size))
+            text_buf[0] = ''
+
+    def read_paren_group(s, j):
+        depth, j = 1, j + 1
+        out = ''
+        while j < n and depth > 0:
+            c = s[j]
+            if c == '(':
+                depth += 1
+                out += c
+            elif c == ')':
+                depth -= 1
+                if depth > 0:
+                    out += c
+            else:
+                out += c
+            j += 1
+        return out, j
+
+    while i < n:
+        ch = s[i]
+
+        if ch == '∫':
+            flush()
+            j = i + 1
+            sub = ''
+            if j < n and s[j] == '_':
+                j += 1
+                if j < n and s[j] == '(':
+                    sub, j = read_paren_group(s, j)
+                else:
+                    while j < n and s[j] != '^':
+                        sub += s[j]
+                        j += 1
+            else:
+                while j < n and s[j] != '^':
+                    c = s[j]
+                    if c in _UNI_SUB:
+                        sub += _UNI_SUB[c]
+                        j += 1
+                    elif c == '∞' and sub:
+                        sub += '∞'
+                        j += 1
+                    else:
+                        break
+
+            sup = ''
+            if j < n and s[j] == '^':
+                j += 1
+                if j < n and s[j] == '(':
+                    sup, j = read_paren_group(s, j)
+                else:
+                    while j < n and s[j] not in ' \t,':
+                        sup += s[j]
+                        j += 1
+
+            body_elements = _parse_math(s[j:], bold=bold, size=size)
+            elements.append(_math_nary(sub, sup, body_elements=body_elements,
+                                       bold=bold, size=size))
+            return elements
+
+        if ch == 'e' and i + 1 < n and s[i + 1] == '^':
+            flush()
+            j = i + 2
+            sup = ''
+            if j < n and s[j] == '(':
+                sup, j = read_paren_group(s, j)
+            else:
+                while j < n and s[j] not in ' \t,)':
+                    sup += s[j]
+                    j += 1
+            elements.append(_math_sSup('e', sup, bold=bold, size=size))
+            i = j
+            continue
+
+        text_buf[0] += ch
+        i += 1
+
+    flush()
+    return elements
+
+
+def add_formula(doc, text, size=12, bold=False, space_before=Pt(6), space_after=Pt(6)):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run(text)
-    run.italic = True
-    run.font.size = Pt(size)
-    run.font.name = 'Cambria Math'
     pf = p.paragraph_format
-    pf.space_after = Pt(6)
-    pf.space_before = Pt(6)
+    pf.space_after = space_after
+    pf.space_before = space_before
+
+    elements = _parse_math(text, bold=bold, size=size)
+
+    oMathPara = OxmlElement('m:oMathPara')
+    oMathParaPr = OxmlElement('m:oMathParaPr')
+    jc = OxmlElement('m:jc')
+    jc.set(qn('m:val'), 'center')
+    oMathParaPr.append(jc)
+    oMathPara.append(oMathParaPr)
+    oMath = OxmlElement('m:oMath')
+    for el in elements:
+        oMath.append(el)
+    oMathPara.append(oMath)
+    p._p.append(oMathPara)
     return p
 
 
@@ -253,16 +416,9 @@ def build_document(plot_path, signals_path):
 
     add_paragraph(doc, 'Тъй като за τ ≥ 0 имаме e^(-a₁τ), а за τ < 0 имаме e^(a₁τ), и двата случая се обединяват в:', size=12, space_after=Pt(4))
 
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₁₁(τ) = A₁² / (2a₁) · e^(-a₁|τ|)')
-    run.bold = True
-    run.italic = True
-    run.font.size = Pt(13)
-    run.font.name = 'Cambria Math'
-    pf = p.paragraph_format
-    pf.space_after = Pt(12)
-    pf.space_before = Pt(8)
+    add_formula(doc, 'R₁₁(τ) = A₁² / (2a₁) · e^(-a₁|τ|)',
+                size=13, bold=True,
+                space_before=Pt(8), space_after=Pt(12))
 
     # --- Task b) ---
     add_paragraph(doc, '3. Задача б) — Автокорелационна функция на S₂(t)', bold=True, size=13, space_after=Pt(8), space_before=Pt(16))
@@ -291,16 +447,9 @@ def build_document(plot_path, signals_path):
 
     add_paragraph(doc, 'Обединявайки двата случая:', size=12, space_after=Pt(4))
 
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₂₂(τ) = A₂² / (2a₂) · e^(-a₂|τ|)')
-    run.bold = True
-    run.italic = True
-    run.font.size = Pt(13)
-    run.font.name = 'Cambria Math'
-    pf = p.paragraph_format
-    pf.space_after = Pt(12)
-    pf.space_before = Pt(8)
+    add_formula(doc, 'R₂₂(τ) = A₂² / (2a₂) · e^(-a₂|τ|)',
+                size=13, bold=True,
+                space_before=Pt(8), space_after=Pt(12))
 
     # --- Task c) ---
     add_paragraph(doc, '4. Задача в) — Взаимнокорелационна функция R₂₁(τ)', bold=True, size=13, space_after=Pt(8), space_before=Pt(16))
@@ -330,25 +479,12 @@ def build_document(plot_path, signals_path):
 
     add_paragraph(doc, 'Крайният резултат:', size=12, space_after=Pt(4))
 
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(-a₂τ),    τ ≥ 0')
-    run.bold = True
-    run.italic = True
-    run.font.size = Pt(13)
-    run.font.name = 'Cambria Math'
-    p.paragraph_format.space_after = Pt(4)
-    p.paragraph_format.space_before = Pt(8)
-
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run('R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(a₁τ),     τ < 0')
-    run.bold = True
-    run.italic = True
-    run.font.size = Pt(13)
-    run.font.name = 'Cambria Math'
-    p.paragraph_format.space_after = Pt(12)
-    p.paragraph_format.space_before = Pt(4)
+    add_formula(doc, 'R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(-a₂τ),    τ ≥ 0',
+                size=13, bold=True,
+                space_before=Pt(8), space_after=Pt(4))
+    add_formula(doc, 'R₂₁(τ) = A₁·A₂ / (a₁+a₂) · e^(a₁τ),     τ < 0',
+                size=13, bold=True,
+                space_before=Pt(4), space_after=Pt(12))
 
     add_paragraph(doc, 'Забележка: За разлика от автокорелационните функции, взаимнокорелационната функция НЕ е четна. Тя е непрекъсната в τ = 0, където стойността е R₂₁(0) = A₁·A₂/(a₁+a₂), но скоростта на спадане е различна за положителни и отрицателни τ (определя се от a₂ и a₁ съответно).', size=11, italic=True, space_after=Pt(12))
 
