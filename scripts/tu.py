@@ -18,7 +18,7 @@ COURSE_RE = re.compile(r"^[IV]+-kurs$")
 DATE_RE = re.compile(r"^\d{4}\.\d{2}\.\d{2}$")
 # Sub-folders of a subject that only group work folders, e.g. BPE/Lab/2025.02.19
 GROUPS = {"Lab", "Seminar", "ExampleTest"}
-SUBJECT_META = {"RULES.md", "README.md"}
+SUBJECT_META = {"RULES.md", "README.md", "run.sh"}
 IGNORED = {".DS_Store", ".idea", ".vscode", "__pycache__"}
 
 

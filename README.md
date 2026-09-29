@@ -30,7 +30,7 @@ Then replace the `TODO` in the new README row with what each task does (rule R5 
 <!-- subjects:III-kurs -->
 | Subject | Name | Language(s) | Rules |
 | --- | --- | --- | --- |
-| [PE](III-kurs/PE) | Програмни езици / Programming Languages | TODO | [rules](III-kurs/PE/RULES.md) |
+| [PE](III-kurs/PE) | Програмни езици / Programming Languages | C++17 | [rules](III-kurs/PE/RULES.md) |
 
 <!-- /subjects:III-kurs -->
 
@@ -41,6 +41,7 @@ Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md)
 <!-- index:III-kurs/PE -->
 | Date | Type | Folder | Language | What's inside |
 | --- | --- | --- | --- | --- |
+| 2026.09.29 | Lab | [III-kurs/PE/2026.09.29](III-kurs/PE/2026.09.29) | C++17 | Lab 1 – classes and objects (handout `lab1_PE-GM.pdf`). task1 – `Time` class: hours/minutes/seconds with range-checked setters, print in 24-hour `hh:mm:ss` and 12-hour AM/PM format (`iomanip`, `setw`, `setfill`); task2 – `Worker` class: private members, two constructors (default zero-init / position read from keyboard with `getline`), getters and setters, salaries in a plain array, average and minimum salary; task3 – `Line` class: constructor draws a line of `*`, destructor erases it with backspaces (constructor/destructor lifetime, scope). Build & run: `III-kurs/PE/run.sh taskN` |
 
 <!-- /index:III-kurs/PE -->
 
