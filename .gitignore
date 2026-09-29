@@ -32,3 +32,6 @@ cmake-build-*/
 
 # Logs
 *.log
+
+# Per-subject build output (e.g. III-kurs/PE/run.sh)
+.build/
