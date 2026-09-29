@@ -14,13 +14,16 @@ Each subject folder has a `RULES.md` listing the required language, techniques a
 
 ## Adding code
 
+All changes go through a branch and a pull request to `main`. The PR can only be merged once the `readme-index` check passes (rule R6 in [RULES.md](RULES.md)).
+
 ```sh
+git switch -c pe/2026.09.29                        # one branch per day/change
 python3 scripts/tu.py new-day III-kurs PE          # creates III-kurs/PE/<today>/ and a README row
 python3 scripts/tu.py new-subject III-kurs XYZ     # new subject: folder, RULES.md, README section
 python3 scripts/tu.py check                        # verifies every folder is indexed (also runs in CI)
 ```
 
-Then replace the `TODO` in the new README row with what each task does (rule R5 in [RULES.md](RULES.md)).
+Then replace the `TODO` in the new README row with what each task does (rule R5), commit, push the branch and open a PR (`gh pr create --base main --fill`).
 
 ---
 
