@@ -36,12 +36,12 @@ Then replace the `TODO` in the new README row with what each task does (rule R5 
 
 ### PE: Programming Languages
 
-Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md)
+Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE/run.sh [DAY] taskN` · Test all tasks of a day: `III-kurs/PE/run.sh --test [DAY]` ([test.py](III-kurs/PE/test.py), cases in `<DAY>/tests/`)
 
 <!-- index:III-kurs/PE -->
 | Date | Type | Folder | Language | What's inside |
 | --- | --- | --- | --- | --- |
-| 2026.09.29 | Lab | [III-kurs/PE/2026.09.29](III-kurs/PE/2026.09.29) | C++17 | Lab 1 – classes and objects (handout `lab1_PE-GM.pdf`). task1 – `Time` class: hours/minutes/seconds with range-checked setters, print in 24-hour `hh:mm:ss` and 12-hour AM/PM format (`iomanip`, `setw`, `setfill`); task2 – `Worker` class: private members, two constructors (default zero-init / position read from keyboard with `getline`), getters and setters, salaries in a plain array, average and minimum salary; task3 – `Line` class: constructor draws a line of `*`, destructor erases it with backspaces (constructor/destructor lifetime, scope). Input validation and end-of-input handling; 24 stdin test cases in `tests/`. Build & run: `III-kurs/PE/run.sh taskN`, test: `III-kurs/PE/run.sh --test` |
+| 2026.09.29 | Lab | [III-kurs/PE/2026.09.29](III-kurs/PE/2026.09.29) | C++17 | Lab 1 – classes and objects (handout `lab1_PE-GM.pdf`). task1 – `Time` class: hours/minutes/seconds with range-checked setters, print in 24-hour `hh:mm:ss` and 12-hour AM/PM format (`iomanip`, `setw`, `setfill`); task2 – `Worker` class: private members, two constructors (default zero-init / position read from keyboard with `getline`), getters and setters, salaries in a plain array, average and minimum salary; task3 – `Line` class: constructor draws a line of `*`, destructor erases it with backspaces `\b` (object lifetime, automatic destructor call at end of scope, RAII, `std::flush`, `sleep_for`). Input validation and end-of-input handling; 24 stdin test cases in `tests/`. Build & run: `III-kurs/PE/run.sh taskN`, test: `III-kurs/PE/run.sh --test` |
 
 <!-- /index:III-kurs/PE -->
 
