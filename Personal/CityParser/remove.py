@@ -1,6 +1,3 @@
-# Description: This script filters a list of cities from one JSON file based on matching names found in another JSON file, saving the result to a new file.
-# Tags: Data Filtering, JSON Processing, Data Comparison, City Data
-
 import json
 
 # Paths to your files

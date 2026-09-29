@@ -1,6 +1,3 @@
-// Description: This script checks for repeating characters in a string using bitwise operations.
-// Tags: C, Bitwise Operations, String Manipulation
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

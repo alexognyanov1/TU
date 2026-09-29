@@ -1,6 +1,3 @@
-# Description: This script solves a given Sudoku puzzle using a backtracking algorithm.
-# Tags: Sudoku, Backtracking
-
 def print_board(board: list[list]) -> None:
     for i in board:
         print('[' + ' '.join([str(j) if j != 0 else ' ' for j in i]), end=']\n', )

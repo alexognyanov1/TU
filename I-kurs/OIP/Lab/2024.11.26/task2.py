@@ -1,6 +1,3 @@
-# Description: This script uses a genetic algorithm to optimize the placement of access points in a rectangular room to maximize coverage. It initializes a population of random access point positions, evaluates their fitness based on the area covered, and iteratively improves the positions through selection, crossover, and mutation. The script visualizes the coverage heatmap for the initial and final access point placements, plots the fitness over generations, and animates the changes in access point positions across generations.
-# Tags: Genetic Algorithm, Optimization, Access Point Placement, Coverage, Heatmap
-
 import numpy as np
 import matplotlib.pyplot as plt
 import random

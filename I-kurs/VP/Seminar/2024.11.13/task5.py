@@ -1,6 +1,3 @@
-# Description: This script demonstrates various set operations in Python, including union, difference, intersection, element removal, and clearing sets. It also shows how to create sets from user input.
-# Tags: Set Operations, Union, Difference, Intersection, Element Removal, Set Creation 
-
 def create_set():
     n = int(input("Enter the number of elements in the set: "))
     s = set()

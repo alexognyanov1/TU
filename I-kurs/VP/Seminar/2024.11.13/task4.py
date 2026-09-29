@@ -1,6 +1,3 @@
-# Description: This script generates a nested array of random integers, prints it, and then removes a specified row and column from the array.
-# Tags: Array Manipulation, Matrix Operations, Random Number Generation
-
 import random
 
 

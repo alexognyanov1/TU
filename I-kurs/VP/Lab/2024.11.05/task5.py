@@ -1,6 +1,3 @@
-# Description: This script implements a Caesar cipher for text encryption.
-# Tags: Caesar Cipher, Encryption
-
 def find_longest_word(sentence):
     words = sentence.split(' ')
 

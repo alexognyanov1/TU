@@ -1,6 +1,3 @@
-// Description: This script implements a doubly linked list with functions to create, append, and traverse the list.
-// Tags: C, Linked List, Data Structures
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

@@ -1,6 +1,3 @@
-# Description: This script simulates a genetic algorithm to optimize the placement of Wi-Fi access points in a classroom to maximize signal coverage. It initializes a population of random access point positions, iteratively improves their placement over several generations using selection, crossover, and mutation, and visualizes the initial and final distributions as well as the dynamic changes in signal strength and fitness scores across generations.
-# Tags: Genetic Algorithm, Optimization, Wi-Fi Placement, Signal Strength, Visualization
-
 import random
 import scipy.io
 import matplotlib.pyplot as plt

@@ -1,6 +1,3 @@
-# Description: This script organizes movie data by rating and prints it in a pretty table format.
-# Tags: Data Organization, PrettyTable
-
 import requests
 from prettytable import PrettyTable
 

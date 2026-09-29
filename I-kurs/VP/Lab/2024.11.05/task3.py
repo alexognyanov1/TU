@@ -1,6 +1,3 @@
-# Description: This script modifies a list of numbers by setting elements greater than a threshold to zero.
-# Tags: List Modification, Threshold
-
 def add(a, b):
     return a + b
 

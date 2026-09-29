@@ -1,6 +1,3 @@
-# Description: This script implements a simple English-Bulgarian dictionary program. It allows users to search for words, add new words, view the dictionary, delete words, and exit the program.
-# Tags: Dictionary, Language Learning, User Interface, Data Management 
-
 def display_menu():
     print("English-Bulgarian Dictionary")
     print("1. Search for a word")

@@ -1,6 +1,3 @@
-# Description: This script is a Flask API that scrapes cost of living data (purchasing power and average salary) from Numbeo website URLs provided in a POST request.  It handles multiple URLs and returns a JSON response with the extracted data or error messages.
-# Tags: Web Scraping, API, Numbeo, Cost of Living, Data Extraction, JSON
-
 from flask import Flask, request, jsonify
 import requests
 from bs4 import BeautifulSoup

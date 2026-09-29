@@ -1,6 +1,3 @@
-# Description: This script finds the future date after a given number of days from a specified date.
-# Tags: Date Calculation, Leap Year
-
 from datetime import datetime, timedelta
 
 

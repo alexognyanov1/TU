@@ -1,6 +1,3 @@
-# Description: This script validates user input and creates a dictionary with character counts.
-# Tags: Character Count
-
 def validate_input():
     while True:
         text = input("Моля, въведете текст: ")

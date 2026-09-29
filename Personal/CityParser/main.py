@@ -1,6 +1,3 @@
-# Description: This script reads city data from a tab-separated text file, extracts and processes geographical and administrative information, quantizes latitude and longitude values, and then exports the structured data into a JSON file.
-# Tags: Data Transformation, File Parsing, Data Extraction, JSON Export, Geographical Data, Data Cleaning
-
 import csv
 import json
 import math

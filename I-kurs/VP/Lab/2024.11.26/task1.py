@@ -1,6 +1,3 @@
-# Description: This script simulates a library system. It allows users to add books, search for books by title or author, borrow books, return books, and view available and borrowed books.  The system tracks book availability and the number of times each book has been borrowed. It also limits the number of books a user can borrow simultaneously.
-# Tags: Library Management, Book Tracking, Inventory Management
-
 class Book:
     def __init__(self, title, author, year):
         self.title = title

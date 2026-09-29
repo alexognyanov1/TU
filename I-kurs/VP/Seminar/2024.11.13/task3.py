@@ -1,6 +1,3 @@
-# Description: This script finds the longest repeating sequence of numbers within a given list. It iterates through the list, comparing adjacent elements. If they are equal, they are added to the current sequence. If they are different, the current sequence is compared to the maximum sequence, and the longer one is kept. The process continues until the end of the list, and the final maximum sequence is returned.
-# Tags: Sequence Analysis, Repetition Detection, Algorithm
-
 def longest_repeating_sequence(numbers):
     if not numbers:
         return []

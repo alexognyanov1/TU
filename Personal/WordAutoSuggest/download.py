@@ -1,6 +1,3 @@
-# Description: This script copies the system's dictionary file (`/usr/share/dict/words`) to a local file named `words.txt`.
-# Tags: File Copying, System Files, Word List
-
 import requests
 import os
 

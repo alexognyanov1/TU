@@ -1,6 +1,3 @@
-# Description: This script generates a visual representation of a directory structure.
-# Tags: Directory Tree, File Sizes
-
 import os
 import argparse
 

@@ -1,6 +1,3 @@
-# Description: This script calculates the area and perimeter of different geometric shapes based on user input.
-# Tags: Geometry
-
 def calculate_square():
     side = float(input("Enter the side length of the square: "))
     area = side ** 2

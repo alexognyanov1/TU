@@ -1,6 +1,3 @@
-# Description: This script reads words from a 'words.txt' file, constructs a Trie (prefix tree) data structure, and provides functionality to efficiently check for the existence of words within the loaded dictionary.
-# Tags: Trie, Prefix Tree, Word Dictionary, Word Search, Data Structure
-
 import os
 import numpy as np
 

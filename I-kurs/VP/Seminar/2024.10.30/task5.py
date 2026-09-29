@@ -1,6 +1,3 @@
-# Description: This script calculates the sum of prime and non-prime numbers entered by the user.
-# Tags: Prime Numbers
-
 def is_prime(n):
     if n <= 1:
         return False

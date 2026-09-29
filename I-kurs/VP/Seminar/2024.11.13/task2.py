@@ -1,6 +1,3 @@
-# Description: This script removes the shortest and longest words from a given sentence.
-# Tags: String Manipulation, Word Processing
-
 def remove_shortest_and_longest(sentence):
     words = sentence.split()
     if len(words) < 3:

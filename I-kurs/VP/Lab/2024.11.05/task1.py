@@ -1,6 +1,3 @@
-# Description: This script calculates the area of different geometric shapes based on user input.
-# Tags: Geometry
-
 def square_area(side):
     return side * side
 

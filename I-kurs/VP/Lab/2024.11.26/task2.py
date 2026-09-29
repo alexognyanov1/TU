@@ -1,6 +1,3 @@
-# Description: This script simulates a zoo, allowing users to add, remove, transfer, and list animals in different enclosures.  It uses object-oriented programming to represent animals (Mammals, Birds, Reptiles) and their attributes, and the zoo itself as a container for enclosures and animals.  The script demonstrates basic zoo management functionalities.
-# Tags: Zoo Simulation, Object-Oriented Programming, Animal Management, Enclosure Management
-
 class Animal:
     def __init__(self, name, species, age, health):
         self.name = name

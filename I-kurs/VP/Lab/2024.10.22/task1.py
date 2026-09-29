@@ -1,6 +1,3 @@
-# Description: This script validates forms tuples of digits in normal and reverse order.
-# Tags: Tuples
-
 def validate_input():
     while True:
         try:
