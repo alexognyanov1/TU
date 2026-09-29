@@ -45,7 +45,10 @@ def visible(text):
 
 def block(title, text):
     out(f"    {title}:")
-    lines = visible(text).rstrip("\n").split("\n") if text.strip() else ["(empty)"]
+    if not text:
+        lines = ["(nothing)"]
+    else:
+        lines = [line or "(empty line)" for line in visible(text).rstrip("\n").split("\n")] if title == "input" else visible(text).rstrip("\n").split("\n")
     for line in lines:
         out(f"      | {line}")
 
