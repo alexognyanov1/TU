@@ -54,7 +54,26 @@ The point of the [README](README.md) is that classmates can find things on GitHu
 - A new subject gets a new section in the README (under its course) and a row in the course's subject table.
 - `python3 scripts/tu.py check` fails if any day or project folder is missing from the README or any subject is missing its `RULES.md`. CI runs it on every push and PR.
 
-## R6. Hygiene
+## R6. Branches and pull requests
+
+- **Nobody pushes to `main` directly.** All work, including README-only changes, goes on a branch and reaches `main` through a pull request.
+- Branch names: `<subject>/<YYYY.MM.DD>` for a day's work (e.g. `pe/2026.09.29`), or `chore/<short-description>` for repo changes (e.g. `chore/update-rules`).
+- Open the PR against `main`. The **`readme-index`** check (`python3 scripts/tu.py check`) must pass before the PR can be merged. If it fails, fix the branch (usually a missing or TODO README row) and push again.
+- Run `python3 scripts/tu.py check` locally before pushing so the PR goes green on the first try.
+- Merge with **Squash and merge**, then delete the branch.
+- `main` is protected by a GitHub ruleset that enforces this: PRs required, the `readme-index` check must pass, and no force-pushes or deletion.
+
+```sh
+git switch -c pe/2026.09.29
+python3 scripts/tu.py new-day III-kurs PE
+# ...write code, fill in the README row...
+python3 scripts/tu.py check
+git add -A && git commit -m "PE 2026.09.29: lab 1 – arrays and pointers"
+git push -u origin pe/2026.09.29
+gh pr create --base main --fill
+```
+
+## R7. Hygiene
 
 - Don't commit build output, IDE workspace state, or OS junk (`.DS_Store`, `*.class`, `*.o`, `a.out`, `out/`, `__pycache__/`, `.idea/workspace.xml`, Office lock files `~$*`). `.gitignore` covers these.
 - Never commit secrets (`.env`, API keys).
