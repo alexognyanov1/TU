@@ -1,5 +1,7 @@
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <thread>
 
 class Line {
@@ -20,10 +22,23 @@ public:
     }
 };
 
-int main() {
-    int length;
+int readLength() {
+    int value;
     std::cout << "Line length: ";
-    std::cin >> length;
+    while (!(std::cin >> value) || value < 0) {
+        if (std::cin.eof()) {
+            std::cout << "\nInput ended\n";
+            std::exit(0);
+        }
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Length must be a whole number, 0 or more: ";
+    }
+    return value;
+}
+
+int main() {
+    int length = readLength();
 
     {
         Line line(length);

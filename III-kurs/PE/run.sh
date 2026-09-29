@@ -13,6 +13,7 @@ Usage:
   ./run.sh DAY TASK          build and run TASK from DAY (YYYY.MM.DD)
   ./run.sh --build [DAY]     compile every task in DAY (default: latest) without running
   ./run.sh --list            list day folders and their tasks
+  ./run.sh --test [DAY] [TASK]  build every task and run all its test cases (see test.py)
 
 TASK is a file name with or without .cpp, e.g. task1 or task1.cpp.
 Binaries go to III-kurs/PE/.build/ (git-ignored).
@@ -41,6 +42,10 @@ build() {
 case "${1:-}" in
     ""|-h|--help)
         usage
+        ;;
+    --test)
+        shift
+        exec "$PE_DIR/test.py" "$@"
         ;;
     --list)
         for d in "$PE_DIR"/[0-9]*.[0-9]*.[0-9]*/; do

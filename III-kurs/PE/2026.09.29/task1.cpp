@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -56,6 +57,10 @@ int readInt(const char* prompt) {
     int value;
     std::cout << prompt;
     while (!(std::cin >> value)) {
+        if (std::cin.eof()) {
+            std::cout << "\nInput ended\n";
+            std::exit(0);
+        }
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "Please enter a whole number: ";
