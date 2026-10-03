@@ -30,6 +30,8 @@ Then replace the `TODO` in the new README row with what each task does (rule R5)
 <!-- course:III-kurs -->
 ## III-kurs (2026/27)
 
+Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_potok8_schedule.pdf) · [stream 9 PDF](III-kurs/2026-27_winter_KSI_potok9_schedule.pdf) · [group 43 JSON](III-kurs/2026-27_winter_KSI_group43_schedule.json)
+
 <!-- subjects:III-kurs -->
 | Subject | Name | Language(s) | Rules |
 | --- | --- | --- | --- |

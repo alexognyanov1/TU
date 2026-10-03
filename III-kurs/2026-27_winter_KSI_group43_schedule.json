@@ -1,0 +1,46 @@
+{
+  "source": "III-kurs/2026-27_winter_KSI_potok9_schedule.pdf (ФКСТ, КСИ, 3 к., 9 поток, зимен семестър 2026/2027)",
+  "group": "43",
+  "subgroups": ["43а", "43б"],
+  "legend": {
+    "weeks": "all = every week; odd = weeks 1,3,5,...; even = weeks 2,4,6,... (in the PDF, the upper-left half of a split cell is odd, the lower-right half is even)",
+    "kind": "л = лекция (lecture); лб = лабораторно упражнение (lab); су = семинарно упражнение (seminar)",
+    "skippable": "true only for lectures (л); labs (лб/лу) and seminars (су) are compulsory and must be made up (отработване) if missed",
+    "subgroups": "which subgroups attend; both = 43а and 43б together with the rest of the stream"
+  },
+  "notes": [
+    "ОС labs start from week 2 (footnote in the PDF).",
+    "One course project is done in one of the semester's subjects (footnote in the PDF).",
+    "Friday afternoon БЕ / ИАДС / ГОТ are alternative elective subjects: attend only the one you chose."
+  ],
+  "classes": [
+    {"day": "Mon", "start": "08:30", "end": "11:15", "subject": "ОС",   "kind": "л",   "skippable": true, "room": "1152",  "weeks": "all",  "subgroups": "both"},
+    {"day": "Mon", "start": "11:30", "end": "13:15", "subject": "ПЕ",   "kind": "л",   "skippable": true, "room": "1152",  "weeks": "all",  "subgroups": "both"},
+
+    {"day": "Tue", "start": "07:30", "end": "10:15", "subject": "КП",   "kind": "лб",  "skippable": false,"room": "1114",  "weeks": "odd",  "subgroups": "43а"},
+    {"day": "Tue", "start": "07:30", "end": "10:15", "subject": "ПЕ",   "kind": "лб",  "skippable": false,"room": "713",   "weeks": "even", "subgroups": "43а"},
+    {"day": "Tue", "start": "07:30", "end": "10:15", "subject": "ПЕ",   "kind": "лб",  "skippable": false,"room": "713",   "weeks": "odd",  "subgroups": "43б"},
+    {"day": "Tue", "start": "07:30", "end": "10:15", "subject": "КП",   "kind": "лб",  "skippable": false,"room": "1114",  "weeks": "even", "subgroups": "43б"},
+    {"day": "Tue", "start": "10:30", "end": "13:15", "subject": "ЦСхТ", "kind": "лб",  "skippable": false,"room": "1413",  "weeks": "odd",  "subgroups": "43а"},
+    {"day": "Tue", "start": "10:30", "end": "13:15", "subject": "ОС",   "kind": "лб",  "skippable": false,"room": "1407",  "weeks": "even", "subgroups": "43а"},
+    {"day": "Tue", "start": "10:30", "end": "13:15", "subject": "ОС",   "kind": "лб",  "skippable": false,"room": "1407",  "weeks": "odd",  "subgroups": "43б"},
+    {"day": "Tue", "start": "10:30", "end": "13:15", "subject": "ЦСхТ", "kind": "лб",  "skippable": false,"room": "1413",  "weeks": "even", "subgroups": "43б"},
+    {"day": "Tue", "start": "13:45", "end": "16:30", "subject": "КА",   "kind": "лб",  "skippable": false,"room": "1309",  "weeks": "odd",  "subgroups": "43а"},
+    {"day": "Tue", "start": "13:45", "end": "16:30", "subject": "КА",   "kind": "лб",  "skippable": false,"room": "1309",  "weeks": "even", "subgroups": "43б"},
+
+    {"day": "Wed", "start": "10:30", "end": "13:15", "subject": "АСЛС", "kind": "лб",  "skippable": false,"room": "1308",  "weeks": "odd",  "subgroups": "43а"},
+    {"day": "Wed", "start": "10:30", "end": "13:15", "subject": "АСЛС", "kind": "лб",  "skippable": false,"room": "1308",  "weeks": "even", "subgroups": "43б"},
+    {"day": "Wed", "start": "13:45", "end": "16:30", "subject": "АСЛС", "kind": "л",   "skippable": true, "room": "1151",  "weeks": "all",  "subgroups": "both"},
+
+    {"day": "Thu", "start": "11:30", "end": "13:15", "subject": "КП",   "kind": "л",   "skippable": true, "room": "1153",  "weeks": "all",  "subgroups": "both"},
+    {"day": "Thu", "start": "13:45", "end": "15:30", "subject": "ЦСхТ", "kind": "л",   "skippable": true, "room": "1151",  "weeks": "all",  "subgroups": "both"},
+
+    {"day": "Fri", "start": "10:30", "end": "13:15", "subject": "КА",   "kind": "л",   "skippable": true, "room": "1151",  "weeks": "all",  "subgroups": "both"},
+    {"day": "Fri", "start": "13:45", "end": "15:30", "subject": "БЕ",   "kind": "л",   "skippable": true, "room": "12627", "weeks": "all",  "subgroups": "both", "elective": true},
+    {"day": "Fri", "start": "13:45", "end": "15:30", "subject": "ИАДС", "kind": "л",   "skippable": true, "room": "12608", "weeks": "all",  "subgroups": "both", "elective": true},
+    {"day": "Fri", "start": "13:45", "end": "15:30", "subject": "ГОТ",  "kind": "л",   "skippable": true, "room": "2533",  "weeks": "all",  "subgroups": "both", "elective": true},
+    {"day": "Fri", "start": "15:45", "end": "19:30", "subject": "БЕ",   "kind": null,  "skippable": false,"room": "12627", "weeks": "all",  "subgroups": "both", "elective": true, "comment": "PDF gives no kind for БЕ here; ИАДС and ГОТ in the same slot are су, so treated as not skippable"},
+    {"day": "Fri", "start": "15:45", "end": "19:30", "subject": "ИАДС", "kind": "су",  "skippable": false,"room": "12608", "weeks": "all",  "subgroups": "both", "elective": true},
+    {"day": "Fri", "start": "15:45", "end": "19:30", "subject": "ГОТ",  "kind": "су",  "skippable": false,"room": "2533",  "weeks": "all",  "subgroups": "both", "elective": true}
+  ]
+}
