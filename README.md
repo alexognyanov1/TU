@@ -36,6 +36,7 @@ Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_p
 | Subject | Name | Language(s) | Rules |
 | --- | --- | --- | --- |
 | [PE](III-kurs/PE) | Програмни езици / Programming Languages | C++17 | [rules](III-kurs/PE/RULES.md) |
+| [ASLS](III-kurs/ASLS) | Анализ и синтез на логически схеми / Analysis and Synthesis of Logic Circuits | Multisim, Python | [rules](III-kurs/ASLS/RULES.md) |
 
 <!-- /subjects:III-kurs -->
 
@@ -49,6 +50,17 @@ Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE
 | 2026.09.29 | Lab | [III-kurs/PE/2026.09.29](III-kurs/PE/2026.09.29) | C++17 | Lab 1 – classes and objects (handout `lab1_PE-GM.pdf`). task1 – `Time` class: hours/minutes/seconds with range-checked setters, print in 24-hour `hh:mm:ss` and 12-hour AM/PM format (`iomanip`, `setw`, `setfill`); task2 – `Worker` class: private members, two constructors (default zero-init / position read from keyboard with `getline`), getters and setters, salaries in a plain array, average and minimum salary; task3 – `Line` class: constructor draws a line of `*`, destructor erases it with backspaces `\b` (object lifetime, automatic destructor call at end of scope, RAII, `std::flush`, `sleep_for`). Input validation and end-of-input handling; 24 stdin test cases in `tests/`. Build & run: `III-kurs/PE/run.sh taskN`, test: `III-kurs/PE/run.sh --test` |
 
 <!-- /index:III-kurs/PE -->
+
+### ASLS: Analysis and Synthesis of Logic Circuits
+
+Rules: [III-kurs/ASLS/RULES.md](III-kurs/ASLS/RULES.md) · Check answers: `python3 III-kurs/ASLS/<DAY>/verify.py`
+
+<!-- index:III-kurs/ASLS -->
+| Date | Type | Folder | Language | What's inside |
+| --- | --- | --- | --- | --- |
+| 2026.10.07 | Lab | [III-kurs/ASLS/2026.10.07](III-kurs/ASLS/2026.10.07) | Multisim, Python | Lab 1 – logic functions and Boolean algebra (handout `Lab1_2026.pdf`, answers in the folder's README). B1 – simplifying 6 functions step by step with Boolean algebra laws (De Morgan, absorption, reduction, consensus / redundant implicants, adding a missing variable): f1 = A ∨ BC, f2 = AD, f3 = AB ∨ ĀC, f4 = A ∨ BC, f5 = AB̄ ∨ BC̄ ∨ ĀC, f6 = A ∨ BC̄. B2 – Multisim: truth table of two-input gates AND/NAND/OR/NOR/XOR/XNOR (7408, 7400, 7432, 7402, 74S86, 74LS266 open-collector pull-up); XOR cascades = 3-bit odd parity generator and 4-bit even parity checker; Word Generator (up counter) + Logic Analyzer timing diagrams; f6 circuit vs minimized form. `verify.py` brute-forces every simplification and prints all truth tables |
+
+<!-- /index:III-kurs/ASLS -->
 
 <!-- /course:III-kurs -->
 
