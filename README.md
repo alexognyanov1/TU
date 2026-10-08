@@ -36,6 +36,7 @@ Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_p
 | Subject | Name | Language(s) | Rules |
 | --- | --- | --- | --- |
 | [PE](III-kurs/PE) | Програмни езици / Programming Languages | C++17 | [rules](III-kurs/PE/RULES.md) |
+| [KP](III-kurs/KP) | Компютърна периферия / Computer Peripherals | HTML → PDF (Bulgarian documents) | [rules](III-kurs/KP/RULES.md) |
 
 <!-- /subjects:III-kurs -->
 
@@ -49,6 +50,17 @@ Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE
 | 2026.09.29 | Lab | [III-kurs/PE/2026.09.29](III-kurs/PE/2026.09.29) | C++17 | Lab 1 – classes and objects (handout `lab1_PE-GM.pdf`). task1 – `Time` class: hours/minutes/seconds with range-checked setters, print in 24-hour `hh:mm:ss` and 12-hour AM/PM format (`iomanip`, `setw`, `setfill`); task2 – `Worker` class: private members, two constructors (default zero-init / position read from keyboard with `getline`), getters and setters, salaries in a plain array, average and minimum salary; task3 – `Line` class: constructor draws a line of `*`, destructor erases it with backspaces `\b` (object lifetime, automatic destructor call at end of scope, RAII, `std::flush`, `sleep_for`). Input validation and end-of-input handling; 24 stdin test cases in `tests/`. Build & run: `III-kurs/PE/run.sh taskN`, test: `III-kurs/PE/run.sh --test` |
 
 <!-- /index:III-kurs/PE -->
+
+### KP: Computer Peripherals
+
+Rules: [III-kurs/KP/RULES.md](III-kurs/KP/RULES.md) · Build the PDFs: `python3 III-kurs/KP/SATA/src/build.py`
+
+<!-- index:III-kurs/KP -->
+| Date | Type | Folder | Language | What's inside |
+| --- | --- | --- | --- | --- |
+| — | Реферат + presentation | [III-kurs/KP/SATA](III-kurs/KP/SATA) | HTML/SVG → PDF | Реферат and 50-slide presentation in Bulgarian on SATA (Serial ATA): history ATA/IDE/PATA, SATA revisions 1.0–3.5 (1.5/3/6 Gb/s), layer model (physical, link, transport, command), LVDS differential signalling, 8b/10b encoding, OOB COMRESET/COMINIT/COMWAKE, speed negotiation, SSC, scrambler LFSR, CRC-32, primitives (ALIGN, SYNC, X_RDY, R_OK, HOLD), FIS types (Register H2D 27h, DMA Setup, Set Device Bits), ATA commands, PIO/DMA protocols, NCQ, TRIM, S.M.A.R.T., ATA Security, AHCI registers and command list/PRDT, hot-plug, staggered spin-up, power management (Partial/Slumber/DevSleep, ALPM), port multiplier/selector, connectors and power pinout (PWDIS), eSATA, mSATA, M.2, SATA Express, SATA vs SAS vs NVMe, RAID, smartctl/hdparm diagnostics. PDFs: `SATA_referat.pdf`, `SATA_prezentatsia.pdf`; sources in `src/`, built with headless Chrome (`src/build.py`) |
+
+<!-- /index:III-kurs/KP -->
 
 <!-- /course:III-kurs -->
 

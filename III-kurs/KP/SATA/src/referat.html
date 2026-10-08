@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<title>Реферат – SATA (Serial ATA)</title>
+<style>
+@page { size: A4; margin: 22mm 20mm 22mm 25mm;
+  @bottom-center { content: counter(page); font-family: "Times New Roman", serif; font-size: 11pt; color: #444; } }
+@page :first { @bottom-center { content: none; } }
+html { font-family: "Times New Roman", Times, serif; font-size: 13pt; line-height: 1.5; color: #111; }
+body { margin: 0; }
+p { margin: 0 0 0.55em; text-align: justify; text-indent: 1.25cm; hyphens: auto; }
+p.ni, li p, td p { text-indent: 0; }
+h1, h2, h3 { font-family: "Times New Roman", serif; page-break-after: avoid; break-after: avoid; }
+h1 { font-size: 17pt; margin: 0 0 0.7em; text-transform: none; color: #0b2e59; break-before: page; }
+h2 { font-size: 14pt; margin: 1.0em 0 0.45em; color: #0b2e59; }
+h3 { font-size: 13pt; margin: 0.8em 0 0.35em; font-style: italic; }
+ul, ol { margin: 0 0 0.6em 1.25cm; padding-left: 0.6cm; }
+li { margin-bottom: 0.2em; text-align: justify; }
+table { border-collapse: collapse; width: 100%; margin: 0.4em 0 0.3em; font-size: 11pt; line-height: 1.3; break-inside: avoid; }
+th, td { border: 1px solid #555; padding: 3px 6px; vertical-align: top; text-align: left; }
+th { background: #dde6f2; }
+.cap { text-align: center; font-size: 11pt; font-style: italic; margin: 0.2em 0 0.9em; text-indent: 0; }
+figure { margin: 0.6em 0 0.2em; text-align: center; break-inside: avoid; }
+figure svg { max-width: 100%; height: auto; }
+code, .mono { font-family: Menlo, "Courier New", monospace; font-size: 10.5pt; }
+pre { font-family: Menlo, "Courier New", monospace; font-size: 9.5pt; line-height: 1.35; background: #f4f6f9; border: 1px solid #ccd; padding: 6px 9px; white-space: pre-wrap; break-inside: avoid; margin: 0.3em 0 0.8em; }
+.box { border-left: 4px solid #0b2e59; background: #f1f5fb; padding: 6px 10px; margin: 0.5em 0 0.9em; break-inside: avoid; }
+.box p { text-indent: 0; margin: 0.2em 0; }
+
+.title { height: 250mm; display: flex; flex-direction: column; text-align: center; line-height: 1.35; }
+.title .uni { font-size: 15pt; font-weight: bold; letter-spacing: 0.5px; }
+.title .fac { font-size: 13pt; margin-top: 4px; }
+.title .mid { margin-top: 62mm; }
+.title .kind { font-size: 24pt; font-weight: bold; letter-spacing: 3px; color: #0b2e59; }
+.title .subj { font-size: 13pt; margin-top: 6px; }
+.title .topic { font-size: 20pt; font-weight: bold; margin-top: 16mm; color: #0b2e59; }
+.title .topic2 { font-size: 14pt; margin-top: 4px; }
+.title .who { margin-top: auto; width: 100%; display: flex; justify-content: space-between; text-align: left; font-size: 12.5pt; }
+.title .year { margin-top: 14mm; font-size: 12.5pt; }
+
+.toc h1 { break-before: page; }
+.toc ul { list-style: none; margin: 0; padding: 0; }
+.toc li { display: flex; align-items: baseline; margin: 0.12em 0; text-align: left; }
+.toc li.l2 { padding-left: 1.0cm; font-size: 12pt; }
+.toc li .t { flex: 0 1 auto; }
+.toc li .dots { flex: 1 1 auto; border-bottom: 1px dotted #777; margin: 0 4px; transform: translateY(-4px); }
+.toc li .pg { flex: 0 0 auto; min-width: 1.2em; text-align: right; }
+.abbr td:first-child { font-family: Menlo, monospace; font-size: 10pt; white-space: nowrap; width: 22%; }
+.refs li { text-align: left; }
+</style>
+</head>
+<body>
+
+<section class="title">
+  <div class="uni">ТЕХНИЧЕСКИ УНИВЕРСИТЕТ – СОФИЯ</div>
+  <div class="fac">Факултет по компютърни системи и технологии</div>
+  <div class="fac">Специалност „Компютърно и софтуерно инженерство“</div>
+  <div class="mid">
+    <div class="kind">РЕФЕРАТ</div>
+    <div class="subj">по дисциплината „Компютърна периферия“</div>
+    <div class="topic">SATA (Serial ATA)</div>
+    <div class="topic2">архитектура, протокол и приложение</div>
+  </div>
+  <div class="who">
+    <div>Изготвил:<br><b>Алекс Огнянов</b><br>ф. № 121224052<br>КСИ, III курс, група 43</div>
+    <div>Проверил:<br>…………………………………<br><br></div>
+  </div>
+  <div class="year">София, 2026/2027 учебна година</div>
+</section>
+
+<section class="toc">
+<h1 id="toc">Съдържание</h1>
+<ul>
+  <li><span class="t">Увод</span><span class="dots"></span><span class="pg" data-for="uvod"></span></li>
+  <li><span class="t">1. Исторически преглед: от ATA до Serial ATA</span><span class="dots"></span><span class="pg" data-for="s1"></span></li>
+  <li class="l2"><span class="t">1.1. Интерфейсът ATA (IDE)</span><span class="dots"></span><span class="pg" data-for="s1-1"></span></li>
+  <li class="l2"><span class="t">1.2. Ограничения на паралелния ATA</span><span class="dots"></span><span class="pg" data-for="s1-2"></span></li>
+  <li class="l2"><span class="t">1.3. Появата на Serial ATA</span><span class="dots"></span><span class="pg" data-for="s1-3"></span></li>
+  <li class="l2"><span class="t">1.4. Ревизии на спецификацията</span><span class="dots"></span><span class="pg" data-for="s1-4"></span></li>
+  <li><span class="t">2. Обща архитектура и модел на слоевете</span><span class="dots"></span><span class="pg" data-for="s2"></span></li>
+  <li><span class="t">3. Физически слой</span><span class="dots"></span><span class="pg" data-for="s3"></span></li>
+  <li class="l2"><span class="t">3.1. Диференциална сигнализация</span><span class="dots"></span><span class="pg" data-for="s3-1"></span></li>
+  <li class="l2"><span class="t">3.2. Кодиране 8b/10b</span><span class="dots"></span><span class="pg" data-for="s3-2"></span></li>
+  <li class="l2"><span class="t">3.3. OOB сигнализация и инициализация на връзката</span><span class="dots"></span><span class="pg" data-for="s3-3"></span></li>
+  <li class="l2"><span class="t">3.4. Spread-spectrum clocking</span><span class="dots"></span><span class="pg" data-for="s3-4"></span></li>
+  <li class="l2"><span class="t">3.5. Кабели и конектори</span><span class="dots"></span><span class="pg" data-for="s3-5"></span></li>
+  <li class="l2"><span class="t">3.6. Форм-фактори: eSATA, mSATA, M.2, SATA Express</span><span class="dots"></span><span class="pg" data-for="s3-6"></span></li>
+  <li><span class="t">4. Канален слой (Link layer)</span><span class="dots"></span><span class="pg" data-for="s4"></span></li>
+  <li><span class="t">5. Транспортен слой и FIS</span><span class="dots"></span><span class="pg" data-for="s5"></span></li>
+  <li><span class="t">6. Команден слой: ATA команди и протоколи</span><span class="dots"></span><span class="pg" data-for="s6"></span></li>
+  <li class="l2"><span class="t">6.1. Набор от команди</span><span class="dots"></span><span class="pg" data-for="s6-1"></span></li>
+  <li class="l2"><span class="t">6.2. PIO и DMA протоколи</span><span class="dots"></span><span class="pg" data-for="s6-2"></span></li>
+  <li class="l2"><span class="t">6.3. Native Command Queuing (NCQ)</span><span class="dots"></span><span class="pg" data-for="s6-3"></span></li>
+  <li class="l2"><span class="t">6.4. TRIM, S.M.A.R.T. и сигурност</span><span class="dots"></span><span class="pg" data-for="s6-4"></span></li>
+  <li><span class="t">7. Хост контролери и AHCI</span><span class="dots"></span><span class="pg" data-for="s7"></span></li>
+  <li><span class="t">8. Разширени възможности</span><span class="dots"></span><span class="pg" data-for="s8"></span></li>
+  <li class="l2"><span class="t">8.1. Hot-plug и staggered spin-up</span><span class="dots"></span><span class="pg" data-for="s8-1"></span></li>
+  <li class="l2"><span class="t">8.2. Управление на енергията</span><span class="dots"></span><span class="pg" data-for="s8-2"></span></li>
+  <li class="l2"><span class="t">8.3. Port Multiplier и Port Selector</span><span class="dots"></span><span class="pg" data-for="s8-3"></span></li>
+  <li><span class="t">9. SATA, SAS и NVMe – сравнение</span><span class="dots"></span><span class="pg" data-for="s9"></span></li>
+  <li><span class="t">10. Практически аспекти</span><span class="dots"></span><span class="pg" data-for="s10"></span></li>
+  <li><span class="t">11. Настояще и бъдеще на SATA</span><span class="dots"></span><span class="pg" data-for="s11"></span></li>
+  <li><span class="t">Заключение</span><span class="dots"></span><span class="pg" data-for="zakl"></span></li>
+  <li><span class="t">Използвана литература</span><span class="dots"></span><span class="pg" data-for="lit"></span></li>
+  <li><span class="t">Приложение: Списък на съкращенията</span><span class="dots"></span><span class="pg" data-for="abbr"></span></li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<h1 id="uvod">Увод</h1>
+
+<p>Външните запомнящи устройства – твърди дискове (HDD), твърдотелни дискове (SSD) и оптични устройства – са сред най-важните периферни устройства на всеки компютър. Колкото и бърз да е процесорът, производителността на системата като цяло силно зависи от това колко бързо, надеждно и ефективно могат да се прехвърлят данни между оперативната памет и устройството за съхранение. Връзката между двете се осигурява от <b>интерфейс</b> – съвкупност от електрически, механични, логически и програмни правила, които и двете страни трябва да спазват.</p>
+
+<p>В продължение на почти две десетилетия стандартен интерфейс за дискове в персоналните компютри е паралелният <b>ATA</b> (Advanced Technology Attachment), известен и като IDE. В началото на 2000-те години той достига физическите граници на паралелното предаване и е заменен от <b>Serial ATA (SATA)</b> – последователен интерфейс от тип „точка-точка“, който запазва програмната съвместимост с ATA, но изцяло променя физическата среда и начина на предаване на данните.</p>
+
+<p>Днес SATA е най-разпространеният интерфейс за масово съхранение на данни. Почти всички настолни и сървърни дънни платки имат SATA портове, а твърдите дискове с голям капацитет за NAS системи, центрове за данни и архиви продължават да се свързват именно по SATA. Дори в епохата на NVMe SSD-тата познаването на SATA е важно, защото върху неговите идеи (последователни линии, 8b/10b кодиране, пакетна комуникация, опашки от команди) са изградени и много съвременни интерфейси.</p>
+
+<p>Целта на настоящия реферат е да представи цялостно интерфейса SATA: неговата история и причините за появата му, архитектурата на слоевете, физическите и електрическите характеристики, протокола на каналния и транспортния слой, командния набор, хост контролерите и стандарта AHCI, разширените възможности като NCQ, hot-plug и управление на енергията, както и мястото на SATA спрямо SAS и NVMe. Накрая са разгледани практически въпроси – диагностика, избор на устройства и бъдещето на технологията.</p>
+
+<!-- ============================================================ -->
+<h1 id="s1">1. Исторически преглед: от ATA до Serial ATA</h1>
+
+<h2 id="s1-1">1.1. Интерфейсът ATA (IDE)</h2>
+
+<p>Историята на SATA започва с интерфейса <b>IDE</b> (Integrated Drive Electronics), разработен около 1986 г. от Western Digital съвместно с Compaq и Control Data Corporation. Основната идея на IDE е контролерът на диска да бъде вграден в самото устройство, а не да се намира на отделна разширителна карта, както при по-старите интерфейси ST-506 и ESDI. Така хостът вижда диска като набор от регистри, на практика директно разширение на шината ISA на IBM PC/AT – откъдето идва и името <i>AT Attachment</i>.</p>
+
+<p>През 1994 г. интерфейсът е стандартизиран от ANSI като <b>ATA-1</b> (комитет X3T10, по-късно T13). Следват редица ревизии, които увеличават скоростта и добавят нови възможности:</p>
+
+<ul>
+  <li><b>ATA-2</b> (EIDE, Fast ATA) – режими PIO 3 и 4, Multiword DMA 2 (до 16,7 MB/s), LBA адресиране;</li>
+  <li><b>ATA-3</b> – въвежда S.M.A.R.T. (Self-Monitoring, Analysis and Reporting Technology) и функции за сигурност;</li>
+  <li><b>ATA/ATAPI-4</b> – Ultra DMA 33 и пакетния интерфейс ATAPI за CD-ROM и лентови устройства;</li>
+  <li><b>ATA/ATAPI-5</b> – Ultra DMA 66 и задължителния 80-жилен кабел;</li>
+  <li><b>ATA/ATAPI-6</b> – Ultra DMA 100 и 48-битово LBA адресиране (до 128 PiB при 512-байтов сектор);</li>
+  <li><b>ATA/ATAPI-7</b> – Ultra DMA 133 и, за първи път, описание на Serial ATA в самия стандарт.</li>
+</ul>
+
+<p>След появата на SATA по-старият интерфейс започва да се нарича <b>Parallel ATA (PATA)</b>. Командният набор продължава да се развива в серията стандарти <b>ATA Command Set (ACS)</b> – ATA8-ACS, ACS-2, ACS-3, ACS-4 и т.н., които са общи за паралелния и серийния вариант.</p>
+
+<h2 id="s1-2">1.2. Ограничения на паралелния ATA</h2>
+
+<p>Паралелният ATA предава 16 бита данни едновременно по 16 проводника, синхронизирани с общи стробиращи сигнали. С увеличаване на тактовата честота този подход среща няколко фундаментални проблема:</p>
+
+<ul>
+  <li><b>Изместване на сигналите (skew).</b> Сигналите в отделните проводници пристигат в различни моменти поради разлики в дължината и капацитета. При високи честоти разликата става съизмерима с периода на такта и данните не могат да бъдат прочетени надеждно.</li>
+  <li><b>Кръстосани смущения (crosstalk).</b> Съседни проводници в лентовия кабел си влияят взаимно. 80-жилният кабел (въведен с UDMA 66) добавя заземен проводник между всеки два сигнални, но това е само временно решение.</li>
+  <li><b>Едностранна (single-ended) 5 V/3,3 V сигнализация</b>, чувствителна към шум и с висока консумация.</li>
+  <li><b>Дължина на кабела</b> – максимум 18 инча (около 46 cm).</li>
+  <li><b>Широк и неудобен кабел</b> с 40-пинов конектор, който пречи на въздушния поток в кутията.</li>
+  <li><b>Споделена шина master/slave</b> – две устройства на един канал се редуват, а по-бавното устройство може да забави по-бързото. Конфигурирането става с джъмпери.</li>
+  <li><b>Липса на hot-plug</b> – устройствата не могат да се свързват и разкачват при включено захранване.</li>
+</ul>
+
+<p>Практическият таван на PATA е Ultra DMA 133 (133 MB/s). За да се постигнат по-високи скорости, е бил необходим принципно различен подход – последователно предаване по малък брой високоскоростни диференциални линии.</p>
+
+<h2 id="s1-3">1.3. Появата на Serial ATA</h2>
+
+<p>През 2000 г. компаниите Intel, APT Technologies, Dell, IBM, Maxtor, Quantum и Seagate създават <b>Serial ATA Working Group</b>. Спецификацията <b>Serial ATA 1.0</b> е публикувана през август 2001 г., а първите продукти се появяват на пазара през 2003 г. През 2004 г. работната група се преобразува в организацията <b>SATA-IO</b> (Serial ATA International Organization), която и днес поддържа спецификацията, провежда тестове за съвместимост и сертифицира продукти.</p>
+
+<p>Основните цели при проектирането на SATA са:</p>
+<ul>
+  <li>пълна <b>програмна съвместимост</b> с ATA – съществуващите операционни системи и драйвери трябва да работят без промяна;</li>
+  <li>по-висока скорост с потенциал за растеж през следващите поколения;</li>
+  <li>тънки и гъвкави кабели, по-дълги от PATA, и малки конектори;</li>
+  <li>по-ниско захранващо напрежение на сигналите и по-ниска консумация;</li>
+  <li>връзка „точка-точка“ – всяко устройство има собствен канал без master/slave;</li>
+  <li>поддръжка на hot-plug.</li>
+</ul>
+
+<p>Ключовото архитектурно решение е хостът да вижда SATA устройството през същия набор от „сенчести“ (shadow) регистри като при ATA. Така на ниво софтуер SATA изглежда като много бърз PATA, а цялата сложност на последователния протокол е скрита в хардуера.</p>
+
+<h2 id="s1-4">1.4. Ревизии на спецификацията</h2>
+
+<p>Спецификацията на SATA се развива чрез ревизии, като всяка добавя нови функции, без да нарушава обратната съвместимост. Таблица 1 обобщава най-важните от тях. Важно е да се отбележи, че SATA-IO официално не препоръчва термините „SATA II“ и „SATA III“, а използва означенията по скорост: <i>SATA 1,5 Gb/s, SATA 3 Gb/s и SATA 6 Gb/s</i>.</p>
+
+<table>
+<tr><th style="width:15%">Ревизия</th><th style="width:10%">Година</th><th style="width:15%">Скорост на линията</th><th>Основни нововъведения</th></tr>
+<tr><td>1.0</td><td>2001–2003</td><td>1,5 Gb/s</td><td>Първата спецификация; 150 MB/s полезна скорост, конектори, OOB сигнализация, shadow регистри</td></tr>
+<tr><td>II extensions / 2.0</td><td>2002–2004</td><td>3 Gb/s</td><td>Native Command Queuing (NCQ), Port Multiplier, Port Selector, staggered spin-up, хост-инициирано управление на енергията; 300 MB/s</td></tr>
+<tr><td>2.5</td><td>2005</td><td>3 Gb/s</td><td>Обединяване на 1.0, II extensions и 2.0 в един документ; eSATA</td></tr>
+<tr><td>2.6</td><td>2007</td><td>3 Gb/s</td><td>Slimline и micro SATA конектори, подобрения на NCQ (приоритет, streaming)</td></tr>
+<tr><td>3.0</td><td>2009</td><td>6 Gb/s</td><td>600 MB/s, NCQ стрийминг, подобрено управление на енергията</td></tr>
+<tr><td>3.1</td><td>2011</td><td>6 Gb/s</td><td>mSATA, Queued TRIM, Zero-power ODD, Universal Storage Module (USM), Hardware Control Features</td></tr>
+<tr><td>3.2</td><td>2013</td><td>6 Gb/s (+ PCIe)</td><td>SATA Express, M.2 (SATA), µSSD (BGA), DevSleep, Transitional Energy Reporting, SSHD оптимизации</td></tr>
+<tr><td>3.3</td><td>2016</td><td>6 Gb/s</td><td>Поддръжка на SMR дискове, Power Disable (PWDIS) на пин P3, Rebuild Assist</td></tr>
+<tr><td>3.4</td><td>2018</td><td>6 Gb/s</td><td>Durable/Ordered Write Notification, мониторинг на температурата на устройството</td></tr>
+<tr><td>3.5</td><td>2020</td><td>6 Gb/s</td><td>Device Activity Signal, Defined Ordered NCQ Commands, Command Duration Limits – синхронизация с ACS и SAS</td></tr>
+</table>
+<p class="cap">Таблица 1. Основни ревизии на спецификацията Serial ATA</p>
+
+<p>От таблицата се вижда, че след ревизия 3.0 скоростта на линията остава 6 Gb/s. Вместо да увеличава скоростта (което би изисквало нови кабели и скъпа схемотехника), SATA-IO насочва усилията си към ефективност, енергоспестяване и нови форм-фактори, а за по-висока производителност препраща към PCI Express (SATA Express и по-късно NVMe).</p>
+
+<figure>
+<svg width="620" height="230" viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="13">
+  <line x1="70" y1="190" x2="600" y2="190" stroke="#333"/>
+  <line x1="70" y1="20" x2="70" y2="190" stroke="#333"/>
+  <g fill="#555" font-size="11" text-anchor="end">
+    <text x="64" y="194">0</text><text x="64" y="137">200</text><text x="64" y="81">400</text><text x="64" y="25">600</text>
+  </g>
+  <g stroke="#ddd"><line x1="70" y1="134" x2="600" y2="134"/><line x1="70" y1="78" x2="600" y2="78"/><line x1="70" y1="22" x2="600" y2="22"/></g>
+  <text x="18" y="110" transform="rotate(-90 18 110)" text-anchor="middle" font-size="12">MB/s</text>
+  <rect x="95" y="153" width="70" height="37" fill="#9db4d3"/><text x="130" y="147" text-anchor="middle">133</text><text x="130" y="210" text-anchor="middle">PATA UDMA 133</text>
+  <rect x="215" y="148" width="70" height="42" fill="#5f87bd"/><text x="250" y="142" text-anchor="middle">150</text><text x="250" y="210" text-anchor="middle">SATA 1,5 Gb/s</text>
+  <rect x="335" y="106" width="70" height="84" fill="#2f5f9e"/><text x="370" y="100" text-anchor="middle">300</text><text x="370" y="210" text-anchor="middle">SATA 3 Gb/s</text>
+  <rect x="455" y="22" width="70" height="168" fill="#0b2e59"/><text x="490" y="16" text-anchor="middle">600</text><text x="490" y="210" text-anchor="middle">SATA 6 Gb/s</text>
+</svg>
+</figure>
+<p class="cap">Фигура 1. Максимална полезна скорост на PATA и поколенията на SATA</p>
+
+<!-- ============================================================ -->
+<h1 id="s2">2. Обща архитектура и модел на слоевете</h1>
+
+<p>SATA свързва <b>хост</b> (host – контролерът в чипсета или на разширителна карта) с <b>устройство</b> (device – диск или оптично устройство) чрез връзка „точка-точка“. Всеки порт на контролера обслужва точно едно устройство (освен ако не се използва Port Multiplier, разгледан в т. 8.3). Връзката е <b>двупосочна</b>: тя съдържа две диференциални двойки – една за предаване от хоста към устройството и една в обратна посока. Въпреки че физически има два независими канала, протоколът на ниво рамки работи в полудуплексен режим: в даден момент полезни данни се пренасят само в една посока, а обратният канал се използва за управляващи сигнали (примитиви) – потвърждения, управление на потока и др.</p>
+
+<p>Спецификацията описва SATA като йерархия от четири слоя, подобно на мрежовите протоколи (фигура 2):</p>
+
+<figure>
+<svg width="640" height="300" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="13">
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="140" y="18" text-anchor="middle" font-weight="bold">Хост (контролер)</text>
+  <text x="500" y="18" text-anchor="middle" font-weight="bold">Устройство (диск)</text>
+  <g stroke="#0b2e59" stroke-width="1.3">
+    <rect x="40" y="30" width="200" height="50" fill="#dde6f2"/><rect x="400" y="30" width="200" height="50" fill="#dde6f2"/>
+    <rect x="40" y="90" width="200" height="50" fill="#c6d5ea"/><rect x="400" y="90" width="200" height="50" fill="#c6d5ea"/>
+    <rect x="40" y="150" width="200" height="50" fill="#a9c0e0"/><rect x="400" y="150" width="200" height="50" fill="#a9c0e0"/>
+    <rect x="40" y="210" width="200" height="50" fill="#86a6d1"/><rect x="400" y="210" width="200" height="50" fill="#86a6d1"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="140" y="52">Приложен / команден слой</text><text x="140" y="70" font-size="11">ATA команди, shadow регистри</text>
+    <text x="500" y="52">Приложен / команден слой</text><text x="500" y="70" font-size="11">изпълнение на командите</text>
+    <text x="140" y="112">Транспортен слой</text><text x="140" y="130" font-size="11">FIS – сглобяване/разглобяване</text>
+    <text x="500" y="112">Транспортен слой</text><text x="500" y="130" font-size="11">FIS – сглобяване/разглобяване</text>
+    <text x="140" y="172">Канален слой (Link)</text><text x="140" y="190" font-size="11">рамки, CRC, скрамблиране, 8b/10b</text>
+    <text x="500" y="172">Канален слой (Link)</text><text x="500" y="190" font-size="11">рамки, CRC, скрамблиране, 8b/10b</text>
+    <text x="140" y="232">Физически слой (Phy)</text><text x="140" y="250" font-size="11">сериализация, OOB, PLL</text>
+    <text x="500" y="232">Физически слой (Phy)</text><text x="500" y="250" font-size="11">сериализация, OOB, CDR</text>
+  </g>
+  <g stroke="#888" stroke-dasharray="5,4">
+    <line x1="245" y1="55" x2="395" y2="55"/><line x1="245" y1="115" x2="395" y2="115"/><line x1="245" y1="175" x2="395" y2="175"/>
+  </g>
+  <g font-size="11" fill="#555" text-anchor="middle"><text x="320" y="50">команди / данни</text><text x="320" y="110">FIS</text><text x="320" y="170">рамки и примитиви</text></g>
+  <line x1="240" y1="228" x2="398" y2="228" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="400" y1="246" x2="242" y2="246" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="320" y="222" text-anchor="middle" font-size="11" fill="#c0392b">Tx двойка (A)</text>
+  <text x="320" y="262" text-anchor="middle" font-size="11" fill="#c0392b">Rx двойка (B)</text>
+  <text x="320" y="290" text-anchor="middle" font-size="12">физическа среда: кабел със 7 проводника (2 диференциални двойки + 3 GND)</text>
+</svg>
+</figure>
+<p class="cap">Фигура 2. Модел на слоевете на SATA</p>
+
+<ul>
+  <li><b>Физически слой (Physical layer, Phy)</b> – преобразува паралелните данни в последователен битов поток и обратно, генерира и възстановява тактовата честота, предава електрическите сигнали по кабела, открива свързване на устройство и извършва OOB сигнализацията и договарянето на скоростта.</li>
+  <li><b>Канален слой (Link layer)</b> – кодира данните с 8b/10b, скрамблира ги, изчислява CRC, оформя рамките (SOF … EOF), управлява обмена чрез примитиви, контролира потока и съобщава за грешки.</li>
+  <li><b>Транспортен слой (Transport layer)</b> – сглобява и разглобява <b>FIS</b> (Frame Information Structure) – пакетите, които носят съдържанието на регистрите, данните и управляващата информация. Той поддържа и съответствието между shadow регистрите и FIS-овете.</li>
+  <li><b>Приложен / команден слой (Application / Command layer)</b> – изпълнява ATA командите и протоколите (PIO, DMA, NCQ, ATAPI пакети).</li>
+</ul>
+
+<p>Предимството на такава архитектура е ясното разделение на отговорностите. Например при прехода от 3 към 6 Gb/s се променя предимно физическият слой, а горните слоеве остават практически същите. Софтуерът на операционната система работи само с най-горния слой – със shadow регистрите (при legacy режим) или със структурите на AHCI.</p>
+
+<!-- ============================================================ -->
+<h1 id="s3">3. Физически слой</h1>
+
+<h2 id="s3-1">3.1. Диференциална сигнализация</h2>
+
+<p>SATA използва <b>нисковолтова диференциална сигнализация</b> (сходна с LVDS/CML). Всеки бит се предава по двойка проводници (D+ и D−), като логическата стойност се определя от знака на разликата между напреженията в тях, а не от абсолютното напрежение спрямо маса. Типичната диференциална амплитуда е от порядъка на няколкостотин миливолта (за първото поколение – около 400–600 mV от връх до връх), което е многократно по-малко от 5-волтовите сигнали на PATA.</p>
+
+<p>Диференциалното предаване има няколко важни предимства:</p>
+<ul>
+  <li><b>устойчивост на шум</b> – външно смущение влияе еднакво на двата проводника и се компенсира при изваждането (common-mode rejection);</li>
+  <li><b>малко излъчване (EMI)</b> – токовете в двата проводника са противоположни и магнитните им полета взаимно се компенсират;</li>
+  <li><b>ниска консумация</b> и възможност за високи честоти поради малкия размах на сигнала.</li>
+</ul>
+
+<p>Линиите са с <b>диференциален импеданс 100 Ω</b> и са <b>AC-свързани</b> (чрез кондензатори), така че хостът и устройството могат да имат различни постоянни нива. Тактовата честота <b>не се предава отделно</b> – приемникът я възстановява от самия поток данни чрез схема за възстановяване на такта (CDR, Clock and Data Recovery) с PLL. Затова кодирането трябва да гарантира достатъчно на брой преходи в сигнала – задача на кодирането 8b/10b.</p>
+
+<table>
+<tr><th>Поколение</th><th>Скорост на линията</th><th>Единичен интервал (UI)</th><th>Полезна скорост</th><th>Означение в спецификацията</th></tr>
+<tr><td>Gen1</td><td>1,5 Gb/s</td><td>666,7 ps</td><td>150 MB/s</td><td>Gen1i / Gen1m / Gen1x</td></tr>
+<tr><td>Gen2</td><td>3,0 Gb/s</td><td>333,3 ps</td><td>300 MB/s</td><td>Gen2i / Gen2m / Gen2x</td></tr>
+<tr><td>Gen3</td><td>6,0 Gb/s</td><td>166,7 ps</td><td>600 MB/s</td><td>Gen3i</td></tr>
+</table>
+<p class="cap">Таблица 2. Поколения на физическия слой (i – вътрешни, m – „medium“, x – външни/дълги връзки)</p>
+
+<p>Полезната скорост се получава така: при 6 Gb/s на линията и кодиране 8b/10b на всеки 10 предадени бита се падат 8 бита данни, т.е. 6 × 8/10 = 4,8 Gb/s = <b>600 MB/s</b>. Реално постижимата скорост е около 530–560 MB/s, защото част от капацитета се изразходва за примитиви, заглавия на FIS, CRC и паузи между рамките.</p>
+
+<h2 id="s3-2">3.2. Кодиране 8b/10b</h2>
+
+<p>Кодирането <b>8b/10b</b>, разработено от IBM (Widmer и Franaszek, 1983) и използвано също в Fibre Channel, Gigabit Ethernet и PCI Express 1.x/2.x, преобразува всеки байт (8 бита) в 10-битов символ. Байтът се разделя на 5-битова и 3-битова част, които се кодират поотделно (5b/6b и 3b/4b). Резултатът има следните свойства:</p>
+
+<ul>
+  <li><b>DC баланс</b> – броят на единиците и нулите в дълъг поток е изравнен. Кодерът следи <b>текущата неравновесност (running disparity, RD)</b> и за всеки байт избира един от двата варианта на символа (RD− или RD+);</li>
+  <li><b>гарантирани преходи</b> – никога не се предават повече от 5 еднакви бита подред, което позволява на CDR да поддържа синхронизация;</li>
+  <li><b>откриване на грешки</b> – много 10-битови комбинации са невалидни, а нарушението на правилото за disparity също се открива;</li>
+  <li><b>управляващи символи</b> – освен 256-те символа за данни (означавани <code>Dxx.y</code>), съществуват 12 специални символа (<code>Kxx.y</code>). SATA използва <b>K28.5</b> (съдържа характерната последователност <i>comma</i> 0011111 / 1100000, по която приемникът намира границите на символите) и <b>K28.3</b>.</li>
+</ul>
+
+<p>Цената е 25 % излишък (overhead): за 8 бита полезна информация се предават 10. Затова по-новите интерфейси (PCIe 3.0+, USB 3.1 Gen2) преминават към по-ефективни кодирания като 128b/130b, но SATA остава с 8b/10b.</p>
+
+<div class="box"><p><b>Пример.</b> Байтът 4Ah се записва като D10.2 (младшите 5 бита 01010 = 10, старшите 3 бита 010 = 2). Неговият 10-битов код е 0101010101 – редуващи се единици и нули, т.е. сигнал с честота половината от битовата скорост. Затова D10.2 се използва при инициализацията като „тактов“ шаблон.</p></div>
+
+<h2 id="s3-3">3.3. OOB сигнализация и инициализация на връзката</h2>
+
+<p>Преди да започне нормален обмен, хостът и устройството трябва да открият взаимно присъствието си, да се „събудят“ и да договорят скорост. Тъй като в този момент тактовете им още не са синхронизирани, се използва специален механизъм – <b>OOB (Out-Of-Band) сигнализация</b>. Тя се състои от поредици от кратки пакети сигнал (bursts) и паузи (idle – линията е в електрически неутрално състояние). Значение има само <b>продължителността на паузите</b> между пакетите, а не съдържанието им, затова OOB сигналите могат да се разпознаят с прост аналогов детектор (squelch detector), без възстановяване на такта.</p>
+
+<table>
+<tr><th>Сигнал</th><th>Посока</th><th>Пакет (burst)</th><th>Пауза (idle)</th><th>Предназначение</th></tr>
+<tr><td>COMRESET</td><td>хост → устройство</td><td>≈106,7 ns</td><td>≈320 ns</td><td>хардуерно нулиране на устройството, начало на инициализацията</td></tr>
+<tr><td>COMINIT</td><td>устройство → хост</td><td>≈106,7 ns</td><td>≈320 ns</td><td>заявка от устройството за инициализация; отговор на COMRESET</td></tr>
+<tr><td>COMWAKE</td><td>в двете посоки</td><td>≈106,7 ns</td><td>≈106,7 ns</td><td>събуждане от енергоспестяващо състояние, калибриране</td></tr>
+</table>
+<p class="cap">Таблица 3. OOB сигнали (всеки се състои от 6 пакета)</p>
+
+<p>COMRESET и COMINIT имат еднаква форма – различават се само по посоката. Всеки пакет е с продължителност 160 UI при Gen1 (≈106,7 ns), т.е. 4 примитива ALIGN. Фигура 3 показва последователността на инициализация (power-on sequence):</p>
+
+<figure>
+<svg width="650" height="300" viewBox="0 0 650 300" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b2e59"/></marker></defs>
+  <text x="90" y="16" text-anchor="middle" font-weight="bold" font-size="13">Хост</text>
+  <text x="560" y="16" text-anchor="middle" font-weight="bold" font-size="13">Устройство</text>
+  <line x1="90" y1="24" x2="90" y2="292" stroke="#333" stroke-width="2"/>
+  <line x1="560" y1="24" x2="560" y2="292" stroke="#333" stroke-width="2"/>
+  <g stroke="#0b2e59" stroke-width="1.5" marker-end="url(#a2)">
+    <line x1="92" y1="40" x2="556" y2="58"/>
+    <line x1="558" y1="80" x2="94" y2="98"/>
+    <line x1="92" y1="120" x2="556" y2="138"/>
+    <line x1="558" y1="160" x2="94" y2="178"/>
+    <line x1="92" y1="200" x2="556" y2="218"/>
+    <line x1="558" y1="230" x2="94" y2="248"/>
+    <line x1="92" y1="262" x2="556" y2="280"/>
+  </g>
+  <g text-anchor="middle" fill="#111">
+    <text x="325" y="42">1. COMRESET (нулиране на устройството)</text>
+    <text x="325" y="82">2. COMINIT (устройството е налично)</text>
+    <text x="325" y="122">3. COMWAKE (хостът калибрира и събужда)</text>
+    <text x="325" y="162">4. COMWAKE (устройството отговаря)</text>
+    <text x="325" y="202">5. D10.2 от хоста; ALIGN от устройството (най-висока скорост)</text>
+    <text x="325" y="232">6. Хостът се синхронизира и връща ALIGN</text>
+    <text x="325" y="264">7. SYNC в двете посоки – връзката е установена</text>
+  </g>
+  <text x="610" y="290" text-anchor="end" font-size="11" fill="#555">→ Register D2H FIS със сигнатура</text>
+</svg>
+</figure>
+<p class="cap">Фигура 3. Последователност на инициализация на SATA връзката</p>
+
+<p><b>Договаряне на скоростта.</b> След размяната на COMWAKE устройството започва да изпраща примитиви ALIGN с най-високата поддържана скорост, а хостът изпраща шаблона D10.2. Ако хостът не успее да се синхронизира в рамките на определен интервал (около 54,6 µs, т.е. 2048 ALIGN примитива при Gen1), устройството преминава към следващата по-ниска скорост. Щом хостът се синхронизира, той започва да изпраща ALIGN със същата скорост, след което двете страни преминават към изпращане на SYNC и връзката е готова. По този начин устройство за 6 Gb/s може да работи с контролер за 1,5 Gb/s и обратно – използва се най-високата обща скорост. Хостът може и принудително да ограничи скоростта (полето SPD в регистъра SControl).</p>
+
+<p><b>Сигнатура на устройството.</b> След успешната инициализация устройството изпраща Register D2H FIS, в който стойностите на регистрите съдържат <b>сигнатура</b>, по която хостът разбира какво е свързано: <code>00000101h</code> за ATA устройство (диск), <code>EB140101h</code> за ATAPI устройство (оптичен диск), <code>96690101h</code> за Port Multiplier и <code>C33C0101h</code> за устройство, поддържащо Enclosure Management Bridge. В AHCI тази стойност се чете от регистъра PxSIG.</p>
+
+<h2 id="s3-4">3.4. Spread-spectrum clocking</h2>
+
+<p>Сигнал с постоянна честота излъчва електромагнитна енергия, концентрирана в тесни спектрални линии, което затруднява спазването на нормите за EMI. SATA допуска <b>Spread-Spectrum Clocking (SSC)</b> – бавна модулация на тактовата честота надолу с до 0,5 % (down-spread, −5000 ppm) с честота на модулация около 30–33 kHz. Така енергията се „размазва“ в по-широка честотна лента и пиковете в спектъра намаляват. Приемникът трябва да проследява тези промени, затова CDR веригата е проектирана с достатъчна честотна лента.</p>
+
+<p>Освен SSC, за намаляване на EMI се използва и <b>скрамблиране</b> на данните (т. 4), което премахва повтарящите се шаблони, създаващи спектрални пикове.</p>
+
+<h2 id="s3-5">3.5. Кабели и конектори</h2>
+
+<h3>Кабел и конектор за данни</h3>
+
+<p>Сигналният кабел на SATA има само <b>7 проводника</b>: две диференциални двойки и три заземяващи проводника, които ги разделят и екранират. Конекторът е с L-образна форма (ключ), която не позволява грешно свързване. Максималната дължина на вътрешния кабел е <b>1 m</b> – повече от двойно спрямо PATA, при значително по-малко сечение. Конекторът е проектиран за hot-plug: заземяващите контакти са по-дълги и се свързват първи.</p>
+
+<figure>
+<svg width="600" height="190" viewBox="0 0 600 190" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <path d="M60,40 H520 V100 H60 Z" fill="#f3f3f3" stroke="#333" stroke-width="1.5"/>
+  <path d="M60,40 V70 H40 V40 Z" fill="#f3f3f3" stroke="#333" stroke-width="1.5"/>
+  <g>
+    <rect x="85" y="55" width="40" height="30" fill="#7f8c8d"/>
+    <rect x="145" y="58" width="40" height="27" fill="#c0392b"/>
+    <rect x="205" y="58" width="40" height="27" fill="#c0392b"/>
+    <rect x="265" y="55" width="40" height="30" fill="#7f8c8d"/>
+    <rect x="325" y="58" width="40" height="27" fill="#2e86c1"/>
+    <rect x="385" y="58" width="40" height="27" fill="#2e86c1"/>
+    <rect x="445" y="55" width="40" height="30" fill="#7f8c8d"/>
+  </g>
+  <g text-anchor="middle" font-weight="bold"><text x="105" y="32">S1</text><text x="165" y="32">S2</text><text x="225" y="32">S3</text><text x="285" y="32">S4</text><text x="345" y="32">S5</text><text x="405" y="32">S6</text><text x="465" y="32">S7</text></g>
+  <g text-anchor="middle"><text x="105" y="122">GND</text><text x="165" y="122">A+</text><text x="225" y="122">A−</text><text x="285" y="122">GND</text><text x="345" y="122">B−</text><text x="405" y="122">B+</text><text x="465" y="122">GND</text></g>
+  <text x="195" y="150" text-anchor="middle" fill="#c0392b">двойка A: хост Tx → устройство Rx</text>
+  <text x="375" y="150" text-anchor="middle" fill="#2e86c1">двойка B: устройство Tx → хост Rx</text>
+  <text x="300" y="178" text-anchor="middle" fill="#555">GND контактите (по-дълги) се свързват първи – hot-plug</text>
+</svg>
+</figure>
+<p class="cap">Фигура 4. Разположение на изводите на 7-пиновия конектор за данни (от гледна точка на хоста)</p>
+
+<h3>Захранващ конектор</h3>
+
+<p>Захранващият конектор на SATA има <b>15 извода</b> и подава три напрежения – 3,3 V, 5 V и 12 V – като всяко напрежение се подава по три паралелни извода, за да се разпредели токът (до около 1,5 A на извод). Някои изводи са по-дълги (свързват се първи) и се използват за <i>pre-charge</i> – предварително зареждане на кондензаторите в устройството през резистор, което предотвратява пусковите токове при hot-plug. Изводът P11 има двойна функция: изход за индикация на активността (LED) и вход за управление на staggered spin-up.</p>
+
+<table>
+<tr><th style="width:12%">Извод</th><th style="width:25%">Сигнал</th><th>Описание</th></tr>
+<tr><td>P1, P2</td><td>3,3 V</td><td>захранване 3,3 V (рядко използвано от 3,5" и 2,5" дискове)</td></tr>
+<tr><td>P3</td><td>3,3 V / PWDIS</td><td>pre-charge; от ревизия 3.3 – Power Disable (високо ниво изключва устройството)</td></tr>
+<tr><td>P4–P6</td><td>GND</td><td>маса (P4 е удължен – свързва се първи)</td></tr>
+<tr><td>P7</td><td>5 V</td><td>pre-charge</td></tr>
+<tr><td>P8, P9</td><td>5 V</td><td>захранване 5 V (електроника, 2,5" дискове, SSD)</td></tr>
+<tr><td>P10</td><td>GND</td><td>маса</td></tr>
+<tr><td>P11</td><td>DAS / DSS</td><td>Device Activity Signal (LED) / Disable Staggered Spin-up</td></tr>
+<tr><td>P12</td><td>GND</td><td>маса (удължен)</td></tr>
+<tr><td>P13</td><td>12 V</td><td>pre-charge</td></tr>
+<tr><td>P14, P15</td><td>12 V</td><td>захранване 12 V (двигател на 3,5" HDD)</td></tr>
+</table>
+<p class="cap">Таблица 4. Изводи на 15-пиновия захранващ конектор</p>
+
+<div class="box"><p><b>Практическа бележка за PWDIS.</b> Някои дискове от корпоративен клас (особено „извадени“ от външни кутии) поддържат функцията Power Disable. При стари захранвания, които подават 3,3 V на P3, такъв диск остава постоянно изключен и „не се вижда“ от системата. Решението е адаптер Molex → SATA или изолиране на извод P3.</p></div>
+
+<p>При <b>slimline</b> конектора (за тънки оптични устройства в лаптопи) захранването е с 6 извода и само 5 V, а <b>micro SATA</b> (за 1,8" устройства) използва 9-пинов захранващ конектор с 3,3 V и 5 V.</p>
+
+<h2 id="s3-6">3.6. Форм-фактори: eSATA, mSATA, M.2, SATA Express</h2>
+
+<p><b>eSATA (External SATA)</b>, стандартизиран през 2004 г., е вариант за външни устройства. Използва същия протокол и сигнали, но с екраниран кабел до <b>2 m</b>, по-здрав конектор без L-образна форма (за да не може да се включи обикновен вътрешен кабел) и по-високи нива на сигнала (физически слой от тип Gen1x/Gen2x). Предимството пред USB 2.0 е, че няма протоколно преобразуване и скоростта е пълната скорост на SATA. Недостатъкът е, че eSATA не подава захранване. Затова е създаден хибридният <b>eSATAp</b> (Power over eSATA, eSATA/USB combo), който съчетава USB порт и eSATA в един конектор и подава 5 V (а при някои реализации и 12 V). С навлизането на USB 3.x и Thunderbolt eSATA практически изчезва.</p>
+
+<p><b>mSATA (mini-SATA)</b>, въведен в ревизия 3.1, използва физическия размер и конектора на картите Mini PCI Express, но с SATA сигнали. Предназначен е за малки SSD устройства в лаптопи и вградени системи. Въпреки механичната съвместимост, mSATA SSD не работи в mPCIe слот, който поддържа само PCIe/USB – трябва дънната платка да изведе SATA сигнали към слота.</p>
+
+<p><b>M.2</b> (по-рано NGFF) е по-новият и по-гъвкав форм-фактор за разширителни карти, който може да носи SATA, PCI Express (с NVMe или AHCI), USB и други интерфейси. Ключът на конектора показва какво се поддържа: M.2 SATA SSD обикновено са с ключ <b>B+M</b> (два изреза), а NVMe SSD – с ключ <b>M</b>. Размерите се означават с четири или пет цифри, напр. 2280 = ширина 22 mm и дължина 80 mm. Важно е да се провери в документацията на дънната платка дали даден M.2 слот поддържа SATA, PCIe или и двете – и дали използването му не изключва някой от SATA портовете.</p>
+
+<p><b>SATA Express</b> (ревизия 3.2) е опит да се съчетаят SATA и PCI Express в един конектор: той обединява два стандартни SATA порта и допълнителен конектор с две PCIe линии. Устройство SATA Express използва PCIe (до около 2 GB/s при PCIe 3.0 ×2), а в същия конектор могат да се включат и два обикновени SATA диска. На практика SATA Express не се налага – почти няма такива устройства – и бързо е изместен от M.2 и U.2.</p>
+
+<p><b>U.2</b> (SFF-8639) е конектор за 2,5" устройства в сървъри, който може да носи SATA, SAS или четири PCIe линии (NVMe). Други варианти са <b>SATA µSSD</b> – SSD като единичен BGA чип за запояване директно на платката, и <b>USM</b> (Universal Storage Module) за сменяеми устройства.</p>
+
+<!-- ============================================================ -->
+<h1 id="s4">4. Канален слой (Link layer)</h1>
+
+<p>Каналният слой отговаря за надеждното предаване на рамки между хоста и устройството. Той получава FIS от транспортния слой, добавя CRC, скрамблира, кодира 8b/10b и ограничава рамката с примитивите SOF и EOF. При приемане извършва обратните операции и съобщава на транспортния слой дали рамката е получена коректно.</p>
+
+<h2>4.1. Примитиви</h2>
+
+<p><b>Примитивите</b> са управляващи думи с дължина 4 байта (една <i>dword</i>), които се предават между рамките или вътре в тях. Всеки примитив започва с управляващ символ – <b>K28.5</b> за ALIGN и <b>K28.3</b> за всички останали – последван от три символа за данни, които определят вида му. Примитивите не се скрамблират.</p>
+
+<table>
+<tr><th style="width:15%">Примитив</th><th>Значение</th></tr>
+<tr><td>ALIGN</td><td>подравняване и поддържане на синхронизацията; изпраща се поне по 2 на всеки 256 dword-а и по време на договарянето на скоростта</td></tr>
+<tr><td>SYNC</td><td>синхронизация; „празен“ примитив, изпращан, когато няма какво друго да се предава</td></tr>
+<tr><td>X_RDY</td><td>предавателят има готова рамка (transmission data ready)</td></tr>
+<tr><td>R_RDY</td><td>приемникът е готов да приеме рамка</td></tr>
+<tr><td>SOF / EOF</td><td>начало / край на рамка (Start / End of Frame)</td></tr>
+<tr><td>R_IP</td><td>приемането е в процес (reception in progress)</td></tr>
+<tr><td>WTRM</td><td>предавателят чака потвърждение за край (wait for frame termination)</td></tr>
+<tr><td>R_OK / R_ERR</td><td>рамката е приета успешно / с грешка (CRC, 8b/10b и др.)</td></tr>
+<tr><td>HOLD / HOLDA</td><td>заявка за пауза в потока данни / потвърждение на паузата</td></tr>
+<tr><td>CONT</td><td>„продължи предишния примитив“ – намалява EMI при дълги поредици еднакви примитиви</td></tr>
+<tr><td>DMAT</td><td>DMA terminate – заявка за прекратяване на DMA трансфер</td></tr>
+<tr><td>PMREQ_P / PMREQ_S / PMACK / PMNAK</td><td>заявки и отговори за преминаване в енергоспестяващо състояние Partial или Slumber</td></tr>
+</table>
+<p class="cap">Таблица 5. Основни примитиви на SATA</p>
+
+<h2>4.2. Структура на рамката</h2>
+
+<p>Рамката (frame) има следната структура: <code>SOF | FIS (1…2049 dword) | CRC (1 dword) | EOF</code>. Полезното съдържание е FIS с максимален размер 8192 байта данни плюс заглавие. <b>CRC</b> е 32-битова контролна сума, изчислявана върху цялото съдържание на FIS, със същия полином като в Ethernet (x³² + x²⁶ + x²³ + … + x + 1) и начална стойност 52325032h.</p>
+
+<p>Данните на FIS и CRC се <b>скрамблират</b> – към тях се прилага XOR с псевдослучайна последователност, генерирана от линеен регистър с обратна връзка (LFSR) с полином <b>G(X) = X¹⁶ + X¹⁵ + X¹³ + X⁴ + 1</b>. Генераторът се нулира при всеки SOF. Скрамблирането не е за сигурност, а за премахване на повтарящи се шаблони (например дълга поредица от нули), които биха концентрирали енергията на сигнала в отделни честоти. Приемникът прилага същата последователност и възстановява оригиналните данни.</p>
+
+<h2>4.3. Предаване на рамка (handshake)</h2>
+
+<p>Фигура 5 показва нормалната размяна при предаване на една рамка от хоста към устройството. В покой и двете страни изпращат SYNC.</p>
+
+<figure>
+<svg width="640" height="320" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="120" y="16" text-anchor="middle" font-weight="bold" font-size="13">Предавател (хост)</text>
+  <text x="520" y="16" text-anchor="middle" font-weight="bold" font-size="13">Приемник (устройство)</text>
+  <line x1="120" y1="24" x2="120" y2="312" stroke="#333" stroke-width="2"/>
+  <line x1="520" y1="24" x2="520" y2="312" stroke="#333" stroke-width="2"/>
+  <g stroke="#333" stroke-width="1.3" marker-end="url(#a3)">
+    <line x1="122" y1="40" x2="516" y2="40"/>
+    <line x1="518" y1="70" x2="124" y2="70"/>
+    <line x1="122" y1="100" x2="516" y2="100" stroke="#0b2e59" stroke-width="2"/>
+    <line x1="122" y1="130" x2="516" y2="130" stroke="#0b2e59" stroke-width="5"/>
+    <line x1="518" y1="160" x2="124" y2="160"/>
+    <line x1="122" y1="190" x2="516" y2="190" stroke="#0b2e59" stroke-width="2"/>
+    <line x1="122" y1="220" x2="516" y2="220"/>
+    <line x1="518" y1="250" x2="124" y2="250" stroke="#1e8449" stroke-width="2"/>
+    <line x1="122" y1="280" x2="516" y2="280"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="320" y="35">X_RDY X_RDY … (имам рамка)</text>
+    <text x="320" y="65">R_RDY R_RDY … (готов съм)</text>
+    <text x="320" y="95">SOF</text>
+    <text x="320" y="124">FIS (заглавие + данни) + CRC – скрамблирани</text>
+    <text x="320" y="155">R_IP R_IP … (приемам)</text>
+    <text x="320" y="185">EOF</text>
+    <text x="320" y="215">WTRM WTRM … (чакам резултат)</text>
+    <text x="320" y="245" fill="#1e8449">R_OK (или R_ERR при грешка)</text>
+    <text x="320" y="275">SYNC – връзката е свободна</text>
+  </g>
+</svg>
+</figure>
+<p class="cap">Фигура 5. Обмен на примитиви при предаване на една рамка</p>
+
+<p>Ако двете страни едновременно изпратят X_RDY (колизия), предимство има устройството – хостът се отказва и приема рамката му, след което прави нов опит. Ако приемникът открие грешка в CRC или невалиден 8b/10b символ, той отговаря с R_ERR; транспортният слой решава дали да повтори предаването (за управляващи FIS-ове е разрешено автоматично повторение) или да съобщи за грешка към по-горния слой.</p>
+
+<h2>4.4. Управление на потока</h2>
+
+<p>Ако по време на предаването буферът на приемника се напълни (или предавателят няма готови данни), се използва механизмът <b>HOLD/HOLDA</b>. Страната, която иска пауза, изпраща HOLD; другата страна отговаря с HOLDA и спира предаването на данни, като вместо тях изпраща HOLDA, докато не получи отново R_IP (или данни). Тъй като отговорът не идва мигновено (има закъснение по линията и в конвейера), приемникът трябва да има резерв в буфера от няколко десетки dword-а. Примитивът <b>CONT</b> позволява дълги поредици от еднакви примитиви (напр. HOLD) да се заменят с CONT, последван от скрамблирани „боклучни“ данни, което отново намалява EMI.</p>
+
+<!-- ============================================================ -->
+<h1 id="s5">5. Транспортен слой и FIS</h1>
+
+<p>Транспортният слой обменя информация под формата на <b>FIS (Frame Information Structure)</b>. Всеки FIS започва с байт <b>FIS Type</b>, който определя формата и предназначението му. SATA дефинира осем основни типа FIS (таблица 6), а някои стойности са запазени за бъдещи разширения и за производителите.</p>
+
+<table>
+<tr><th style="width:9%">Код</th><th style="width:27%">Тип FIS</th><th style="width:15%">Посока</th><th style="width:10%">Размер</th><th>Предназначение</th></tr>
+<tr><td>27h</td><td>Register – Host to Device</td><td>H → D</td><td>20 B</td><td>изпраща команда (или управляващ регистър) – копие на shadow регистрите</td></tr>
+<tr><td>34h</td><td>Register – Device to Host</td><td>D → H</td><td>20 B</td><td>статус и грешка след изпълнение на команда; сигнатура след reset</td></tr>
+<tr><td>39h</td><td>DMA Activate</td><td>D → H</td><td>4 B</td><td>устройството е готово да приема данни при DMA запис</td></tr>
+<tr><td>41h</td><td>DMA Setup</td><td>двупосочен</td><td>28 B</td><td>подготвя First-party DMA трансфер (NCQ) – съдържа тага на командата</td></tr>
+<tr><td>46h</td><td>Data</td><td>двупосочен</td><td>до 8196 B</td><td>пренася данни (до 2048 dword полезни данни)</td></tr>
+<tr><td>58h</td><td>BIST Activate</td><td>двупосочен</td><td>12 B</td><td>активира вграден самотест (Built-In Self Test) на връзката</td></tr>
+<tr><td>5Fh</td><td>PIO Setup</td><td>D → H</td><td>20 B</td><td>подготвя PIO трансфер: брой байтове, посока, статус</td></tr>
+<tr><td>A1h</td><td>Set Device Bits</td><td>D → H</td><td>8 B</td><td>асинхронно обновява статуса и битовете SActive (завършване на NCQ)</td></tr>
+</table>
+<p class="cap">Таблица 6. Типове FIS</p>
+
+<h2>5.1. Register Host to Device FIS</h2>
+
+<p>Най-важният FIS е <b>Register H2D</b> – чрез него хостът подава всяка ATA команда. Той съдържа стойностите на всички shadow регистри – Command, Features, LBA, Device, Count, Control. Битът <b>C</b> показва дали FIS-ът е генериран от запис в регистъра Command (нова команда) или в Device Control (напр. софтуерен reset чрез бита SRST). Полето <b>PM Port</b> указва порта на Port Multiplier, за който е предназначен FIS-ът.</p>
+
+<figure>
+<svg width="640" height="250" viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <g text-anchor="middle" font-size="11" fill="#555">
+    <text x="535" y="16">байт 3 (31:24)</text><text x="395" y="16">байт 2 (23:16)</text><text x="255" y="16">байт 1 (15:8)</text><text x="115" y="16">байт 0 (7:0)</text>
+  </g>
+  <g stroke="#0b2e59" stroke-width="1.2" fill="#eef3fa">
+    <rect x="45" y="24" width="140" height="40"/><rect x="185" y="24" width="140" height="40"/><rect x="325" y="24" width="140" height="40"/><rect x="465" y="24" width="140" height="40"/>
+    <rect x="45" y="64" width="140" height="40"/><rect x="185" y="64" width="140" height="40"/><rect x="325" y="64" width="140" height="40"/><rect x="465" y="64" width="140" height="40"/>
+    <rect x="45" y="104" width="140" height="40"/><rect x="185" y="104" width="140" height="40"/><rect x="325" y="104" width="140" height="40"/><rect x="465" y="104" width="140" height="40"/>
+    <rect x="45" y="144" width="140" height="40"/><rect x="185" y="144" width="140" height="40"/><rect x="325" y="144" width="140" height="40"/><rect x="465" y="144" width="140" height="40"/>
+    <rect x="45" y="184" width="560" height="40" fill="#f7f7f7"/>
+  </g>
+  <rect x="45" y="24" width="140" height="40" fill="#0b2e59"/>
+  <g text-anchor="end" font-weight="bold"><text x="38" y="48">DW0</text><text x="38" y="88">DW1</text><text x="38" y="128">DW2</text><text x="38" y="168">DW3</text><text x="38" y="208">DW4</text></g>
+  <g text-anchor="middle">
+    <text x="115" y="48" fill="#fff" font-weight="bold">FIS Type = 27h</text><text x="255" y="48">C | R R R | PM Port</text><text x="395" y="48" font-weight="bold">Command</text><text x="535" y="48">Features (7:0)</text>
+    <text x="115" y="88">LBA (7:0)</text><text x="255" y="88">LBA (15:8)</text><text x="395" y="88">LBA (23:16)</text><text x="535" y="88">Device</text>
+    <text x="115" y="128">LBA (31:24)</text><text x="255" y="128">LBA (39:32)</text><text x="395" y="128">LBA (47:40)</text><text x="535" y="128">Features (15:8)</text>
+    <text x="115" y="168">Count (7:0)</text><text x="255" y="168">Count (15:8)</text><text x="395" y="168">ICC</text><text x="535" y="168">Control</text>
+    <text x="325" y="208" fill="#777">Auxiliary / запазено</text>
+  </g>
+  <text x="325" y="244" text-anchor="middle" font-size="11" fill="#555">Общ размер: 5 dword = 20 байта; следва CRC от каналния слой</text>
+</svg>
+</figure>
+<p class="cap">Фигура 6. Структура на Register Host to Device FIS (тип 27h)</p>
+
+<p>Register D2H FIS (34h) има подобна структура, но вместо Command и Features съдържа регистрите <b>Status</b> и <b>Error</b>, а битът <b>I</b> (Interrupt) указва дали хостът трябва да генерира прекъсване. Битовете на регистъра Status са наследени от ATA: <b>BSY</b> (зает), <b>DRDY</b> (готов), <b>DF</b> (повреда на устройството), <b>DRQ</b> (заявка за данни) и <b>ERR</b> (грешка).</p>
+
+<h2>5.2. Shadow регистри и съвместимост</h2>
+
+<p>За да работи старият софтуер, SATA контролерите в режим IDE (legacy) емулират регистровия блок на PATA контролер – т.нар. <b>shadow register block</b>. Когато драйверът запише код на команда в регистъра Command, контролерът автоматично формира Register H2D FIS и го изпраща. Когато пристигне Register D2H FIS, контролерът обновява shadow регистрите Status и Error и при нужда генерира прекъсване. Така драйвер, писан за PATA, не „разбира“, че реално комуникира по последователна линия.</p>
+
+<!-- ============================================================ -->
+<h1 id="s6">6. Команден слой: ATA команди и протоколи</h1>
+
+<h2 id="s6-1">6.1. Набор от команди</h2>
+
+<p>SATA използва командния набор на ATA, описан в стандартите <b>ACS (ATA Command Set)</b> на комитета T13 на INCITS. Всяка команда има 8-битов код и параметри в регистрите Features, Count, LBA и Device. Адресирането е логическо – <b>LBA (Logical Block Addressing)</b> – блоковете се номерират последователно от 0, а 48-битовото LBA позволява адресиране на 2⁴⁸ сектора. Таблица 7 изброява най-често използваните команди.</p>
+
+<table>
+<tr><th style="width:11%">Код</th><th style="width:34%">Команда</th><th style="width:13%">Протокол</th><th>Описание</th></tr>
+<tr><td>ECh</td><td>IDENTIFY DEVICE</td><td>PIO In</td><td>връща 512 байта с информация: модел, сериен номер, капацитет, поддържани функции</td></tr>
+<tr><td>A1h</td><td>IDENTIFY PACKET DEVICE</td><td>PIO In</td><td>същото за ATAPI устройства</td></tr>
+<tr><td>20h / 24h</td><td>READ SECTOR(S) / … EXT</td><td>PIO In</td><td>четене чрез програмиран вход/изход</td></tr>
+<tr><td>C8h / 25h</td><td>READ DMA / READ DMA EXT</td><td>DMA</td><td>четене чрез DMA (28-/48-битово LBA)</td></tr>
+<tr><td>CAh / 35h</td><td>WRITE DMA / WRITE DMA EXT</td><td>DMA</td><td>запис чрез DMA</td></tr>
+<tr><td>60h</td><td>READ FPDMA QUEUED</td><td>NCQ</td><td>четене с опашка от команди</td></tr>
+<tr><td>61h</td><td>WRITE FPDMA QUEUED</td><td>NCQ</td><td>запис с опашка от команди</td></tr>
+<tr><td>E7h / EAh</td><td>FLUSH CACHE / … EXT</td><td>Non-data</td><td>записва кеша на диска върху носителя</td></tr>
+<tr><td>06h</td><td>DATA SET MANAGEMENT</td><td>DMA</td><td>TRIM – маркира блокове като неизползвани (SSD)</td></tr>
+<tr><td>B0h</td><td>SMART</td><td>различни</td><td>четене на атрибути, стартиране на самотестове</td></tr>
+<tr><td>EFh</td><td>SET FEATURES</td><td>Non-data</td><td>включва/изключва функции (кеш за запис, режим на трансфер, APM…)</td></tr>
+<tr><td>E0h–E5h</td><td>STANDBY / IDLE / CHECK POWER MODE</td><td>Non-data</td><td>управление на енергийните режими на устройството</td></tr>
+<tr><td>F1h–F6h</td><td>SECURITY SET PASSWORD / UNLOCK / ERASE …</td><td>PIO / Non-data</td><td>ATA Security – парола и сигурно изтриване</td></tr>
+<tr><td>2Fh</td><td>READ LOG EXT</td><td>PIO In</td><td>четене на логове (грешки, NCQ грешки, статистики)</td></tr>
+<tr><td>A0h</td><td>PACKET</td><td>Packet</td><td>изпраща SCSI команда (CDB) към ATAPI устройство</td></tr>
+<tr><td>92h</td><td>DOWNLOAD MICROCODE</td><td>PIO / DMA</td><td>обновяване на фърмуера</td></tr>
+</table>
+<p class="cap">Таблица 7. Често използвани ATA команди</p>
+
+<h2 id="s6-2">6.2. PIO и DMA протоколи</h2>
+
+<p><b>PIO (Programmed Input/Output)</b> е протокол, при който процесорът сам пренася данните чрез четене/запис на регистър за данни. При SATA последователността при PIO четене е следната: хостът изпраща Register H2D FIS с командата; устройството отговаря с <b>PIO Setup FIS</b> (указва броя байтове, посоката и стойността на статуса след трансфера), последван от <b>Data FIS</b> с данните; за многосекторни команди двойката PIO Setup + Data се повтаря за всеки блок. PIO натоварва процесора и се използва основно за служебни команди като IDENTIFY DEVICE.</p>
+
+<p><b>DMA (Direct Memory Access)</b> позволява контролерът да пренася данните директно между паметта и устройството без участие на процесора. При DMA четене устройството просто изпраща един или повече Data FIS, а накрая – Register D2H FIS със статуса. При DMA запис устройството първо изпраща <b>DMA Activate FIS</b>, когато е готово да приеме данни; хостът изпраща един Data FIS (до 8 KiB); ако има още данни, устройството изпраща нов DMA Activate. Това позволява на устройството да управлява темпа на записа според свободното място в буфера си.</p>
+
+<figure>
+<svg width="640" height="200" viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
+  <text x="160" y="16" text-anchor="middle" font-weight="bold">DMA четене</text>
+  <text x="480" y="16" text-anchor="middle" font-weight="bold">DMA запис</text>
+  <g font-size="11" text-anchor="middle"><text x="40" y="34">Хост</text><text x="280" y="34">Устр.</text><text x="360" y="34">Хост</text><text x="600" y="34">Устр.</text></g>
+  <g stroke="#333" stroke-width="1.5"><line x1="40" y1="40" x2="40" y2="195"/><line x1="280" y1="40" x2="280" y2="195"/><line x1="360" y1="40" x2="360" y2="195"/><line x1="600" y1="40" x2="600" y2="195"/></g>
+  <g stroke="#333" stroke-width="1.2" marker-end="url(#a4)">
+    <line x1="42" y1="58" x2="276" y2="58"/><line x1="278" y1="92" x2="44" y2="92"/><line x1="278" y1="124" x2="44" y2="124"/><line x1="278" y1="160" x2="44" y2="160"/>
+    <line x1="362" y1="58" x2="596" y2="58"/><line x1="598" y1="86" x2="364" y2="86"/><line x1="362" y1="112" x2="596" y2="112"/><line x1="598" y1="138" x2="364" y2="138"/><line x1="362" y1="160" x2="596" y2="160"/><line x1="598" y1="186" x2="364" y2="186"/>
+  </g>
+  <g text-anchor="middle" font-size="11.5">
+    <text x="160" y="53">Register H2D (READ DMA EXT)</text><text x="160" y="87">Data FIS</text><text x="160" y="119">Data FIS …</text><text x="160" y="155">Register D2H (статус)</text>
+    <text x="480" y="53">Register H2D (WRITE DMA EXT)</text><text x="480" y="81">DMA Activate</text><text x="480" y="107">Data FIS (≤ 8 KiB)</text><text x="480" y="133">DMA Activate</text><text x="480" y="155">Data FIS …</text><text x="480" y="181">Register D2H (статус)</text>
+  </g>
+</svg>
+</figure>
+<p class="cap">Фигура 7. Последователност на FIS при DMA четене и DMA запис</p>
+
+<p>Съществуват още протоколите <b>Non-data</b> (команди без пренос на данни – отговорът е само Register D2H FIS) и <b>Packet</b> (за ATAPI: след командата PACKET хостът изпраща 12- или 16-байтов SCSI CDB чрез PIO, след което данните се пренасят чрез PIO или DMA).</p>
+
+<h2 id="s6-3">6.3. Native Command Queuing (NCQ)</h2>
+
+<p>При класическите ATA команди устройството изпълнява само една команда в даден момент: хостът изпраща команда, изчаква завършването ѝ и едва тогава изпраща следващата. За механичен твърд диск това е неефективно, защото времето за позициониране на главата (seek) и изчакване на завъртането на диска (rotational latency) зависи от реда на заявките. Ако дискът знае предварително няколко заявки, той може сам да ги подреди така, че главата да се движи по-малко – подобно на асансьор, който обслужва етажите по пътя си, а не в реда на натискане на бутоните.</p>
+
+<p><b>Native Command Queuing (NCQ)</b>, въведено с SATA II extensions, позволява на хоста да изпрати до <b>32 команди</b> едновременно. Всяка команда получава <b>таг (tag)</b> от 0 до 31. Устройството изпълнява командите в избран от него ред и уведомява хоста за завършването им поотделно.</p>
+
+<figure>
+<svg width="640" height="210" viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker><marker id="a6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1e8449"/></marker></defs>
+  <g transform="translate(160,110)">
+    <circle r="85" fill="#f4f6f9" stroke="#333"/><circle r="12" fill="#999"/>
+    <circle cx="0" cy="-70" r="6" fill="#0b2e59"/><text x="10" y="-72">1</text>
+    <circle cx="66" cy="22" r="6" fill="#0b2e59"/><text x="72" y="36">2</text>
+    <circle cx="-50" cy="-48" r="6" fill="#0b2e59"/><text x="-66" y="-52">3</text>
+    <circle cx="-30" cy="62" r="6" fill="#0b2e59"/><text x="-44" y="76">4</text>
+    <path d="M0,-70 L66,22 L-50,-48 L-30,62" fill="none" stroke="#c0392b" stroke-width="2" marker-end="url(#a5)"/>
+    <text x="0" y="112" text-anchor="middle" font-weight="bold">Без NCQ: 1 → 2 → 3 → 4</text>
+  </g>
+  <g transform="translate(480,110)">
+    <circle r="85" fill="#f4f6f9" stroke="#333"/><circle r="12" fill="#999"/>
+    <circle cx="0" cy="-70" r="6" fill="#0b2e59"/><text x="10" y="-72">1</text>
+    <circle cx="66" cy="22" r="6" fill="#0b2e59"/><text x="72" y="36">2</text>
+    <circle cx="-50" cy="-48" r="6" fill="#0b2e59"/><text x="-66" y="-52">3</text>
+    <circle cx="-30" cy="62" r="6" fill="#0b2e59"/><text x="-44" y="76">4</text>
+    <path d="M-50,-48 L0,-70 L66,22 L-30,62" fill="none" stroke="#1e8449" stroke-width="2" marker-end="url(#a6)"/>
+    <text x="0" y="112" text-anchor="middle" font-weight="bold">С NCQ: 3 → 1 → 2 → 4</text>
+  </g>
+</svg>
+</figure>
+<p class="cap">Фигура 8. Пренареждане на заявките от NCQ (по посоката на въртене на диска)</p>
+
+<p>Командите READ FPDMA QUEUED (60h) и WRITE FPDMA QUEUED (61h) използват т.нар. <b>First-Party DMA (FPDMA)</b> – инициативата за трансфер е на устройството. Броят сектори се задава в регистъра Features, а тагът – в битове 7:3 на регистъра Count. Протоколът протича така:</p>
+
+<ol>
+  <li>Хостът изпраща Register H2D FIS с командата и задава съответния бит в регистъра <b>SActive</b> (в AHCI – PxSACT).</li>
+  <li>Устройството веднага отговаря с Register D2H FIS с изчистен бит BSY – командата е приета в опашката. Хостът може да изпрати следващата команда.</li>
+  <li>Когато устройството реши да изпълни дадена команда, изпраща <b>DMA Setup FIS</b>, съдържащ тага ѝ. Контролерът намира по тага съответната таблица с буфери в паметта.</li>
+  <li>Следват Data FIS (при запис – след DMA Activate).</li>
+  <li>При завършване устройството изпраща <b>Set Device Bits FIS</b>, в който битовете на завършилите команди в полето SActive са установени. Един такъв FIS може да съобщи за завършването на няколко команди наведнъж, което намалява броя на прекъсванията.</li>
+</ol>
+
+<p>Предимствата на NCQ са по-висока производителност при произволен достъп (особено при сървърни натоварвания с много паралелни заявки), по-малко прекъсвания и по-добро използване на вътрешния паралелизъм на SSD (повече NAND чипове работят едновременно). NCQ изисква поддръжка от трите страни – устройството, контролера (AHCI) и драйвера. Ревизиите 2.6–3.5 разширяват NCQ с приоритети, NCQ стрийминг, Queued TRIM (3.1) и подредени NCQ команди.</p>
+
+<h2 id="s6-4">6.4. TRIM, S.M.A.R.T. и сигурност</h2>
+
+<p><b>TRIM.</b> Флаш паметта в SSD не може да презапише страница директно – тя трябва първо да бъде изтрита, а изтриването става на ниво блок (стотици страници). Когато файловата система изтрие файл, тя само маркира блоковете като свободни в собствените си структури, а SSD не знае, че данните вече са ненужни, и продължава да ги пренася при събиране на боклука (garbage collection). Командата <b>DATA SET MANAGEMENT</b> с бит TRIM съобщава на устройството кои LBA диапазони вече не се използват. Това подобрява скоростта на запис и намалява износването (write amplification). До ревизия 3.1 TRIM не е опашкова команда и прекъсва NCQ опашката; с <b>Queued TRIM</b> тя може да се изпълнява заедно с другите NCQ команди. В Linux TRIM се изпълнява периодично (<code>fstrim</code>) или при всяко изтриване (опция <code>discard</code>).</p>
+
+<p><b>S.M.A.R.T.</b> (Self-Monitoring, Analysis and Reporting Technology) е система за самодиагностика, при която устройството следи множество параметри (атрибути) и може да предупреди за предстояща повреда. Всеки атрибут има идентификатор, текуща (нормализирана) стойност, най-лоша стойност, праг и „сурова“ стойност. Някои от най-важните атрибути са:</p>
+
+<table>
+<tr><th style="width:9%">ID</th><th style="width:36%">Атрибут</th><th>Значение</th></tr>
+<tr><td>5</td><td>Reallocated Sectors Count</td><td>брой преназначени повредени сектори – растящата стойност е лош знак</td></tr>
+<tr><td>9</td><td>Power-On Hours</td><td>общо време на работа</td></tr>
+<tr><td>12</td><td>Power Cycle Count</td><td>брой включвания</td></tr>
+<tr><td>194</td><td>Temperature</td><td>температура на устройството</td></tr>
+<tr><td>197</td><td>Current Pending Sector Count</td><td>нестабилни сектори, чакащи преназначаване</td></tr>
+<tr><td>198</td><td>Offline Uncorrectable</td><td>неотстраними грешки, открити при офлайн сканиране</td></tr>
+<tr><td>199</td><td>UDMA CRC Error Count</td><td>грешки в CRC при предаване по интерфейса – обикновено <b>лош кабел или конектор</b>, а не повреда на диска</td></tr>
+<tr><td>177 / 231 / 233</td><td>Wear Leveling / SSD Life Left / Media Wearout</td><td>износване на флаш паметта при SSD (зависи от производителя)</td></tr>
+</table>
+<p class="cap">Таблица 8. Важни S.M.A.R.T. атрибути</p>
+
+<p><b>ATA Security.</b> Командите от групата Security позволяват задаване на потребителска и главна (master) парола; заключеният диск отказва достъп до данните, докато не бъде отключен с SECURITY UNLOCK. Командата <b>SECURITY ERASE UNIT</b> изтрива сигурно цялото устройство, като при SSD обикновено се изтриват всички NAND блокове (или се сменя ключът за криптиране), което е по-надеждно от презаписване от операционната система. Самокриптиращите дискове (SED) поддържат и стандарта TCG Opal, а функцията <b>Sanitize</b> (ACS-2 и по-нови) предлага още по-строги гаранции за унищожаване на данните.</p>
+
+<!-- ============================================================ -->
+<h1 id="s7">7. Хост контролери и AHCI</h1>
+
+<h2>7.1. Режими на работа на контролера</h2>
+
+<p>SATA контролерът в чипсета (например Intel PCH или AMD FCH) обикновено може да работи в един от следните режими, избирани от BIOS/UEFI настройките:</p>
+
+<ul>
+  <li><b>IDE (legacy / compatibility)</b> – контролерът емулира класически PATA контролер (PCI клас 01h, подклас 01h) с shadow регистри и Bus Master DMA. Работи със стари операционни системи без специални драйвери, но не поддържа NCQ, hot-plug и повечето енергоспестяващи функции.</li>
+  <li><b>AHCI</b> – стандартизиран интерфейс за SATA контролери (подклас 06h, prog-if 01h), който дава достъп до всички възможности на SATA. Това е препоръчителният режим.</li>
+  <li><b>RAID</b> – контролерът (обикновено с поддръжка от фърмуер и драйвер, т.нар. „fake RAID“, напр. Intel RST, AMD RAIDXpert) обединява няколко диска в масив. Вътрешно обикновено използва AHCI.</li>
+</ul>
+
+<div class="box"><p><b>Практическа бележка.</b> Ако Windows е инсталиран в режим IDE и в BIOS се превключи на AHCI, системата може да не стартира (грешка INACCESSIBLE_BOOT_DEVICE), защото драйверът <code>storahci.sys</code> не е активиран при зареждане. Преди смяната трябва драйверът да бъде разрешен (например чрез стартиране в безопасен режим).</p></div>
+
+<h2>7.2. Advanced Host Controller Interface (AHCI)</h2>
+
+<p><b>AHCI</b> е спецификация, разработена от Intel (версия 1.0 през 2004 г., последна масово използвана версия 1.3.1), която описва регистрите и структурите в паметта на SATA хост контролера. Благодарение на нея една операционна система може да използва един общ драйвер за контролери от различни производители. AHCI контролерът се вижда като PCI устройство, чиито регистри са съпоставени в паметта (MMIO) на адреса, записан в <b>BAR5</b>, наричан <b>ABAR</b> (AHCI Base Address).</p>
+
+<p>Регистрите в ABAR се делят на <b>общи (Generic Host Control)</b> и <b>регистри на портовете</b>. Контролерът поддържа до 32 порта; регистрите на порт <i>n</i> се намират на отместване 100h + n × 80h.</p>
+
+<table>
+<tr><th style="width:14%">Регистър</th><th style="width:10%">Отместв.</th><th>Описание</th></tr>
+<tr><td>CAP</td><td>00h</td><td>Host Capabilities – брой портове, брой командни слотове, поддръжка на NCQ (SNCQ), 64-битово адресиране (S64A), скорост, PM, staggered spin-up (SSS) и др.</td></tr>
+<tr><td>GHC</td><td>04h</td><td>Global Host Control – HBA reset (HR), разрешаване на прекъсвания (IE), режим AHCI (AE)</td></tr>
+<tr><td>IS</td><td>08h</td><td>Interrupt Status – по един бит за всеки порт, който изисква обслужване</td></tr>
+<tr><td>PI</td><td>0Ch</td><td>Ports Implemented – битова маска на реално наличните портове</td></tr>
+<tr><td>VS</td><td>10h</td><td>версия на AHCI</td></tr>
+<tr><td colspan="3"><i>Регистри на порт n (база = 100h + n·80h):</i></td></tr>
+<tr><td>PxCLB / PxFB</td><td>00h / 08h</td><td>физически адрес на Command List (1 KiB, подравнен на 1 KiB) и на Received FIS area (256 B)</td></tr>
+<tr><td>PxIS / PxIE</td><td>10h / 14h</td><td>статус и маска на прекъсванията на порта (завършване, грешки, промяна в свързването)</td></tr>
+<tr><td>PxCMD</td><td>18h</td><td>управление: ST (стартиране на обработката на команди), FRE (приемане на FIS), CR/FR (статус), SUD, POD, ALPE…</td></tr>
+<tr><td>PxTFD</td><td>20h</td><td>Task File Data – копие на регистрите Status и Error на устройството</td></tr>
+<tr><td>PxSIG</td><td>24h</td><td>сигнатура на устройството от първия Register D2H FIS</td></tr>
+<tr><td>PxSSTS / PxSCTL / PxSERR</td><td>28h / 2Ch / 30h</td><td>регистрите SStatus, SControl и SError на SATA интерфейса</td></tr>
+<tr><td>PxSACT</td><td>34h</td><td>SActive – битове на активните NCQ команди</td></tr>
+<tr><td>PxCI</td><td>38h</td><td>Command Issue – софтуерът задава бит, за да издаде команда от съответния слот; контролерът го нулира при завършване</td></tr>
+<tr><td>PxSNTF / PxFBS</td><td>3Ch / 40h</td><td>SNotification (асинхронни известия) и FIS-based switching</td></tr>
+</table>
+<p class="cap">Таблица 9. Основни регистри на AHCI</p>
+
+<p>Регистрите на SATA интерфейса (SCR – Status and Control Registers) дават информация за физическата връзка. В <b>SStatus</b> полето DET = 3 означава „устройството е открито и комуникацията е установена“, SPD показва договорената скорост (1 = Gen1, 2 = Gen2, 3 = Gen3), а IPM – текущото енергийно състояние (1 = активно, 2 = Partial, 6 = Slumber, 8 = DevSleep). Чрез <b>SControl</b> софтуерът може да инициира COMRESET (DET = 1), да ограничи скоростта (SPD) и да забрани определени енергоспестяващи състояния (IPM). <b>SError</b> натрупва флагове за грешки – CRC, 8b/10b, загуба на синхронизация, промяна в свързването (PhyRdy change, използвано за hot-plug) и др.</p>
+
+<h2>7.3. Структури в паметта</h2>
+
+<p>Комуникацията между драйвера и AHCI контролера става чрез структури в оперативната памет, до които контролерът има DMA достъп (фигура 9):</p>
+
+<figure>
+<svg width="650" height="300" viewBox="0 0 650 300" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <defs><marker id="a7" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b2e59"/></marker></defs>
+  <rect x="10" y="20" width="130" height="150" fill="#dde6f2" stroke="#0b2e59"/>
+  <text x="75" y="38" text-anchor="middle" font-weight="bold">Регистри на порт</text>
+  <g font-size="11.5"><text x="20" y="62">PxCLB</text><text x="20" y="86">PxFB</text><text x="20" y="110">PxCI</text><text x="20" y="134">PxSACT</text><text x="20" y="158">PxIS …</text></g>
+  <rect x="190" y="20" width="150" height="190" fill="#eef3fa" stroke="#0b2e59"/>
+  <text x="265" y="38" text-anchor="middle" font-weight="bold">Command List</text>
+  <text x="265" y="54" text-anchor="middle" font-size="11">32 слота × 32 B = 1 KiB</text>
+  <g stroke="#0b2e59" fill="#fff"><rect x="200" y="64" width="130" height="26"/><rect x="200" y="90" width="130" height="26"/><rect x="200" y="116" width="130" height="26"/><rect x="200" y="168" width="130" height="26"/></g>
+  <g text-anchor="middle" font-size="11"><text x="265" y="81">Command Header 0</text><text x="265" y="107">Command Header 1</text><text x="265" y="133">Command Header 2</text><text x="265" y="160">⋮</text><text x="265" y="185">Command Header 31</text></g>
+  <rect x="190" y="230" width="150" height="60" fill="#fdf2e9" stroke="#b9770e"/>
+  <text x="265" y="250" text-anchor="middle" font-weight="bold">Received FIS (256 B)</text>
+  <text x="265" y="268" text-anchor="middle" font-size="11">DMA Setup, PIO Setup,</text><text x="265" y="282" text-anchor="middle" font-size="11">D2H, SDB, Unknown FIS</text>
+  <rect x="390" y="20" width="150" height="190" fill="#eef3fa" stroke="#0b2e59"/>
+  <text x="465" y="38" text-anchor="middle" font-weight="bold">Command Table</text>
+  <g stroke="#0b2e59" fill="#fff"><rect x="400" y="50" width="130" height="34"/><rect x="400" y="84" width="130" height="26"/><rect x="400" y="110" width="130" height="22"/><rect x="400" y="132" width="130" height="70"/></g>
+  <g text-anchor="middle" font-size="11"><text x="465" y="66">CFIS (64 B)</text><text x="465" y="79" font-size="10">Register H2D FIS</text><text x="465" y="101">ACMD (16 B, ATAPI)</text><text x="465" y="125">запазено (48 B)</text><text x="465" y="160">PRDT</text><text x="465" y="176" font-size="10">PRD 0, PRD 1, … PRD n</text><text x="465" y="190" font-size="10">16 B на запис</text></g>
+  <g stroke="#0b2e59" fill="#e8f6ef"><rect x="580" y="120" width="60" height="30"/><rect x="580" y="160" width="60" height="30"/><rect x="580" y="200" width="60" height="30"/></g>
+  <g text-anchor="middle" font-size="11"><text x="610" y="139">буфер</text><text x="610" y="179">буфер</text><text x="610" y="219">буфер</text><text x="610" y="112" font-weight="bold">Данни</text></g>
+  <g stroke="#0b2e59" stroke-width="1.4" fill="none" marker-end="url(#a7)">
+    <path d="M60,58 C120,58 140,70 196,74"/>
+    <path d="M60,82 C140,120 120,250 186,256"/>
+    <path d="M330,78 C360,78 360,62 396,62"/>
+    <path d="M530,160 C555,160 555,135 576,135"/>
+    <path d="M530,176 C555,176 555,175 576,175"/>
+    <path d="M530,192 C555,200 555,215 576,215"/>
+  </g>
+</svg>
+</figure>
+<p class="cap">Фигура 9. Структури в паметта на AHCI за един порт</p>
+
+<ul>
+  <li><b>Command List</b> – масив от 32 <b>Command Header</b>-а (по един за всеки команден слот). Всеки header съдържа дължината на CFIS, посоката (запис/четене), бит за ATAPI, броя на PRD записите (PRDTL), брояча на пренесените байтове (PRDBC) и физическия адрес на Command Table.</li>
+  <li><b>Command Table</b> – съдържа самия команден FIS (<b>CFIS</b>, до 64 байта, обикновено Register H2D FIS), ATAPI командата (<b>ACMD</b>, 12 или 16 байта) и <b>PRDT</b> (Physical Region Descriptor Table) – списък от дескриптори, всеки от които описва един непрекъснат буфер в паметта (адрес и дължина до 4 MiB, плюс бит за прекъсване). Така се реализира <i>scatter/gather</i> – данните на една команда могат да бъдат разпръснати в много физически страници.</li>
+  <li><b>Received FIS area</b> – 256-байтова област, в която контролерът копира пристигащите FIS-ове (DMA Setup, PIO Setup, Register D2H, Set Device Bits и непознати FIS-ове), за да може драйверът да ги прочете.</li>
+</ul>
+
+<p><b>Изпращане на команда</b> от драйвера става в следните стъпки: 1) избира се свободен слот (бит, който е 0 и в PxCI, и в PxSACT); 2) попълва се Command Table – CFIS с командата и PRDT с адресите на буферите; 3) попълва се Command Header; 4) за NCQ команда се задава битът в PxSACT; 5) задава се битът в PxCI. Контролерът сам изпраща FIS-а, извършва трансфера на данните чрез DMA и при завършване нулира бита в PxCI (или PxSACT) и генерира прекъсване. Драйверът проверява PxIS и PxTFD за грешки.</p>
+
+<h2>7.4. Поддръжка в операционните системи</h2>
+
+<p>В <b>Linux</b> SATA се обслужва от подсистемата <b>libata</b>, която представя SATA дисковете като SCSI устройства (<code>/dev/sdX</code>) чрез транслационен слой SAT (SCSI/ATA Translation). Драйверът за AHCI е <code>ahci</code>, а за по-старите контролери – <code>ata_piix</code>, <code>sata_nv</code>, <code>sata_sil</code> и др. При зареждане ядрото извежда редове от вида:</p>
+
+<pre>ata1: SATA max UDMA/133 abar m2048@0xf7d36000 port 0xf7d36100 irq 29
+ata1: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+ata1.00: ATA-11: Samsung SSD 870 EVO 1TB, SVT02B6Q, max UDMA/133
+ata1.00: 1953525168 sectors, multi 1: LBA48 NCQ (depth 32), AA
+ata1.00: configured for UDMA/133</pre>
+
+<p>Стойността <code>SStatus 133</code> се разчита като IPM = 1 (активно), SPD = 3 (6 Gb/s), DET = 3 (свързано). „UDMA/133“ е наследено означение от PATA и няма отношение към реалната скорост на SATA връзката. В <b>Windows</b> стандартният драйвер е <code>storahci.sys</code> (Microsoft Standard SATA AHCI Controller), а производителите предлагат собствени (напр. Intel Rapid Storage Technology). В <b>macOS</b> SATA устройствата се обслужват от <code>IOAHCIFamily</code>.</p>
+
+<!-- ============================================================ -->
+<h1 id="s8">8. Разширени възможности</h1>
+
+<h2 id="s8-1">8.1. Hot-plug и staggered spin-up</h2>
+
+<p><b>Hot-plug</b> (гореща смяна) позволява свързване и разкачване на устройство при включено захранване. Механично това се осигурява от контактите с различна дължина (първо се свързват масите, после pre-charge изводите, накрая сигналите и основното захранване). Логически – хостът открива новото устройство по получения COMINIT (или по промяната в SError/PxIS – PhyRdy change), а изчезването му – по загубата на връзката. Hot-plug изисква поддръжка от контролера (AHCI) и от операционната система и обикновено трябва да бъде разрешен за всеки порт в BIOS (опция „Hot Plug“ / „External SATA“). Разграничават се <i>surprise hot-plug</i> (неочаквано изваждане) и <i>OS-aware hot-plug</i> (устройството се демонтира програмно преди изваждане).</p>
+
+<p><b>Staggered spin-up</b> (поетапно завъртане) решава проблема с пусковия ток в системи с много дискове. Двигателят на 3,5" HDD при завъртане консумира около 2 A от 12 V линията – ако 24 диска се завъртят едновременно, захранването трябва да издържи много голям пиков ток. При staggered spin-up дискът не завърта двигателя, докато хостът не установи връзка с него (т.е. не му изпрати COMRESET), а контролерът стартира портовете последователно. Функцията се управлява от извод P11 и от бита SUD (Spin-Up Device) в PxCMD. Сходна функция е <b>Power-Up In Standby (PUIS)</b> – дискът се включва в режим standby и се завърта едва след специална команда.</p>
+
+<h2 id="s8-2">8.2. Управление на енергията</h2>
+
+<p>Управлението на енергията при SATA се извършва на две нива: <b>на интерфейса</b> (връзката) и <b>на устройството</b>.</p>
+
+<table>
+<tr><th style="width:18%">Състояние</th><th style="width:30%">Описание</th><th style="width:20%">Време за излизане</th><th>Консумация</th></tr>
+<tr><td>PHY Ready (активно)</td><td>връзката е активна, предават се примитиви</td><td>–</td><td>най-висока</td></tr>
+<tr><td>Partial</td><td>физическият слой е частично изключен, PLL работи</td><td>≤ 10 µs</td><td>намалена</td></tr>
+<tr><td>Slumber</td><td>по-дълбоко изключване на физическия слой</td><td>≤ 10 ms</td><td>ниска</td></tr>
+<tr><td>DevSleep</td><td>устройството изключва почти изцяло интерфейса си; управлява се от отделен сигнал DEVSLP (ревизия 3.2)</td><td>≈ 20 ms (типично)</td><td>много ниска (единици mW)</td></tr>
+</table>
+<p class="cap">Таблица 10. Енергийни състояния на SATA интерфейса</p>
+
+<p>Преминаването в Partial или Slumber може да бъде инициирано от хоста (<b>HIPM</b>, Host-Initiated Power Management) или от устройството (<b>DIPM</b>, Device-Initiated Power Management) чрез примитивите PMREQ_P / PMREQ_S, на които другата страна отговаря с PMACK (съгласие) или PMNAK (отказ). Събуждането става чрез OOB сигнала COMWAKE. AHCI поддържа <b>ALPM</b> (Aggressive Link Power Management) – контролерът автоматично поставя връзката в Partial/Slumber, когато няма активни команди. В Linux политиката се задава чрез <code>/sys/class/scsi_host/hostN/link_power_management_policy</code> (стойности <code>max_performance</code>, <code>medium_power</code>, <code>min_power</code>, <code>med_power_with_dipm</code>).</p>
+
+<p>На ниво устройство ATA командите IDLE, STANDBY и SLEEP управляват енергийните режими на самия диск (спиране на двигателя, паркиране на главите), а функцията <b>APM</b> (Advanced Power Management) позволява да се зададе баланс между производителност и консумация (стойност 1–254 чрез SET FEATURES; в Linux – <code>hdparm -B</code>). DevSleep е особено важен за лаптопи и ултрабуци, тъй като позволява SSD да консумира минимална енергия в режим на сън, като същевременно се събужда бързо.</p>
+
+<h2 id="s8-3">8.3. Port Multiplier и Port Selector</h2>
+
+<p><b>Port Multiplier (PM)</b> е устройство, което позволява към един хост порт да се свържат до <b>15 устройства</b>. Адресирането става чрез 4-битовото поле <b>PM Port</b> във всеки FIS (стойности 0–14 за устройствата, 15 – за управляващия порт на самия мултиплексор). Широката лента на хост порта се споделя между всички устройства – например 5 диска на 3 Gb/s порт си поделят 300 MB/s. Port Multiplier се използва основно във външни кутии с много дискове (eSATA) и в някои NAS устройства.</p>
+
+<p>Хост контролерът може да поддържа два режима на превключване:</p>
+<ul>
+  <li><b>Command-Based Switching (CBS)</b> – в даден момент се обслужва само едно устройство; контролерът трябва да изчака завършването на командите към него, преди да се обърне към друго. По-просто, но по-бавно;</li>
+  <li><b>FIS-Based Switching (FBS)</b> – контролерът може да има активни команди към няколко устройства едновременно и да обработва FIS-овете им в произволен ред. Значително по-ефективно, особено с NCQ. В AHCI се управлява от регистъра PxFBS.</li>
+</ul>
+
+<p><b>Port Selector (PS)</b> е друго устройство: то позволява <b>два хоста</b> да бъдат свързани към <b>едно устройство</b>, като в даден момент само единият хост е активен. Целта е резервираност (failover) – ако единият контролер откаже, другият поема достъпа до диска. Изборът на активния хост става чрез специална последователност от OOB сигнали (protocol-based selection) или чрез външен сигнал (side-band).</p>
+
+<figure>
+<svg width="640" height="190" viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" font-family="Times New Roman" font-size="12">
+  <rect x="10" y="70" width="80" height="40" fill="#dde6f2" stroke="#0b2e59"/><text x="50" y="94" text-anchor="middle">Хост</text>
+  <rect x="140" y="65" width="90" height="50" fill="#a9c0e0" stroke="#0b2e59"/><text x="185" y="87" text-anchor="middle">Port</text><text x="185" y="103" text-anchor="middle">Multiplier</text>
+  <line x1="90" y1="90" x2="140" y2="90" stroke="#333" stroke-width="2"/>
+  <g fill="#f4f6f9" stroke="#333"><rect x="270" y="10" width="60" height="28"/><rect x="270" y="48" width="60" height="28"/><rect x="270" y="104" width="60" height="28"/><rect x="270" y="142" width="60" height="28"/></g>
+  <g text-anchor="middle" font-size="11"><text x="300" y="29">диск 0</text><text x="300" y="67">диск 1</text><text x="300" y="93">⋮</text><text x="300" y="123">диск 13</text><text x="300" y="161">диск 14</text></g>
+  <g stroke="#333"><line x1="230" y1="80" x2="270" y2="24"/><line x1="230" y1="85" x2="270" y2="62"/><line x1="230" y1="95" x2="270" y2="118"/><line x1="230" y1="100" x2="270" y2="156"/></g>
+  <text x="185" y="140" text-anchor="middle" font-size="11">1 хост → до 15 устройства</text>
+  <rect x="400" y="20" width="80" height="40" fill="#dde6f2" stroke="#0b2e59"/><text x="440" y="44" text-anchor="middle">Хост A</text>
+  <rect x="400" y="120" width="80" height="40" fill="#dde6f2" stroke="#0b2e59"/><text x="440" y="144" text-anchor="middle">Хост B</text>
+  <rect x="510" y="65" width="60" height="50" fill="#a9c0e0" stroke="#0b2e59"/><text x="540" y="87" text-anchor="middle">Port</text><text x="540" y="103" text-anchor="middle">Selector</text>
+  <rect x="595" y="75" width="40" height="30" fill="#f4f6f9" stroke="#333"/><text x="615" y="94" text-anchor="middle" font-size="11">диск</text>
+  <g stroke="#333"><line x1="480" y1="40" x2="510" y2="80"/><line x1="480" y1="140" x2="510" y2="100" stroke-dasharray="4,3"/><line x1="570" y1="90" x2="595" y2="90"/></g>
+  <text x="520" y="182" text-anchor="middle" font-size="11">2 хоста → 1 устройство (failover)</text>
+</svg>
+</figure>
+<p class="cap">Фигура 10. Топологии с Port Multiplier и Port Selector</p>
+
+<h2>8.4. Други функции</h2>
+
+<ul>
+  <li><b>Asynchronous Notification</b> – устройството (напр. оптично устройство при поставяне на диск) може само да уведоми хоста чрез Set Device Bits FIS с бит N, без хостът да го проверява периодично (polling). Това спестява енергия.</li>
+  <li><b>Zero-Power ODD</b> (ZPODD, 3.1) – оптичното устройство се изключва напълно, когато в него няма диск.</li>
+  <li><b>Enclosure Management</b> – управление на индикаторите (LED) и сензорите в кутии и backplane-и, напр. чрез протоколите SGPIO или SES.</li>
+  <li><b>Rebuild Assist</b> (3.3) – ускорява възстановяването на RAID масив, като устройството съобщава кои области са нечетими, вместо да ги опитва многократно.</li>
+  <li><b>Поддръжка на SMR</b> (Shingled Magnetic Recording, 3.3) – командите на <b>ZAC</b> (Zoned ATA Commands) позволяват на хоста да управлява зоните на SMR дисковете (host-aware / host-managed).</li>
+  <li><b>Hybrid Information</b> (3.2) – подсказки от хоста към хибридни дискове (SSHD) кои данни да се кешират във флаш паметта.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h1 id="s9">9. SATA, SAS и NVMe – сравнение</h1>
+
+<h2>9.1. SATA и SAS</h2>
+
+<p><b>SAS (Serial Attached SCSI)</b> е последователният наследник на паралелния SCSI, предназначен за сървъри и системи за съхранение. SAS и SATA са разработени координирано и използват сходна физическа среда, но се различават по възможности:</p>
+
+<table>
+<tr><th style="width:26%">Характеристика</th><th style="width:37%">SATA</th><th>SAS</th></tr>
+<tr><td>Команден набор</td><td>ATA (ACS)</td><td>SCSI</td></tr>
+<tr><td>Скорост</td><td>1,5 / 3 / 6 Gb/s</td><td>3 / 6 / 12 / 22,5 Gb/s (SAS-1 … SAS-4)</td></tr>
+<tr><td>Дуплекс</td><td>полудуплекс на ниво рамки</td><td>пълен дуплекс</td></tr>
+<tr><td>Портове на устройството</td><td>един</td><td>два (dual-port) – резервиран достъп от два контролера</td></tr>
+<tr><td>Дължина на кабела</td><td>1 m (eSATA – 2 m)</td><td>до 10 m</td></tr>
+<tr><td>Мащабиране</td><td>Port Multiplier (до 15)</td><td>експандери – хиляди устройства</td></tr>
+<tr><td>Опашка от команди</td><td>NCQ – 32 команди</td><td>TCQ – стотици до хиляди команди</td></tr>
+<tr><td>Напрежение на сигнала</td><td>по-ниско</td><td>по-високо (подходящо за backplane и по-дълги кабели)</td></tr>
+<tr><td>Цена, приложение</td><td>ниска; настолни компютри, лаптопи, NAS, архиви</td><td>по-висока; корпоративни сървъри и масиви</td></tr>
+</table>
+<p class="cap">Таблица 11. Сравнение на SATA и SAS</p>
+
+<p>Важна особеност е <b>съвместимостта</b>: SAS контролерите поддържат и SATA устройства. За да работи SATA диск през SAS експандер, се използва протоколът <b>STP (SATA Tunneling Protocol)</b>, който „тунелира“ SATA FIS-овете през SAS мрежата. Обратното не е възможно – SAS диск не работи на SATA контролер. Затова SAS конекторът на диска има допълнителен „мост“, запълващ пролуката между сигналния и захранващия конектор, който физически не позволява включването му в SATA кабел.</p>
+
+<h2>9.2. SATA и NVMe</h2>
+
+<p>С появата на SSD устройствата SATA се оказва тясно място. SATA и AHCI са проектирани за механични дискове, при които латентността се измерва в милисекунди и една опашка от 32 команди е напълно достатъчна. Флаш паметта има латентност от порядъка на десетки микросекунди и огромен вътрешен паралелизъм, който SATA не може да използва. За SSD е създаден интерфейсът <b>NVMe (Non-Volatile Memory Express)</b>, който работи директно върху PCI Express.</p>
+
+<table>
+<tr><th style="width:28%">Характеристика</th><th style="width:36%">SATA + AHCI</th><th>NVMe (PCIe)</th></tr>
+<tr><td>Физическа връзка</td><td>SATA 6 Gb/s</td><td>PCIe ×4 (Gen3 ≈ 3,9 GB/s; Gen4 ≈ 7,9 GB/s; Gen5 ≈ 15,8 GB/s)</td></tr>
+<tr><td>Максимална скорост</td><td>≈ 550 MB/s реално</td><td>≈ 3,5 / 7 / 14 GB/s реално</td></tr>
+<tr><td>Опашки</td><td>1 опашка × 32 команди</td><td>до 65 535 опашки × 65 536 команди</td></tr>
+<tr><td>Достъп до регистри за 1 команда</td><td>няколко некеширани MMIO достъпа</td><td>един запис в „doorbell“ регистър</td></tr>
+<tr><td>Прекъсвания</td><td>едно MSI за целия контролер (обикновено)</td><td>MSI-X – отделно прекъсване за всяка опашка/ядро</td></tr>
+<tr><td>Паралелизъм на CPU</td><td>изисква синхронизация между ядрата</td><td>отделна опашка за всяко ядро – без заключване</td></tr>
+<tr><td>Латентност на софтуерния стек</td><td>по-висока</td><td>значително по-ниска</td></tr>
+</table>
+<p class="cap">Таблица 12. Сравнение на SATA (AHCI) и NVMe</p>
+
+<p>Въпреки предимствата на NVMe, SATA SSD остават разумен избор за надграждане на по-стари компютри (без M.2 слот), за допълнително хранилище и за бюджетни системи. При ежедневна работа (стартиране на програми, работа с офис приложения) разликата между SATA SSD и NVMe SSD е много по-малка от разликата между HDD и какъвто и да е SSD, защото определящ фактор там е латентността при произволен достъп, а не последователната скорост.</p>
+
+<!-- ============================================================ -->
+<h1 id="s10">10. Практически аспекти</h1>
+
+<h2>10.1. Свързване и избор</h2>
+
+<ul>
+  <li><b>Кабели.</b> Да се използват кабели с метални фиксатори (latching), които не се разкачват от вибрации. Да се избягват силни огъвания и смачкване. Растящият S.M.A.R.T. атрибут 199 (UDMA CRC Error Count) най-често означава лош кабел.</li>
+  <li><b>Портове.</b> На много дънни платки част от портовете са от чипсета, а част – от допълнителен контролер (напр. ASMedia), който може да е по-бавен или да не поддържа всички функции. Някои портове се изключват, когато се използва M.2 слот, тъй като делят линии с него.</li>
+  <li><b>Режим AHCI</b> трябва да е включен в BIOS/UEFI за NCQ, TRIM, hot-plug и енергоспестяване.</li>
+  <li><b>Подравняване на дяловете</b> на 4 KiB (1 MiB) е важно за дисковете с Advanced Format (4 KiB физически сектори, 512e емулация) и за SSD; съвременните инструменти за разделяне на дялове го правят автоматично.</li>
+  <li><b>SSD или HDD.</b> За системен диск – SSD; за голям обем данни (медия, архиви, резервни копия, NAS) – HDD, при които SATA е и ще остане основен интерфейс. За NAS се препоръчват дискове с CMR запис и поддръжка на <b>TLER/ERC</b> (ограничено време за възстановяване от грешка), за да не бъдат изключени от RAID масива.</li>
+</ul>
+
+<h2>10.2. RAID със SATA дискове</h2>
+
+<p>SATA дисковете често се обединяват в RAID масиви – чрез хардуерен контролер, чрез фърмуерния RAID на чипсета или софтуерно (Linux <code>mdadm</code>, ZFS, Windows Storage Spaces):</p>
+<ul>
+  <li><b>RAID 0</b> (striping) – данните се разпределят между дисковете; по-висока скорост, но без резервираност;</li>
+  <li><b>RAID 1</b> (mirroring) – огледално копие; издържа отказ на един диск;</li>
+  <li><b>RAID 5 / RAID 6</b> – разпределена четност; издържат отказ на един / два диска при по-добро използване на капацитета;</li>
+  <li><b>RAID 10</b> – комбинация от огледала и striping; висока скорост и надеждност.</li>
+</ul>
+<p>RAID не е резервно копие (backup) – той предпазва от отказ на диск, но не и от изтриване, вируси или повреда на файловата система.</p>
+
+<h2>10.3. Диагностика и инструменти</h2>
+
+<p>В Linux за работа със SATA устройства се използват следните инструменти:</p>
+
+<pre>$ sudo smartctl -i /dev/sda          # информация: модел, SATA версия, скорост
+SATA Version is:  SATA 3.3, 6.0 Gb/s (current: 6.0 Gb/s)
+$ sudo smartctl -a /dev/sda          # всички S.M.A.R.T. атрибути и логове
+$ sudo smartctl -t long /dev/sda     # стартира разширен самотест
+$ sudo hdparm -I /dev/sda            # IDENTIFY DEVICE: NCQ, TRIM, Security…
+$ sudo hdparm -tT /dev/sda           # бърз тест на скоростта на четене
+$ cat /sys/block/sda/device/queue_depth   # дълбочина на NCQ опашката (32)
+$ sudo fstrim -v /                   # ръчно изпълнение на TRIM
+$ dmesg | grep -i ata                # съобщения на libata: скорост, грешки</pre>
+
+<p>За по-точни измервания на производителността се използва <code>fio</code> с различни натоварвания (последователно/произволно четене и запис, различна дълбочина на опашката). В Windows аналогични инструменти са CrystalDiskInfo (S.M.A.R.T.) и CrystalDiskMark (производителност), а <code>wmic diskdrive</code> / <code>Get-PhysicalDisk</code> дават основна информация.</p>
+
+<p>Типични проблеми и техните признаци:</p>
+<table>
+<tr><th style="width:38%">Симптом</th><th>Възможна причина</th></tr>
+<tr><td>Връзката е 1,5 или 3 Gb/s вместо 6 Gb/s</td><td>по-стар контролер/порт, лош кабел, ограничение в SControl, принудително понижаване след грешки</td></tr>
+<tr><td>Растящ атрибут 199, грешки „ICRC ABRT“ в dmesg</td><td>повреден или некачествен кабел, окислени контакти, смущения</td></tr>
+<tr><td>Дискът не се открива при старо захранване</td><td>функция PWDIS (3,3 V на P3)</td></tr>
+<tr><td>Ниска скорост на SSD при запис с времето</td><td>липса на TRIM (IDE режим, стара ОС, RAID без TRIM)</td></tr>
+<tr><td>Растящи атрибути 5, 197, 198</td><td>повреда на носителя – данните трябва да бъдат архивирани и дискът – сменен</td></tr>
+<tr><td>Периодични „link reset“ и „hard resetting link“</td><td>проблем в захранването, кабела или агресивно ALPM с несъвместим диск</td></tr>
+</table>
+<p class="cap">Таблица 13. Типични проблеми при SATA устройства</p>
+
+<!-- ============================================================ -->
+<h1 id="s11">11. Настояще и бъдеще на SATA</h1>
+
+<p>Последната ревизия на спецификацията (3.5) е от 2020 г. и не увеличава скоростта над 6 Gb/s. SATA-IO няма планове за „SATA 12 Gb/s“: увеличаването на скоростта би изисквало нов физически слой, нови кабели и конектори, а за устройствата, за които скоростта има значение (SSD), индустрията вече е избрала NVMe по PCI Express. Вместо това развитието на SATA е насочено към:</p>
+
+<ul>
+  <li><b>твърди дискове с голям капацитет</b> – SMR, HAMR и MAMR технологиите позволяват дискове от 20–30 TB и повече, за които 600 MB/s е напълно достатъчна скорост (един HDD рядко надхвърля 300 MB/s последователно);</li>
+  <li><b>центрове за данни</b> – функции като Command Duration Limits, Rebuild Assist и подобрена телеметрия, които сближават SATA със SAS;</li>
+  <li><b>енергийна ефективност</b> – DevSleep и по-фино управление на енергията;</li>
+  <li><b>съвместимост</b> – огромната инсталирана база от устройства и контролери гарантира, че SATA портове ще присъстват още години в настолните компютри, сървърите и NAS устройствата.</li>
+</ul>
+
+<p>В лаптопите и все по-често в настолните компютри SATA портовете постепенно изчезват в полза на M.2 NVMe. Оптичните устройства, исторически основни потребители на SATA, също излизат от масова употреба. Все пак, поради ниската цена на гигабайт при HDD, SATA остава основният интерфейс за масово и евтино съхранение на данни – в домашните NAS сървъри, системите за видеонаблюдение и „студените“ архиви в облачните центрове за данни.</p>
+
+<!-- ============================================================ -->
+<h1 id="zakl">Заключение</h1>
+
+<p>Serial ATA е пример за успешна еволюция на интерфейс: той заменя паралелния ATA с високоскоростна последователна връзка „точка-точка“, като същевременно запазва пълна съвместимост на софтуерно ниво. Чрез преминаването към диференциална сигнализация, кодиране 8b/10b, пакетна комуникация чрез FIS и ясно разделение на слоевете SATA увеличава скоростта от 133 MB/s при PATA до 600 MB/s, позволява тънки и по-дълги кабели, hot-plug и по-ниска консумация.</p>
+
+<p>Разширенията на протокола – Native Command Queuing, стандартът AHCI, TRIM, усъвършенстваното управление на енергията, Port Multiplier и новите форм-фактори (eSATA, mSATA, M.2) – правят SATA подходящ за много различни устройства: от механични дискове и оптични устройства до SSD. Именно появата на SSD показва и ограниченията на интерфейса – единичната опашка от 32 команди и таванът от 6 Gb/s – което води до създаването на NVMe.</p>
+
+<p>Въпреки това SATA остава най-разпространеният интерфейс за съхранение на данни в света. Разбирането на неговата архитектура – от електрическите сигнали и OOB инициализацията, през каналния и транспортния слой, до командите и структурите на AHCI – дава солидна основа за изучаване на всички съвременни интерфейси за периферни устройства, тъй като много от идеите му (последователни диференциални линии, кодиране, пакетни протоколи, опашки от команди, DMA със scatter/gather) се използват и в PCI Express, USB, SAS и NVMe.</p>
+
+<!-- ============================================================ -->
+<h1 id="lit">Използвана литература</h1>
+
+<ol class="refs">
+  <li>Serial ATA International Organization. <i>Serial ATA Revision 3.5 (Gold)</i>. SATA-IO, 2020.</li>
+  <li>Serial ATA International Organization. <i>Serial ATA Revision 3.2</i>. SATA-IO, 2013.</li>
+  <li>Serial ATA International Organization. <i>Serial ATA Revision 2.6</i>. SATA-IO, 2007.</li>
+  <li>Intel Corporation. <i>Serial ATA Advanced Host Controller Interface (AHCI), Revision 1.3.1</i>. Intel, 2013.</li>
+  <li>INCITS T13. <i>AT Attachment 8 – ATA/ATAPI Command Set (ATA8-ACS)</i> и <i>ACS-4</i>. American National Standards Institute.</li>
+  <li>INCITS T13. <i>AT Attachment with Packet Interface – 7 (ATA/ATAPI-7), Volume 3: Serial Transport Protocols and Physical Interconnect</i>. 2005.</li>
+  <li>Grimsrud, K., Smith, H. <i>Serial ATA Storage Architecture and Applications</i>. Intel Press, 2003.</li>
+  <li>Widmer, A. X., Franaszek, P. A. <i>A DC-Balanced, Partitioned-Block, 8B/10B Transmission Code</i>. IBM Journal of Research and Development, 27(5), 1983.</li>
+  <li>NVM Express, Inc. <i>NVM Express Base Specification, Revision 2.0</i>. 2021.</li>
+  <li>Документация на ядрото Linux: <i>libata Developer's Guide</i>, <code>drivers/ata/ahci.c</code>. kernel.org.</li>
+  <li>OSDev Wiki. <i>AHCI</i>, <i>SATA</i>. wiki.osdev.org.</li>
+  <li>Wikipedia. <i>Serial ATA</i>, <i>Parallel ATA</i>, <i>Advanced Host Controller Interface</i>, <i>8b/10b encoding</i>, <i>S.M.A.R.T.</i>.</li>
+  <li>Smartmontools Project. <i>smartctl(8) manual page</i>. smartmontools.org.</li>
+  <li>Учебни материали по дисциплината „Компютърна периферия“, ТУ – София, ФКСТ.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h1 id="abbr">Приложение: Списък на съкращенията</h1>
+
+<table class="abbr">
+<tr><td>8b/10b</td><td>кодиране на 8 бита данни в 10-битов символ</td></tr>
+<tr><td>ACS</td><td>ATA Command Set – стандарт за командния набор на ATA</td></tr>
+<tr><td>AHCI</td><td>Advanced Host Controller Interface – стандартен програмен интерфейс на SATA контролер</td></tr>
+<tr><td>ALPM</td><td>Aggressive Link Power Management</td></tr>
+<tr><td>APM</td><td>Advanced Power Management</td></tr>
+<tr><td>ATA / PATA</td><td>AT Attachment / Parallel ATA</td></tr>
+<tr><td>ATAPI</td><td>ATA Packet Interface – за оптични и лентови устройства</td></tr>
+<tr><td>BIST</td><td>Built-In Self Test</td></tr>
+<tr><td>CBS / FBS</td><td>Command-Based / FIS-Based Switching</td></tr>
+<tr><td>CDR</td><td>Clock and Data Recovery – възстановяване на такта от данните</td></tr>
+<tr><td>CRC</td><td>Cyclic Redundancy Check – циклична контролна сума</td></tr>
+<tr><td>DIPM / HIPM</td><td>Device- / Host-Initiated Power Management</td></tr>
+<tr><td>DMA / FPDMA</td><td>Direct Memory Access / First-Party DMA</td></tr>
+<tr><td>EMI</td><td>Electromagnetic Interference – електромагнитни смущения</td></tr>
+<tr><td>eSATA / eSATAp</td><td>External SATA / Power over eSATA</td></tr>
+<tr><td>FIS</td><td>Frame Information Structure – пакет на транспортния слой</td></tr>
+<tr><td>HBA</td><td>Host Bus Adapter – хост контролер</td></tr>
+<tr><td>HDD / SSD / SSHD</td><td>твърд диск / твърдотелен диск / хибриден диск</td></tr>
+<tr><td>IDE</td><td>Integrated Drive Electronics</td></tr>
+<tr><td>LBA</td><td>Logical Block Addressing – логическо адресиране на блокове</td></tr>
+<tr><td>LFSR</td><td>Linear-Feedback Shift Register</td></tr>
+<tr><td>LVDS</td><td>Low-Voltage Differential Signaling</td></tr>
+<tr><td>MMIO</td><td>Memory-Mapped I/O</td></tr>
+<tr><td>mSATA</td><td>mini-SATA</td></tr>
+<tr><td>NCQ</td><td>Native Command Queuing</td></tr>
+<tr><td>NVMe</td><td>Non-Volatile Memory Express</td></tr>
+<tr><td>OOB</td><td>Out-Of-Band – сигнализация извън нормалния поток данни</td></tr>
+<tr><td>PCIe</td><td>PCI Express</td></tr>
+<tr><td>PIO</td><td>Programmed Input/Output</td></tr>
+<tr><td>PLL</td><td>Phase-Locked Loop – фазово затворен контур</td></tr>
+<tr><td>PM / PS</td><td>Port Multiplier / Port Selector</td></tr>
+<tr><td>PRD / PRDT</td><td>Physical Region Descriptor (Table)</td></tr>
+<tr><td>PUIS</td><td>Power-Up In Standby</td></tr>
+<tr><td>PWDIS</td><td>Power Disable</td></tr>
+<tr><td>RAID</td><td>Redundant Array of Independent Disks</td></tr>
+<tr><td>SAS</td><td>Serial Attached SCSI</td></tr>
+<tr><td>SATA-IO</td><td>Serial ATA International Organization</td></tr>
+<tr><td>SCR</td><td>SATA Status and Control Registers (SStatus, SControl, SError, SActive)</td></tr>
+<tr><td>S.M.A.R.T.</td><td>Self-Monitoring, Analysis and Reporting Technology</td></tr>
+<tr><td>SMR / CMR</td><td>Shingled / Conventional Magnetic Recording</td></tr>
+<tr><td>SOF / EOF</td><td>Start / End of Frame</td></tr>
+<tr><td>SSC</td><td>Spread-Spectrum Clocking</td></tr>
+<tr><td>STP</td><td>SATA Tunneling Protocol (в SAS)</td></tr>
+<tr><td>TCQ</td><td>Tagged Command Queuing</td></tr>
+<tr><td>TLER / ERC</td><td>Time-Limited Error Recovery / Error Recovery Control</td></tr>
+<tr><td>UI</td><td>Unit Interval – продължителност на един бит на линията</td></tr>
+<tr><td>ZAC</td><td>Zoned ATA Commands</td></tr>
+</table>
+
+</body>
+</html>
