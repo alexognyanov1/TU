@@ -48,18 +48,22 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 .toc { columns: 2; column-gap: 60px; font-size: 24px; margin: 20px 0 0; padding-left: 36px }
 .toc li { margin: 0 0 22px; break-inside: avoid }
 .toc span { color: #64748b; font-size: 18px; white-space: nowrap }
+.authors, .authors td, .authors tr { border: none !important; background: none !important; font-size: inherit !important; color: inherit !important; line-height: inherit; }
 </style>
 </head>
 <body>
 
 <!-- 1 -->
 <section class="slide title">
+  <img src="tu-sofia-logo-white.png" alt="ТУ – София" style="position:absolute; top:0.55in; right:0.7in; height:1.15in">
   <div class="inner">
     <h1>SATA (Serial ATA) –<br>архитектура, протокол и приложение</h1>
     <div class="bar"></div>
     <p class="sub">Реферат и презентация по дисциплината „Компютърна периферия“</p>
     <div class="meta">
-      Изготвил: <b>Алекс Огнянов</b>, ф. № 121224052<br>
+      <table class="authors" style="border-collapse:collapse;margin:0 0 0.4em;font:inherit;color:inherit;width:auto">
+        <tr><td style="padding:0 0.6em 0 0;vertical-align:top">Изготвили:</td><td style="padding:0 1.2em 0 0"><b>Алекс Огнянов</b><br><b>Йордан Начев</b><br><b>Магдалена Джисова</b></td><td style="padding:0">фак. № 121224052<br>фак. № 121224053<br>фак. № 121224054</td></tr>
+      </table>
       КСИ, III курс, група 43<br>
       Технически университет – София, ФКСТ<br>
       2026/2027 г.
@@ -437,7 +441,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
     <div class="small">
       <p><span class="k">Приложен (команден)</span> – ATA команди, протоколи PIO, DMA, FPDMA (NCQ)</p>
       <p><span class="k">Транспортен</span> – изгражда и разбира <b>FIS</b> (Frame Information Structure); управлява shadow регистри</p>
-      <p><span class="k">Канален</span> – рамкиране (SOF/EOF), CRC-32, скрамблиране, 8b/10b, примитиви, flow control</p>
+      <p><span class="k">Канален</span> – framing (SOF/EOF), CRC-32, scrambling, 8b/10b, примитиви, flow control</p>
       <p><span class="k">Физически</span> – сериализация, LVDS приемо-предавател, OOB, синхронизация и договаряне на скорост, възстановяване на такта</p>
       <div class="box b">Пунктираните линии показват логическата („peer-to-peer“) комуникация между еднаквите слоеве.</div>
     </div>
@@ -585,7 +589,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
           <rect x="310" y="36" width="100" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="360" y="64">D27.3</text>
         </g>
         <text x="10" y="115" font-size="15" fill="#475569">Останалите примитиви започват с K28.3.</text>
-        <text x="10" y="140" font-size="15" fill="#475569">Примитивите не се скрамблират.</text>
+        <text x="10" y="140" font-size="15" fill="#475569">Към примитивите не се прилага scrambling.</text>
       </svg>
     </div>
   </div>
@@ -595,7 +599,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 <section class="slide">
   <h2>OOB сигнализация <small>COMRESET · COMINIT · COMWAKE</small></h2>
   <div class="c">
-    <p class="small">OOB (Out-Of-Band) сигналите се разпознават по <b>продължителността на паузите</b> между пакети (бърсти) от сигнал. Бърст ≈ <b>106,7 ns</b> (160 Gen1 UI); всеки OOB сигнал е 6 бърста.</p>
+    <p class="small">OOB (Out-Of-Band) сигналите се разпознават по <b>продължителността на паузите</b> между пакети (bursts) от сигнал. Burst ≈ <b>106,7 ns</b> (160 Gen1 UI); всеки OOB сигнал се състои от 6 burst-а.</p>
     <svg width="1180" height="350" viewBox="0 0 1180 350">
       <g font-size="17" font-weight="700" fill="#0b3d63">
         <text x="0" y="60">COMRESET</text><text x="0" y="78" font-size="13" fill="#475569" font-weight="400">(хост → устройство)</text>
@@ -616,7 +620,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
         <text x="270" y="100">пауза ≈ 320 ns</text>
         <text x="270" y="210">пауза ≈ 320 ns</text>
         <text x="230" y="320">≈ 106,7 ns</text>
-        <text x="190" y="25" fill="#475569">бърст</text>
+        <text x="190" y="25" fill="#475569">burst</text>
       </g>
       <text x="1045" y="105" font-size="15" fill="#475569">еднаква</text>
       <text x="1045" y="125" font-size="15" fill="#475569">форма,</text>
@@ -624,7 +628,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
       <text x="1045" y="165" font-size="15" fill="#475569">посока</text>
       <text x="645" y="282" font-size="15" fill="#475569">по-къси паузи (≈ 106,7 ns) → различен сигнал</text>
     </svg>
-    <p class="note">Бърстовете се състоят от ALIGN примитиви (или еквивалентен сигнал) на Gen1 скорост; паузите са състояние „electrical idle“. Приемникът използва прозорци на допуск за паузите.</p>
+    <p class="note">Burst-овете се състоят от ALIGN примитиви (или еквивалентен сигнал) на Gen1 скорост; паузите са състояние „electrical idle“. Приемникът използва прозорци на допуск за паузите.</p>
   </div>
 </section>
 
@@ -667,16 +671,16 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 
 <!-- 21 -->
 <section class="slide">
-  <h2>Скрамблиране и Spread-Spectrum Clocking</h2>
+  <h2>Scrambling и Spread-Spectrum Clocking</h2>
   <div class="c cols">
     <div>
-      <p class="k">Скрамблиране (scrambling)</p>
+      <p class="k">Scrambling</p>
       <ul>
         <li>Данните (FIS + CRC) се XOR-ват с псевдослучайна последователност</li>
         <li>LFSR с полином <span class="o">G(x) = x<sup>16</sup> + x<sup>15</sup> + x<sup>13</sup> + x<sup>4</sup> + 1</span></li>
         <li>Генераторът се инициализира при всеки <span class="k">SOF</span></li>
         <li>Премахва повтарящи се шаблони → разпръсква спектъра, намалява EMI</li>
-        <li>Примитивите не се скрамблират (освен данните след CONT)</li>
+        <li>Към примитивите не се прилага scrambling (освен данните след CONT)</li>
       </ul>
     </div>
     <div>
@@ -705,9 +709,9 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   <div class="c cols">
     <div>
       <ul>
-        <li>Приема FIS от транспортния слой и го <span class="k">рамкира</span></li>
+        <li>Приема FIS от транспортния слой и извършва <span class="k">framing</span></li>
         <li>Изчислява и проверява <span class="k">CRC-32</span></li>
-        <li><span class="k">Скрамблиране / дескрамблиране</span></li>
+        <li><span class="k">Scrambling / descrambling</span></li>
         <li>Кодиране / декодиране <span class="k">8b/10b</span></li>
         <li>Генерира и разпознава <span class="k">примитиви</span></li>
         <li><span class="k">Flow control</span> (HOLD/HOLDA)</li>
@@ -721,7 +725,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
         <g font-size="17" text-anchor="middle">
           <rect x="130" y="10" width="280" height="54" rx="8" fill="#1d5a8a"/><text x="270" y="43" fill="#fff">FIS от транспортния слой</text>
           <rect x="130" y="95" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="128">+ CRC-32</text>
-          <rect x="130" y="180" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="213">скрамблиране</text>
+          <rect x="130" y="180" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="213">scrambling</text>
           <rect x="130" y="265" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="298">+ SOF … EOF, примитиви</text>
           <rect x="130" y="350" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="383">8b/10b кодиране</text>
           <rect x="130" y="425" width="280" height="50" rx="8" fill="#4f95cc"/><text x="270" y="456" fill="#fff">към физическия слой</text>
@@ -747,14 +751,14 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
         <rect x="1010" y="40" width="150" height="70" fill="#f28c28"/><text x="1085" y="83" fill="#fff">EOF</text>
       </g>
       <path d="M170,130 L170,150 L1010,150 L1010,130" fill="none" stroke="#475569" stroke-width="2"/>
-      <text x="590" y="175" font-size="16" text-anchor="middle" fill="#475569">скрамблирана част (FIS + CRC)</text>
+      <text x="590" y="175" font-size="16" text-anchor="middle" fill="#475569">част със scrambling (FIS + CRC)</text>
       <text x="20" y="25" font-size="15" fill="#475569">примитив</text>
       <text x="1160" y="25" font-size="15" fill="#475569" text-anchor="end">примитив</text>
     </svg>
     <div class="cols">
       <ul>
         <li>Цялата рамка е съставена от <span class="k">dwords</span> (32 бита)</li>
-        <li>CRC се изчислява върху FIS-а (преди скрамблиране)</li>
+        <li>CRC се изчислява върху FIS-а (преди scrambling)</li>
         <li>Между рамките линията носи SYNC / ALIGN</li>
         <li>По време на рамката могат да се вмъкват HOLD, ALIGN, CONT</li>
       </ul>
@@ -1519,13 +1523,13 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
         <tr><td>Дуплекс</td><td>полудуплекс</td><td>пълен дуплекс</td></tr>
         <tr><td>Портове на диска</td><td>1</td><td>2 (dual-port, резервиране)</td></tr>
         <tr><td>Кабел</td><td>до 1 m</td><td>до ~10 m</td></tr>
-        <tr><td>Топология</td><td>точка-точка (+ PM)</td><td>експандери, хиляди устройства</td></tr>
+        <tr><td>Топология</td><td>точка-точка (+ PM)</td><td>expander-и, хиляди устройства</td></tr>
         <tr><td>Цена / надеждност</td><td>ниска / настолна</td><td>висока / корпоративна</td></tr>
       </table>
     </div>
     <div>
       <ul>
-        <li>SAS контролер <span class="k">поддържа SATA дискове</span> – тунелиране чрез <span class="k">STP</span> (Serial ATA Tunneling Protocol) през експандери</li>
+        <li>SAS контролер <span class="k">поддържа SATA дискове</span> – tunneling чрез <span class="k">STP</span> (Serial ATA Tunneling Protocol) през expander-и</li>
         <li>SATA контролер <span class="k">не</span> поддържа SAS дискове</li>
         <li>Механично: SAS дискът има „мост“ между конектора за данни и захранването → не влиза в SATA кабел</li>
         <li>Общ физически слой и сходни електрически характеристики</li>

@@ -2,7 +2,8 @@
 """Render the SATA реферат and presentation to PDF with headless Chrome.
 
 The реферат is rendered twice: the first pass finds the page of every heading,
-the second fills those page numbers into the table of contents.
+the second fills those page numbers into the table of contents. The second pass
+is written next to the source so relative assets (the TU logo) still resolve.
 
   python3 III-kurs/KP/SATA/src/build.py
 """
@@ -27,19 +28,19 @@ def render(html_path, pdf_path):
 def page_texts(pdf_path):
     text = subprocess.run(["pdftotext", "-layout", str(pdf_path), "-"],
                           check=True, capture_output=True, text=True).stdout
-    return [" ".join(p.split()) for p in text.split("\f")]
+    return [" ".join(p.split()).upper() for p in text.split("\f")]
 
 
 def build_referat():
     source = (SRC / "referat.html").read_text(encoding="utf-8")
-    headings = {hid: " ".join(html.unescape(re.sub(r"<[^>]+>", "", t)).split())
+    headings = {hid: " ".join(html.unescape(re.sub(r"<[^>]+>", "", t)).split()).upper()
                 for hid, t in re.findall(r'<h[12] id="([^"]+)">(.*?)</h[12]>', source)}
     final = OUT / "SATA_referat.pdf"
     with tempfile.TemporaryDirectory() as tmp:
         first = Path(tmp) / "pass1.pdf"
         render(SRC / "referat.html", first)
         pages = page_texts(first)
-        toc_page = next(i for i, p in enumerate(pages) if "Съдържание" in p)
+        toc_page = next(i for i, p in enumerate(pages) if "СЪДЪРЖАНИЕ" in p)
         numbers = {}
         for hid, title in headings.items():
             if hid == "toc":
@@ -50,9 +51,12 @@ def build_referat():
             numbers[hid] = hit + 1
         filled = re.sub(r'<span class="pg" data-for="([^"]+)"></span>',
                         lambda m: f'<span class="pg" data-for="{m[1]}">{numbers[m[1]]}</span>', source)
-        second = Path(tmp) / "referat.html"
+        second = SRC / ".referat.filled.html"
         second.write_text(filled, encoding="utf-8")
-        render(second, final)
+        try:
+            render(second, final)
+        finally:
+            second.unlink()
     print(f"{final.relative_to(OUT.parent.parent.parent)}: {len(page_texts(final)) - 1} pages")
 
 
