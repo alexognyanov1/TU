@@ -1,0 +1,7 @@
+Start -> printer is free
+pr1 starts printing -> printer is in use
+pr1 finishes -> printer is free
+pr2 starts printing -> printer is in use
+pr1 also printing -> printer is in use
+Both finish -> printer is free
+Input ended

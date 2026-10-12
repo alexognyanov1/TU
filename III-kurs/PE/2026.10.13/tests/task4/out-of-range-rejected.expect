@@ -1,0 +1,3 @@
+Status must be 0 (idle) or 1 (printing):
+Status must be 0 (idle) or 1 (printing):
+inuse() -> printer is in use

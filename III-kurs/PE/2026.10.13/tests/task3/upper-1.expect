@@ -1,0 +1,7 @@
+loadstack() (26 symbols): zyxwvutsrqponmlkjihgfedcba
+loadstack(1) (26 symbols): ZYXWVUTSRQPONMLKJIHGFEDCBA
+loadstack(0) (26 symbols): zyxwvutsrqponmlkjihgfedcba
+loadstack(upper) (26 symbols): ZYXWVUTSRQPONMLKJIHGFEDCBA
+Popped through a pointer: Z, left 25
+Push on a full stack: rejected
+Pop from an empty stack: rejected

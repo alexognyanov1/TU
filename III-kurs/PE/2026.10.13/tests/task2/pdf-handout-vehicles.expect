@@ -1,0 +1,12 @@
+Comparing c1 (6 passengers) and t1 (10000 kg):
+Car and truck speed is the same.
+car 2.00 h, truck 2.00 h
+They arrive at the same time.
+Comparing c2 (2 passengers) and t2 (20000 kg):
+Car is faster.
+car 0.92 h, truck 1.53 h
+The car arrives 0.61 h earlier.
+Member function of car, friend of truck
+Car and truck speed is the same.
+Car is faster.
+The car arrives 0.61 h earlier.
