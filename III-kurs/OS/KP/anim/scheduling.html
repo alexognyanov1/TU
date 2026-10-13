@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Планиране на процесорното време – анимации</title>
+<style>
+:root {
+  --bg: #0b0f17; --panel: #121826; --line: rgba(255,255,255,0.07);
+  --text: #e9edf4; --muted: #8b94a7; --faint: #5a6377;
+  --sans: "SF Pro Display", -apple-system, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --mono: "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-feature-settings: "locl" 0; }
+body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+#stage { width: 100%; max-width: calc((100vh - 110px) * 16 / 9); aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+#stage svg { display: block; width: 100%; height: 100%; }
+body.record { padding: 0; display: block; }
+body.record #stage { width: 1920px; height: 1080px; max-width: none; border-radius: 0; box-shadow: none; }
+body.record #ui { display: none; }
+
+svg text { font-family: var(--sans); fill: var(--text); font-variant-numeric: tabular-nums; font-feature-settings: "locl" 0, "tnum" 1; }
+svg .eyebrow { font-size: 19px; letter-spacing: 3.2px; fill: var(--muted); font-weight: 600; }
+svg .title { font-size: 58px; font-weight: 700; letter-spacing: -0.5px; }
+svg .rule { font-size: 25px; fill: var(--muted); }
+svg .ptitle { font-size: 16px; letter-spacing: 2.6px; fill: var(--muted); font-weight: 600; }
+svg .psub { font-size: 17px; fill: var(--faint); }
+svg .th { font-size: 14px; letter-spacing: 0.8px; fill: var(--faint); font-weight: 600; }
+svg .td { font-size: 23px; }
+svg .tdn { font-size: 23px; font-weight: 700; }
+svg .cn { font-size: 36px; font-weight: 750; fill: #fff; text-anchor: middle; }
+svg .cs { font-size: 16px; fill: rgba(255,255,255,0.85); text-anchor: middle; font-weight: 500; }
+svg .badge { font-size: 13px; font-weight: 700; fill: #fff; text-anchor: middle; }
+svg .clock { font-size: 62px; font-weight: 700; text-anchor: end; word-spacing: 6px; }
+svg .clockl { font-size: 15px; letter-spacing: 2.6px; fill: var(--muted); font-weight: 600; text-anchor: end; }
+svg .pill { font-size: 18px; font-weight: 600; text-anchor: middle; }
+svg .gl { font-size: 21px; font-weight: 700; fill: #fff; text-anchor: middle; }
+svg .tick { font-family: var(--mono); font-size: 16px; fill: var(--muted); text-anchor: middle; }
+svg .log { font-size: 21px; }
+svg .logt { font-family: var(--mono); font-size: 17px; fill: var(--faint); }
+svg .mv { font-size: 46px; font-weight: 700; text-anchor: middle; }
+svg .ml { font-size: 16px; fill: var(--muted); text-anchor: middle; letter-spacing: 0.4px; }
+svg .idle { font-size: 20px; fill: var(--faint); text-anchor: middle; }
+svg .next { font-size: 15px; fill: var(--muted); text-anchor: middle; letter-spacing: 1.6px; font-weight: 600; }
+
+#ui { width: 100%; max-width: calc((100vh - 110px) * 16 / 9); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#ui .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+#ui button, #ui select { font: 600 14px var(--sans); color: var(--text); background: #182033; border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+#ui button:hover { background: #1f2940; }
+#ui button.on { background: #e9edf4; color: #0b0f17; }
+#ui input[type=range] { flex: 1; min-width: 160px; accent-color: #e9edf4; }
+#ui .hint { font-size: 12px; color: var(--faint); }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="ui">
+  <div class="tabs" id="tabs"></div>
+  <button id="play" title="Пауза / пускане (интервал)">Пауза</button>
+  <button id="restart" title="Отначало (R)">Отначало</button>
+  <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Време">
+  <select id="speed" aria-label="Скорост"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+  <span class="hint">интервал – пауза · ← → – стъпка · 1–6 – алгоритъм</span>
+</div>
+<script>
+const DATA = {"order":["fcfs","sjf","srtf","rr","prio","prio-p"],"processes":[{"name":"P1","arrival":0,"burst":8,"priority":3,"color":"#00a2da","light":"#33b5e1"},{"name":"P2","arrival":1,"burst":4,"priority":1,"color":"#b8445a","light":"#c6697b"},{"name":"P3","arrival":2,"burst":9,"priority":4,"color":"#23ac6a","light":"#4fbd88"},{"name":"P4","arrival":3,"burst":5,"priority":2,"color":"#bd8800","light":"#caa033"},{"name":"P5","arrival":4,"burst":2,"priority":5,"color":"#8059bb","light":"#997ac9"}],"runs":{"fcfs":{"short":"FCFS","label":"First-Come, First-Served","rule":"Процесорът се дава по реда на пристигане и не се отнема.","pill":"без изместване","order":"подредба: по пристигане","quantum":null,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P1","ready":["P2"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":1,"sw":0},{"t":2,"run":"P1","ready":["P2","P3"],"remaining":{"P1":6,"P2":4,"P3":9,"P4":5,"P5":2},"used":2,"sw":0},{"t":3,"run":"P1","ready":["P2","P3","P4"],"remaining":{"P1":5,"P2":4,"P3":9,"P4":5,"P5":2},"used":3,"sw":0},{"t":4,"run":"P1","ready":["P2","P3","P4","P5"],"remaining":{"P1":4,"P2":4,"P3":9,"P4":5,"P5":2},"used":4,"sw":0},{"t":5,"run":"P1","ready":["P2","P3","P4","P5"],"remaining":{"P1":3,"P2":4,"P3":9,"P4":5,"P5":2},"used":5,"sw":0},{"t":6,"run":"P1","ready":["P2","P3","P4","P5"],"remaining":{"P1":2,"P2":4,"P3":9,"P4":5,"P5":2},"used":6,"sw":0},{"t":7,"run":"P1","ready":["P2","P3","P4","P5"],"remaining":{"P1":1,"P2":4,"P3":9,"P4":5,"P5":2},"used":7,"sw":0},{"t":8,"run":"P2","ready":["P3","P4","P5"],"remaining":{"P1":0,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":9,"run":"P2","ready":["P3","P4","P5"],"remaining":{"P1":0,"P2":3,"P3":9,"P4":5,"P5":2},"used":1,"sw":1},{"t":10,"run":"P2","ready":["P3","P4","P5"],"remaining":{"P1":0,"P2":2,"P3":9,"P4":5,"P5":2},"used":2,"sw":1},{"t":11,"run":"P2","ready":["P3","P4","P5"],"remaining":{"P1":0,"P2":1,"P3":9,"P4":5,"P5":2},"used":3,"sw":1},{"t":12,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":5,"P5":2},"used":0,"sw":2},{"t":13,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":8,"P4":5,"P5":2},"used":1,"sw":2},{"t":14,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":7,"P4":5,"P5":2},"used":2,"sw":2},{"t":15,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":6,"P4":5,"P5":2},"used":3,"sw":2},{"t":16,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":5,"P4":5,"P5":2},"used":4,"sw":2},{"t":17,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":4,"P4":5,"P5":2},"used":5,"sw":2},{"t":18,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":3,"P4":5,"P5":2},"used":6,"sw":2},{"t":19,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":2,"P4":5,"P5":2},"used":7,"sw":2},{"t":20,"run":"P3","ready":["P4","P5"],"remaining":{"P1":0,"P2":0,"P3":1,"P4":5,"P5":2},"used":8,"sw":2},{"t":21,"run":"P4","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":0,"P4":5,"P5":2},"used":0,"sw":3},{"t":22,"run":"P4","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":0,"P4":4,"P5":2},"used":1,"sw":3},{"t":23,"run":"P4","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":0,"P4":3,"P5":2},"used":2,"sw":3},{"t":24,"run":"P4","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":0,"P4":2,"P5":2},"used":3,"sw":3},{"t":25,"run":"P4","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":0,"P4":1,"P5":2},"used":4,"sw":3},{"t":26,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":2},"used":0,"sw":4},{"t":27,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":1},"used":1,"sw":4}],"gantt":[["P1",0,8],["P2",8,12],["P3",12,21],["P4",21,26],["P5",26,28]],"completion":{"P1":8,"P2":12,"P3":21,"P4":26,"P5":28},"switches":4,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2"},{"t":8,"proc":"P1","text":"P1 завършва · чакане 0"},{"t":8,"proc":"P2","text":"P2 получава процесора"},{"t":12,"proc":"P2","text":"P2 завършва · чакане 7"},{"t":12,"proc":"P3","text":"P3 получава процесора"},{"t":21,"proc":"P3","text":"P3 завършва · чакане 10"},{"t":21,"proc":"P4","text":"P4 получава процесора"},{"t":26,"proc":"P4","text":"P4 завършва · чакане 18"},{"t":26,"proc":"P5","text":"P5 получава процесора"},{"t":28,"proc":"P5","text":"P5 завършва · чакане 22"}],"metrics":{"P1":{"wait":0,"tat":8,"resp":0},"P2":{"wait":7,"tat":11,"resp":7},"P3":{"wait":10,"tat":19,"resp":10},"P4":{"wait":18,"tat":23,"resp":18},"P5":{"wait":22,"tat":24,"resp":22}}},"sjf":{"short":"SJF","label":"SJF – Shortest Job First","rule":"Избира се процесът с най-кратък CPU burst и се изпълнява докрай.","pill":"без изместване","order":"подредба: по дължина на burst","quantum":null,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P1","ready":["P2"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":1,"sw":0},{"t":2,"run":"P1","ready":["P2","P3"],"remaining":{"P1":6,"P2":4,"P3":9,"P4":5,"P5":2},"used":2,"sw":0},{"t":3,"run":"P1","ready":["P2","P4","P3"],"remaining":{"P1":5,"P2":4,"P3":9,"P4":5,"P5":2},"used":3,"sw":0},{"t":4,"run":"P1","ready":["P5","P2","P4","P3"],"remaining":{"P1":4,"P2":4,"P3":9,"P4":5,"P5":2},"used":4,"sw":0},{"t":5,"run":"P1","ready":["P5","P2","P4","P3"],"remaining":{"P1":3,"P2":4,"P3":9,"P4":5,"P5":2},"used":5,"sw":0},{"t":6,"run":"P1","ready":["P5","P2","P4","P3"],"remaining":{"P1":2,"P2":4,"P3":9,"P4":5,"P5":2},"used":6,"sw":0},{"t":7,"run":"P1","ready":["P5","P2","P4","P3"],"remaining":{"P1":1,"P2":4,"P3":9,"P4":5,"P5":2},"used":7,"sw":0},{"t":8,"run":"P5","ready":["P2","P4","P3"],"remaining":{"P1":0,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":9,"run":"P5","ready":["P2","P4","P3"],"remaining":{"P1":0,"P2":4,"P3":9,"P4":5,"P5":1},"used":1,"sw":1},{"t":10,"run":"P2","ready":["P4","P3"],"remaining":{"P1":0,"P2":4,"P3":9,"P4":5,"P5":0},"used":0,"sw":2},{"t":11,"run":"P2","ready":["P4","P3"],"remaining":{"P1":0,"P2":3,"P3":9,"P4":5,"P5":0},"used":1,"sw":2},{"t":12,"run":"P2","ready":["P4","P3"],"remaining":{"P1":0,"P2":2,"P3":9,"P4":5,"P5":0},"used":2,"sw":2},{"t":13,"run":"P2","ready":["P4","P3"],"remaining":{"P1":0,"P2":1,"P3":9,"P4":5,"P5":0},"used":3,"sw":2},{"t":14,"run":"P4","ready":["P3"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":5,"P5":0},"used":0,"sw":3},{"t":15,"run":"P4","ready":["P3"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":4,"P5":0},"used":1,"sw":3},{"t":16,"run":"P4","ready":["P3"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":3,"P5":0},"used":2,"sw":3},{"t":17,"run":"P4","ready":["P3"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":2,"P5":0},"used":3,"sw":3},{"t":18,"run":"P4","ready":["P3"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":1,"P5":0},"used":4,"sw":3},{"t":19,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":9,"P4":0,"P5":0},"used":0,"sw":4},{"t":20,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":8,"P4":0,"P5":0},"used":1,"sw":4},{"t":21,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":7,"P4":0,"P5":0},"used":2,"sw":4},{"t":22,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":6,"P4":0,"P5":0},"used":3,"sw":4},{"t":23,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":5,"P4":0,"P5":0},"used":4,"sw":4},{"t":24,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":4,"P4":0,"P5":0},"used":5,"sw":4},{"t":25,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":3,"P4":0,"P5":0},"used":6,"sw":4},{"t":26,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":2,"P4":0,"P5":0},"used":7,"sw":4},{"t":27,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":1,"P4":0,"P5":0},"used":8,"sw":4}],"gantt":[["P1",0,8],["P5",8,10],["P2",10,14],["P4",14,19],["P3",19,28]],"completion":{"P1":8,"P5":10,"P2":14,"P4":19,"P3":28},"switches":4,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2"},{"t":8,"proc":"P1","text":"P1 завършва · чакане 0"},{"t":8,"proc":"P5","text":"P5 получава процесора"},{"t":10,"proc":"P5","text":"P5 завършва · чакане 4"},{"t":10,"proc":"P2","text":"P2 получава процесора"},{"t":14,"proc":"P2","text":"P2 завършва · чакане 9"},{"t":14,"proc":"P4","text":"P4 получава процесора"},{"t":19,"proc":"P4","text":"P4 завършва · чакане 11"},{"t":19,"proc":"P3","text":"P3 получава процесора"},{"t":28,"proc":"P3","text":"P3 завършва · чакане 17"}],"metrics":{"P1":{"wait":0,"tat":8,"resp":0},"P2":{"wait":9,"tat":13,"resp":9},"P3":{"wait":17,"tat":26,"resp":17},"P4":{"wait":11,"tat":16,"resp":11},"P5":{"wait":4,"tat":6,"resp":4}}},"srtf":{"short":"SRTF","label":"SRTF – Shortest Remaining Time First","rule":"Избира се най-малкото оставащо време; по-кратък нов процес измества текущия.","pill":"с изместване","order":"подредба: по оставащо време","quantum":null,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P2","ready":["P1"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":2,"run":"P2","ready":["P1","P3"],"remaining":{"P1":7,"P2":3,"P3":9,"P4":5,"P5":2},"used":1,"sw":1},{"t":3,"run":"P2","ready":["P4","P1","P3"],"remaining":{"P1":7,"P2":2,"P3":9,"P4":5,"P5":2},"used":2,"sw":1},{"t":4,"run":"P2","ready":["P5","P4","P1","P3"],"remaining":{"P1":7,"P2":1,"P3":9,"P4":5,"P5":2},"used":3,"sw":1},{"t":5,"run":"P5","ready":["P4","P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":5,"P5":2},"used":0,"sw":2},{"t":6,"run":"P5","ready":["P4","P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":5,"P5":1},"used":1,"sw":2},{"t":7,"run":"P4","ready":["P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":5,"P5":0},"used":0,"sw":3},{"t":8,"run":"P4","ready":["P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":4,"P5":0},"used":1,"sw":3},{"t":9,"run":"P4","ready":["P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":3,"P5":0},"used":2,"sw":3},{"t":10,"run":"P4","ready":["P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":2,"P5":0},"used":3,"sw":3},{"t":11,"run":"P4","ready":["P1","P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":1,"P5":0},"used":4,"sw":3},{"t":12,"run":"P1","ready":["P3"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":0,"P5":0},"used":0,"sw":4},{"t":13,"run":"P1","ready":["P3"],"remaining":{"P1":6,"P2":0,"P3":9,"P4":0,"P5":0},"used":1,"sw":4},{"t":14,"run":"P1","ready":["P3"],"remaining":{"P1":5,"P2":0,"P3":9,"P4":0,"P5":0},"used":2,"sw":4},{"t":15,"run":"P1","ready":["P3"],"remaining":{"P1":4,"P2":0,"P3":9,"P4":0,"P5":0},"used":3,"sw":4},{"t":16,"run":"P1","ready":["P3"],"remaining":{"P1":3,"P2":0,"P3":9,"P4":0,"P5":0},"used":4,"sw":4},{"t":17,"run":"P1","ready":["P3"],"remaining":{"P1":2,"P2":0,"P3":9,"P4":0,"P5":0},"used":5,"sw":4},{"t":18,"run":"P1","ready":["P3"],"remaining":{"P1":1,"P2":0,"P3":9,"P4":0,"P5":0},"used":6,"sw":4},{"t":19,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":9,"P4":0,"P5":0},"used":0,"sw":5},{"t":20,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":8,"P4":0,"P5":0},"used":1,"sw":5},{"t":21,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":7,"P4":0,"P5":0},"used":2,"sw":5},{"t":22,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":6,"P4":0,"P5":0},"used":3,"sw":5},{"t":23,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":5,"P4":0,"P5":0},"used":4,"sw":5},{"t":24,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":4,"P4":0,"P5":0},"used":5,"sw":5},{"t":25,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":3,"P4":0,"P5":0},"used":6,"sw":5},{"t":26,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":2,"P4":0,"P5":0},"used":7,"sw":5},{"t":27,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":1,"P4":0,"P5":0},"used":8,"sw":5}],"gantt":[["P1",0,1],["P2",1,5],["P5",5,7],["P4",7,12],["P1",12,19],["P3",19,28]],"completion":{"P2":5,"P5":7,"P4":12,"P1":19,"P3":28},"switches":5,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4"},{"t":1,"proc":"P2","text":"P2 измества P1: остават 4 < 7"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2"},{"t":5,"proc":"P2","text":"P2 завършва · чакане 0"},{"t":5,"proc":"P5","text":"P5 получава процесора"},{"t":7,"proc":"P5","text":"P5 завършва · чакане 1"},{"t":7,"proc":"P4","text":"P4 получава процесора"},{"t":12,"proc":"P4","text":"P4 завършва · чакане 4"},{"t":12,"proc":"P1","text":"P1 получава процесора"},{"t":19,"proc":"P1","text":"P1 завършва · чакане 11"},{"t":19,"proc":"P3","text":"P3 получава процесора"},{"t":28,"proc":"P3","text":"P3 завършва · чакане 17"}],"metrics":{"P1":{"wait":11,"tat":19,"resp":0},"P2":{"wait":0,"tat":4,"resp":0},"P3":{"wait":17,"tat":26,"resp":17},"P4":{"wait":4,"tat":9,"resp":4},"P5":{"wait":1,"tat":3,"resp":1}}},"rr":{"short":"Round Robin","label":"Round Robin (q = 3)","rule":"Всеки процес получава квант от 3 единици, после отива в края на опашката.","pill":"с изместване по таймер","order":"подредба: FIFO","quantum":3,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P1","ready":["P2"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":1,"sw":0},{"t":2,"run":"P1","ready":["P2","P3"],"remaining":{"P1":6,"P2":4,"P3":9,"P4":5,"P5":2},"used":2,"sw":0},{"t":3,"run":"P2","ready":["P3","P4","P1"],"remaining":{"P1":5,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":4,"run":"P2","ready":["P3","P4","P1","P5"],"remaining":{"P1":5,"P2":3,"P3":9,"P4":5,"P5":2},"used":1,"sw":1},{"t":5,"run":"P2","ready":["P3","P4","P1","P5"],"remaining":{"P1":5,"P2":2,"P3":9,"P4":5,"P5":2},"used":2,"sw":1},{"t":6,"run":"P3","ready":["P4","P1","P5","P2"],"remaining":{"P1":5,"P2":1,"P3":9,"P4":5,"P5":2},"used":0,"sw":2},{"t":7,"run":"P3","ready":["P4","P1","P5","P2"],"remaining":{"P1":5,"P2":1,"P3":8,"P4":5,"P5":2},"used":1,"sw":2},{"t":8,"run":"P3","ready":["P4","P1","P5","P2"],"remaining":{"P1":5,"P2":1,"P3":7,"P4":5,"P5":2},"used":2,"sw":2},{"t":9,"run":"P4","ready":["P1","P5","P2","P3"],"remaining":{"P1":5,"P2":1,"P3":6,"P4":5,"P5":2},"used":0,"sw":3},{"t":10,"run":"P4","ready":["P1","P5","P2","P3"],"remaining":{"P1":5,"P2":1,"P3":6,"P4":4,"P5":2},"used":1,"sw":3},{"t":11,"run":"P4","ready":["P1","P5","P2","P3"],"remaining":{"P1":5,"P2":1,"P3":6,"P4":3,"P5":2},"used":2,"sw":3},{"t":12,"run":"P1","ready":["P5","P2","P3","P4"],"remaining":{"P1":5,"P2":1,"P3":6,"P4":2,"P5":2},"used":0,"sw":4},{"t":13,"run":"P1","ready":["P5","P2","P3","P4"],"remaining":{"P1":4,"P2":1,"P3":6,"P4":2,"P5":2},"used":1,"sw":4},{"t":14,"run":"P1","ready":["P5","P2","P3","P4"],"remaining":{"P1":3,"P2":1,"P3":6,"P4":2,"P5":2},"used":2,"sw":4},{"t":15,"run":"P5","ready":["P2","P3","P4","P1"],"remaining":{"P1":2,"P2":1,"P3":6,"P4":2,"P5":2},"used":0,"sw":5},{"t":16,"run":"P5","ready":["P2","P3","P4","P1"],"remaining":{"P1":2,"P2":1,"P3":6,"P4":2,"P5":1},"used":1,"sw":5},{"t":17,"run":"P2","ready":["P3","P4","P1"],"remaining":{"P1":2,"P2":1,"P3":6,"P4":2,"P5":0},"used":0,"sw":6},{"t":18,"run":"P3","ready":["P4","P1"],"remaining":{"P1":2,"P2":0,"P3":6,"P4":2,"P5":0},"used":0,"sw":7},{"t":19,"run":"P3","ready":["P4","P1"],"remaining":{"P1":2,"P2":0,"P3":5,"P4":2,"P5":0},"used":1,"sw":7},{"t":20,"run":"P3","ready":["P4","P1"],"remaining":{"P1":2,"P2":0,"P3":4,"P4":2,"P5":0},"used":2,"sw":7},{"t":21,"run":"P4","ready":["P1","P3"],"remaining":{"P1":2,"P2":0,"P3":3,"P4":2,"P5":0},"used":0,"sw":8},{"t":22,"run":"P4","ready":["P1","P3"],"remaining":{"P1":2,"P2":0,"P3":3,"P4":1,"P5":0},"used":1,"sw":8},{"t":23,"run":"P1","ready":["P3"],"remaining":{"P1":2,"P2":0,"P3":3,"P4":0,"P5":0},"used":0,"sw":9},{"t":24,"run":"P1","ready":["P3"],"remaining":{"P1":1,"P2":0,"P3":3,"P4":0,"P5":0},"used":1,"sw":9},{"t":25,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":3,"P4":0,"P5":0},"used":0,"sw":10},{"t":26,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":2,"P4":0,"P5":0},"used":1,"sw":10},{"t":27,"run":"P3","ready":[],"remaining":{"P1":0,"P2":0,"P3":1,"P4":0,"P5":0},"used":2,"sw":10}],"gantt":[["P1",0,3],["P2",3,6],["P3",6,9],["P4",9,12],["P1",12,15],["P5",15,17],["P2",17,18],["P3",18,21],["P4",21,23],["P1",23,25],["P3",25,28]],"completion":{"P5":17,"P2":18,"P4":23,"P1":25,"P3":28},"switches":10,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5"},{"t":3,"proc":"P1","text":"Квантът на P1 изтече → в края на опашката"},{"t":3,"proc":"P2","text":"P2 получава процесора"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2"},{"t":6,"proc":"P2","text":"Квантът на P2 изтече → в края на опашката"},{"t":6,"proc":"P3","text":"P3 получава процесора"},{"t":9,"proc":"P3","text":"Квантът на P3 изтече → в края на опашката"},{"t":9,"proc":"P4","text":"P4 получава процесора"},{"t":12,"proc":"P4","text":"Квантът на P4 изтече → в края на опашката"},{"t":12,"proc":"P1","text":"P1 получава процесора"},{"t":15,"proc":"P1","text":"Квантът на P1 изтече → в края на опашката"},{"t":15,"proc":"P5","text":"P5 получава процесора"},{"t":17,"proc":"P5","text":"P5 завършва · чакане 11"},{"t":17,"proc":"P2","text":"P2 получава процесора"},{"t":18,"proc":"P2","text":"P2 завършва · чакане 13"},{"t":18,"proc":"P3","text":"P3 получава процесора"},{"t":21,"proc":"P3","text":"Квантът на P3 изтече → в края на опашката"},{"t":21,"proc":"P4","text":"P4 получава процесора"},{"t":23,"proc":"P4","text":"P4 завършва · чакане 15"},{"t":23,"proc":"P1","text":"P1 получава процесора"},{"t":25,"proc":"P1","text":"P1 завършва · чакане 17"},{"t":25,"proc":"P3","text":"P3 получава процесора"},{"t":28,"proc":"P3","text":"P3 завършва · чакане 17"}],"metrics":{"P1":{"wait":17,"tat":25,"resp":0},"P2":{"wait":13,"tat":17,"resp":2},"P3":{"wait":17,"tat":26,"resp":4},"P4":{"wait":15,"tat":20,"resp":6},"P5":{"wait":11,"tat":13,"resp":11}}},"prio":{"short":"Приоритетно","label":"Приоритетно планиране","rule":"Избира се най-високият приоритет (по-малко число) и се изпълнява докрай.","pill":"без изместване","order":"подредба: по приоритет","quantum":null,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P1","ready":["P2"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":1,"sw":0},{"t":2,"run":"P1","ready":["P2","P3"],"remaining":{"P1":6,"P2":4,"P3":9,"P4":5,"P5":2},"used":2,"sw":0},{"t":3,"run":"P1","ready":["P2","P4","P3"],"remaining":{"P1":5,"P2":4,"P3":9,"P4":5,"P5":2},"used":3,"sw":0},{"t":4,"run":"P1","ready":["P2","P4","P3","P5"],"remaining":{"P1":4,"P2":4,"P3":9,"P4":5,"P5":2},"used":4,"sw":0},{"t":5,"run":"P1","ready":["P2","P4","P3","P5"],"remaining":{"P1":3,"P2":4,"P3":9,"P4":5,"P5":2},"used":5,"sw":0},{"t":6,"run":"P1","ready":["P2","P4","P3","P5"],"remaining":{"P1":2,"P2":4,"P3":9,"P4":5,"P5":2},"used":6,"sw":0},{"t":7,"run":"P1","ready":["P2","P4","P3","P5"],"remaining":{"P1":1,"P2":4,"P3":9,"P4":5,"P5":2},"used":7,"sw":0},{"t":8,"run":"P2","ready":["P4","P3","P5"],"remaining":{"P1":0,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":9,"run":"P2","ready":["P4","P3","P5"],"remaining":{"P1":0,"P2":3,"P3":9,"P4":5,"P5":2},"used":1,"sw":1},{"t":10,"run":"P2","ready":["P4","P3","P5"],"remaining":{"P1":0,"P2":2,"P3":9,"P4":5,"P5":2},"used":2,"sw":1},{"t":11,"run":"P2","ready":["P4","P3","P5"],"remaining":{"P1":0,"P2":1,"P3":9,"P4":5,"P5":2},"used":3,"sw":1},{"t":12,"run":"P4","ready":["P3","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":5,"P5":2},"used":0,"sw":2},{"t":13,"run":"P4","ready":["P3","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":4,"P5":2},"used":1,"sw":2},{"t":14,"run":"P4","ready":["P3","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":3,"P5":2},"used":2,"sw":2},{"t":15,"run":"P4","ready":["P3","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":2,"P5":2},"used":3,"sw":2},{"t":16,"run":"P4","ready":["P3","P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":1,"P5":2},"used":4,"sw":2},{"t":17,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":0,"P5":2},"used":0,"sw":3},{"t":18,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":8,"P4":0,"P5":2},"used":1,"sw":3},{"t":19,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":7,"P4":0,"P5":2},"used":2,"sw":3},{"t":20,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":6,"P4":0,"P5":2},"used":3,"sw":3},{"t":21,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":5,"P4":0,"P5":2},"used":4,"sw":3},{"t":22,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":4,"P4":0,"P5":2},"used":5,"sw":3},{"t":23,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":3,"P4":0,"P5":2},"used":6,"sw":3},{"t":24,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":2,"P4":0,"P5":2},"used":7,"sw":3},{"t":25,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":1,"P4":0,"P5":2},"used":8,"sw":3},{"t":26,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":2},"used":0,"sw":4},{"t":27,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":1},"used":1,"sw":4}],"gantt":[["P1",0,8],["P2",8,12],["P4",12,17],["P3",17,26],["P5",26,28]],"completion":{"P1":8,"P2":12,"P4":17,"P3":26,"P5":28},"switches":4,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8 · приоритет 3"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4 · приоритет 1"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9 · приоритет 4"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5 · приоритет 2"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2 · приоритет 5"},{"t":8,"proc":"P1","text":"P1 завършва · чакане 0"},{"t":8,"proc":"P2","text":"P2 получава процесора"},{"t":12,"proc":"P2","text":"P2 завършва · чакане 7"},{"t":12,"proc":"P4","text":"P4 получава процесора"},{"t":17,"proc":"P4","text":"P4 завършва · чакане 9"},{"t":17,"proc":"P3","text":"P3 получава процесора"},{"t":26,"proc":"P3","text":"P3 завършва · чакане 15"},{"t":26,"proc":"P5","text":"P5 получава процесора"},{"t":28,"proc":"P5","text":"P5 завършва · чакане 22"}],"metrics":{"P1":{"wait":0,"tat":8,"resp":0},"P2":{"wait":7,"tat":11,"resp":7},"P3":{"wait":15,"tat":24,"resp":15},"P4":{"wait":9,"tat":14,"resp":9},"P5":{"wait":22,"tat":24,"resp":22}}},"prio-p":{"short":"Приоритетно с изм.","label":"Приоритетно с изместване","rule":"Избира се най-високият приоритет; по-важен нов процес измества текущия.","pill":"с изместване","order":"подредба: по приоритет","quantum":null,"length":28,"steps":[{"t":0,"run":"P1","ready":[],"remaining":{"P1":8,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":0},{"t":1,"run":"P2","ready":["P1"],"remaining":{"P1":7,"P2":4,"P3":9,"P4":5,"P5":2},"used":0,"sw":1},{"t":2,"run":"P2","ready":["P1","P3"],"remaining":{"P1":7,"P2":3,"P3":9,"P4":5,"P5":2},"used":1,"sw":1},{"t":3,"run":"P2","ready":["P4","P1","P3"],"remaining":{"P1":7,"P2":2,"P3":9,"P4":5,"P5":2},"used":2,"sw":1},{"t":4,"run":"P2","ready":["P4","P1","P3","P5"],"remaining":{"P1":7,"P2":1,"P3":9,"P4":5,"P5":2},"used":3,"sw":1},{"t":5,"run":"P4","ready":["P1","P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":5,"P5":2},"used":0,"sw":2},{"t":6,"run":"P4","ready":["P1","P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":4,"P5":2},"used":1,"sw":2},{"t":7,"run":"P4","ready":["P1","P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":3,"P5":2},"used":2,"sw":2},{"t":8,"run":"P4","ready":["P1","P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":2,"P5":2},"used":3,"sw":2},{"t":9,"run":"P4","ready":["P1","P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":1,"P5":2},"used":4,"sw":2},{"t":10,"run":"P1","ready":["P3","P5"],"remaining":{"P1":7,"P2":0,"P3":9,"P4":0,"P5":2},"used":0,"sw":3},{"t":11,"run":"P1","ready":["P3","P5"],"remaining":{"P1":6,"P2":0,"P3":9,"P4":0,"P5":2},"used":1,"sw":3},{"t":12,"run":"P1","ready":["P3","P5"],"remaining":{"P1":5,"P2":0,"P3":9,"P4":0,"P5":2},"used":2,"sw":3},{"t":13,"run":"P1","ready":["P3","P5"],"remaining":{"P1":4,"P2":0,"P3":9,"P4":0,"P5":2},"used":3,"sw":3},{"t":14,"run":"P1","ready":["P3","P5"],"remaining":{"P1":3,"P2":0,"P3":9,"P4":0,"P5":2},"used":4,"sw":3},{"t":15,"run":"P1","ready":["P3","P5"],"remaining":{"P1":2,"P2":0,"P3":9,"P4":0,"P5":2},"used":5,"sw":3},{"t":16,"run":"P1","ready":["P3","P5"],"remaining":{"P1":1,"P2":0,"P3":9,"P4":0,"P5":2},"used":6,"sw":3},{"t":17,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":9,"P4":0,"P5":2},"used":0,"sw":4},{"t":18,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":8,"P4":0,"P5":2},"used":1,"sw":4},{"t":19,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":7,"P4":0,"P5":2},"used":2,"sw":4},{"t":20,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":6,"P4":0,"P5":2},"used":3,"sw":4},{"t":21,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":5,"P4":0,"P5":2},"used":4,"sw":4},{"t":22,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":4,"P4":0,"P5":2},"used":5,"sw":4},{"t":23,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":3,"P4":0,"P5":2},"used":6,"sw":4},{"t":24,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":2,"P4":0,"P5":2},"used":7,"sw":4},{"t":25,"run":"P3","ready":["P5"],"remaining":{"P1":0,"P2":0,"P3":1,"P4":0,"P5":2},"used":8,"sw":4},{"t":26,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":2},"used":0,"sw":5},{"t":27,"run":"P5","ready":[],"remaining":{"P1":0,"P2":0,"P3":0,"P4":0,"P5":1},"used":1,"sw":5}],"gantt":[["P1",0,1],["P2",1,5],["P4",5,10],["P1",10,17],["P3",17,26],["P5",26,28]],"completion":{"P2":5,"P4":10,"P1":17,"P3":26,"P5":28},"switches":5,"events":[{"t":0,"proc":"P1","text":"P1 пристига · burst 8 · приоритет 3"},{"t":0,"proc":"P1","text":"P1 получава процесора"},{"t":1,"proc":"P2","text":"P2 пристига · burst 4 · приоритет 1"},{"t":1,"proc":"P2","text":"P2 измества P1: приоритет 1 пред 3"},{"t":2,"proc":"P3","text":"P3 пристига · burst 9 · приоритет 4"},{"t":3,"proc":"P4","text":"P4 пристига · burst 5 · приоритет 2"},{"t":4,"proc":"P5","text":"P5 пристига · burst 2 · приоритет 5"},{"t":5,"proc":"P2","text":"P2 завършва · чакане 0"},{"t":5,"proc":"P4","text":"P4 получава процесора"},{"t":10,"proc":"P4","text":"P4 завършва · чакане 2"},{"t":10,"proc":"P1","text":"P1 получава процесора"},{"t":17,"proc":"P1","text":"P1 завършва · чакане 9"},{"t":17,"proc":"P3","text":"P3 получава процесора"},{"t":26,"proc":"P3","text":"P3 завършва · чакане 15"},{"t":26,"proc":"P5","text":"P5 получава процесора"},{"t":28,"proc":"P5","text":"P5 завършва · чакане 22"}],"metrics":{"P1":{"wait":9,"tat":17,"resp":0},"P2":{"wait":0,"tat":4,"resp":0},"P3":{"wait":15,"tat":24,"resp":15},"P4":{"wait":2,"tat":7,"resp":2},"P5":{"wait":22,"tat":24,"resp":22}}}}};
+const W = 1920, H = 1080, U = 0.75, INTRO = 1.4, OUTRO = 4.2, TR = 0.42;
+const RECORD = new URLSearchParams(location.search).has("record");
+const PROCS = DATA.processes, BYNAME = Object.fromEntries(PROCS.map(p => [p.name, p]));
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const lerp = (a, b, t) => a + (b - a) * t;
+const fmt = (x, d = 2) => x.toFixed(d).replace(".", ",");
+const duration = alg => INTRO + DATA.runs[alg].length * U + OUTRO;
+
+const SLOT_X = i => 676 + 56 + i * 130, SLOT_Y = 421;
+const CPU = { cx: 1614, cy: 428, s: 1.3 };
+const G = { x0: 112, x1: 1808, y: 708, h: 62 };
+
+function defs() {
+  let g = "";
+  for (const p of PROCS) {
+    g += `<linearGradient id="g-${p.name}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.light}"/><stop offset="1" stop-color="${p.color}"/></linearGradient>`;
+  }
+  return `<defs>${g}
+    <radialGradient id="bgg" cx="0.18" cy="0" r="1.1"><stop offset="0" stop-color="#16203a"/><stop offset="0.55" stop-color="#0d1220"/><stop offset="1" stop-color="#0b0f17"/></radialGradient>
+    <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151c2c"/><stop offset="1" stop-color="#111725"/></linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="190%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.45"/></filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>`;
+}
+
+function panel(x, y, w, h, title, a, extra = "") {
+  const dy = (1 - a) * 16;
+  return `<g opacity="${a}" transform="translate(0 ${dy})">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="22" fill="url(#pg)" stroke="rgba(255,255,255,0.07)"/>
+    <text x="${x + 30}" y="${y + 46}" class="ptitle">${title}</text>${extra}</g>`;
+}
+
+function layout(run, k) {
+  const out = {};
+  const n = run.length;
+  if (k < 0) { for (const p of PROCS) out[p.name] = { pending: true }; return out; }
+  const st = k < n ? run.steps[k] : null;
+  for (const p of PROCS) {
+    const c = run.completion[p.name];
+    if (c <= k) out[p.name] = { cx: CPU.cx, cy: CPU.cy - 70, s: 1.12, o: 0, done: true };
+    else if (st && st.run === p.name) out[p.name] = { cx: CPU.cx, cy: CPU.cy, s: CPU.s, o: 1 };
+    else if (st && st.ready.includes(p.name)) out[p.name] = { cx: SLOT_X(st.ready.indexOf(p.name)), cy: SLOT_Y, s: 1, o: 1 };
+    else out[p.name] = { pending: true };
+  }
+  return out;
+}
+
+function remainingAt(run, name, s) {
+  const n = run.length;
+  if (s >= n) return 0;
+  const k = Math.floor(s), f = s - k, st = run.steps[k];
+  return st.run === name ? st.remaining[name] - f : st.remaining[name];
+}
+
+function card(p, cx, cy, sc, o, rem, alg) {
+  if (o <= 0.001) return "";
+  const w = 112, h = 150, frac = clamp(rem / p.burst, 0, 1);
+  const badge = alg.startsWith("prio")
+    ? `<rect x="6" y="-66" width="46" height="24" rx="12" fill="rgba(0,0,0,0.28)"/><text x="29" y="-49" class="badge">пр. ${p.priority}</text>` : "";
+  return `<g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)}) scale(${sc.toFixed(3)})" opacity="${o.toFixed(3)}">
+    <rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="20" fill="url(#g-${p.name})" filter="url(#sh)"/>
+    <rect x="${-w / 2 + 0.5}" y="${-h / 2 + 0.5}" width="${w - 1}" height="${h - 1}" rx="19.5" fill="none" stroke="rgba(255,255,255,0.22)"/>
+    ${badge}
+    <text y="-4" class="cn">${p.name}</text>
+    <text y="26" class="cs">ост. ${Math.max(0, Math.ceil(rem - 1e-6))}</text>
+    <rect x="-40" y="44" width="80" height="6" rx="3" fill="rgba(0,0,0,0.25)"/>
+    <rect x="-40" y="44" width="${(80 * frac).toFixed(1)}" height="6" rx="3" fill="#fff"/>
+  </g>`;
+}
+
+function cards(run, alg, s) {
+  const n = run.length;
+  const k = Math.min(Math.floor(s), n), f = s - k;
+  const to = layout(run, k), from = layout(run, k - 1);
+  const t = ease(clamp(f / TR, 0, 1));
+  let out = "", top = "";
+  for (const p of PROCS) {
+    const b = to[p.name];
+    let a = from[p.name];
+    if (b.pending) continue;
+    if (a.pending) a = { cx: b.cx, cy: b.cy + 30, s: b.s * 0.9, o: 0 };
+    if (b.done && a.done) continue;
+    const g = card(p, lerp(a.cx, b.cx, t), lerp(a.cy, b.cy, t), lerp(a.s, b.s, t), lerp(a.o, b.o, t), remainingAt(run, p.name, s), alg);
+    if (b.cx === CPU.cx && b.cy === CPU.cy) top += g; else out += g;
+  }
+  return out + top;
+}
+
+function header(run, s, a) {
+  const clockT = Math.min(Math.floor(s), run.length);
+  const pill = run.pill;
+  const pw = pill.length * 10.5 + 44;
+  return `<g opacity="${a}" transform="translate(0 ${(1 - a) * 12})">
+    <text x="72" y="96" class="eyebrow">ОПЕРАЦИОННИ СИСТЕМИ · ПЛАНИРАНЕ НА ПРОЦЕСОРНОТО ВРЕМЕ</text>
+    <text x="72" y="160" class="title">${run.label}</text>
+    <text x="72" y="202" class="rule">${run.rule}</text>
+    <rect x="${1560 - pw}" y="128" width="${pw}" height="42" rx="21" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)"/>
+    <text x="${1560 - pw / 2}" y="155" class="pill">${pill}</text>
+    <text x="1848" y="98" class="clockl">ВРЕМЕ</text>
+    <text x="1848" y="168" class="clock">t = ${clockT}</text>
+  </g>`;
+}
+
+function table(run, alg, s, a) {
+  const x = 72, y = 236, cols = [172, 250, 328, 406, 478];
+  let rows = `<text x="${x + 30}" y="${y + 92}" class="th">ПРОЦЕС</text>`;
+  ["ПРИСТ.", "BURST", "ПРИОР.", "КРАЙ", "ЧАКАНЕ"].forEach((h, i) => rows += `<text x="${x + cols[i]}" y="${y + 92}" class="th" text-anchor="middle">${h}</text>`);
+  const k = Math.min(Math.floor(s), run.length - 1);
+  PROCS.forEach((p, i) => {
+    const ry = y + 134 + i * 46;
+    const arrived = clamp((s - p.arrival) / 0.35, 0, 1);
+    const c = run.completion[p.name];
+    const done = clamp((s - c) / 0.4, 0, 1);
+    const running = s < run.length && run.steps[k].run === p.name;
+    const op = 0.35 + 0.65 * easeOut(arrived);
+    if (running) rows += `<rect x="${x + 14}" y="${ry - 30}" width="512" height="42" rx="10" fill="${p.color}" fill-opacity="0.16"/><rect x="${x + 14}" y="${ry - 30}" width="4" height="42" rx="2" fill="${p.color}"/>`;
+    const prioStyle = alg.startsWith("prio") ? "" : ` fill="var(--muted)"`;
+    rows += `<g opacity="${op.toFixed(3)}">
+      <circle cx="${x + 38}" cy="${ry - 8}" r="7" fill="${p.color}"/>
+      <text x="${x + 56}" y="${ry}" class="tdn">${p.name}</text>
+      <text x="${x + cols[0]}" y="${ry}" class="td" text-anchor="middle">${p.arrival}</text>
+      <text x="${x + cols[1]}" y="${ry}" class="td" text-anchor="middle">${p.burst}</text>
+      <text x="${x + cols[2]}" y="${ry}" class="td" text-anchor="middle"${prioStyle}>${p.priority}</text>
+      <g opacity="${easeOut(done).toFixed(3)}">
+        <text x="${x + cols[3]}" y="${ry}" class="td" text-anchor="middle">${c}</text>
+        <text x="${x + cols[4]}" y="${ry}" class="tdn" text-anchor="middle">${run.metrics[p.name].wait}</text>
+      </g></g>`;
+  });
+  return panel(x, y, 540, 360, "ПРОЦЕСИ", a, rows);
+}
+
+function queuePanel(run, s, a) {
+  const x = 640, y = 236;
+  let extra = `<text x="${x + 712 - 30}" y="${y + 46}" class="psub" text-anchor="end">${run.order}</text>`;
+  for (let i = 0; i < 5; i++) {
+    extra += `<rect x="${SLOT_X(i) - 56}" y="${SLOT_Y - 75}" width="112" height="150" rx="20" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.07)" stroke-dasharray="6 6"/>`;
+  }
+  const k = Math.min(Math.floor(s), run.length - 1);
+  const hasNext = s < run.length && run.steps[k].ready.length > 0;
+  extra += `<g opacity="${hasNext ? 1 : 0.25}"><path d="M${SLOT_X(0) - 7} ${SLOT_Y + 98} l7 -8 l7 8" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="${SLOT_X(0)}" y="${SLOT_Y + 124}" class="next">СЛЕДВАЩ</text></g>`;
+  extra += `<g transform="translate(1366 ${SLOT_Y})"><circle r="20" fill="#182033" stroke="rgba(255,255,255,0.1)"/><path d="M-5 -8 L4 0 L-5 8" fill="none" stroke="var(--text)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  return panel(x, y, 712, 360, "ОПАШКА НА ГОТОВИТЕ ПРОЦЕСИ", a, extra);
+}
+
+function cpuPanel(run, alg, s, a) {
+  const x = 1380, y = 236;
+  let extra = "";
+  const fx = CPU.cx - 96, fy = CPU.cy - 122;
+  extra += `<rect x="${fx}" y="${fy}" width="192" height="244" rx="28" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.12)"/>`;
+  for (let i = 0; i < 6; i++) {
+    const py = fy + 32 + i * 36;
+    extra += `<line x1="${fx - 14}" x2="${fx}" y1="${py}" y2="${py}" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round"/>`;
+    extra += `<line x1="${fx + 192}" x2="${fx + 206}" y1="${py}" y2="${py}" stroke="rgba(255,255,255,0.14)" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  const n = run.length, k = Math.min(Math.floor(s), n - 1), f = s - Math.floor(s);
+  const st = run.steps[k];
+  if (s >= n || !st.run) extra += `<text x="${CPU.cx}" y="${CPU.cy + 7}" class="idle">свободен</text>`;
+  if (run.quantum) {
+    const used = s < n && st.run ? st.used + f : 0;
+    const pw = 44, gap = 8, total = run.quantum * pw + (run.quantum - 1) * gap, px0 = CPU.cx - total / 2;
+    for (let i = 0; i < run.quantum; i++) {
+      const fill = clamp(used - i, 0, 1);
+      const col = s < n && st.run ? BYNAME[st.run].color : "#fff";
+      extra += `<rect x="${px0 + i * (pw + gap)}" y="${y + 336}" width="${pw}" height="8" rx="4" fill="rgba(255,255,255,0.1)"/>`;
+      extra += `<rect x="${px0 + i * (pw + gap)}" y="${y + 336}" width="${(pw * fill).toFixed(1)}" height="8" rx="4" fill="${col}"/>`;
+    }
+    extra += `<text x="${x + 468 - 30}" y="${y + 46}" class="psub" text-anchor="end">квант q = ${run.quantum}</text>`;
+  }
+  return panel(x, y, 468, 360, "ПРОЦЕСОР", a, extra);
+}
+
+function gantt(run, s, a) {
+  const n = run.length, unit = (G.x1 - G.x0) / n, sc = clamp(s, 0, n);
+  const endA = easeOut(clamp((s - n - 0.2) / 0.8, 0, 1));
+  let extra = `<text x="1818" y="${624 + 46}" class="psub" text-anchor="end" opacity="${endA}">всички процеси завършиха · общо ${n} единици</text>`;
+  extra += `<rect x="${G.x0}" y="${G.y}" width="${G.x1 - G.x0}" height="${G.h}" rx="12" fill="rgba(255,255,255,0.03)"/>`;
+  for (let t = 0; t <= n; t++) {
+    const tx = G.x0 + t * unit;
+    extra += `<line x1="${tx}" x2="${tx}" y1="${G.y + G.h + 8}" y2="${G.y + G.h + 14}" stroke="rgba(255,255,255,${t <= sc ? 0.28 : 0.1})"/>`;
+  }
+  const labels = new Set([0]);
+  for (const [name, st, en] of run.gantt) {
+    if (st >= sc) break;
+    const e = Math.min(en, sc), x = G.x0 + st * unit + 1.5, w = (e - st) * unit - 3;
+    if (w <= 0) continue;
+    const col = name ? `url(#g-${name})` : "rgba(255,255,255,0.06)";
+    extra += `<rect x="${x.toFixed(1)}" y="${G.y}" width="${w.toFixed(1)}" height="${G.h}" rx="10" fill="${col}"/>`;
+    if (name && w > 46) extra += `<text x="${(x + w / 2).toFixed(1)}" y="${G.y + G.h / 2 + 8}" class="gl">${name}</text>`;
+    if (en <= sc) labels.add(en);
+  }
+  for (const t of labels) extra += `<text x="${G.x0 + t * unit}" y="${G.y + G.h + 38}" class="tick">${t}</text>`;
+  if (s < n + 0.6) {
+    const px = G.x0 + sc * unit, o = 1 - clamp((s - n) / 0.6, 0, 1);
+    extra += `<g opacity="${o}"><line x1="${px}" x2="${px}" y1="${G.y - 14}" y2="${G.y + G.h + 14}" stroke="#fff" stroke-width="6" opacity="0.25" filter="url(#glow)"/>
+      <line x1="${px}" x2="${px}" y1="${G.y - 14}" y2="${G.y + G.h + 14}" stroke="#fff" stroke-width="2"/><circle cx="${px}" cy="${G.y - 14}" r="5" fill="#fff"/></g>`;
+  }
+  return panel(72, 624, 1776, 222, "ДИАГРАМА НА ГАНТ", a, extra);
+}
+
+function logPanel(run, s, a) {
+  const x = 72, y = 874;
+  const seen = run.events.filter(e => e.t <= s);
+  const last = seen.slice(-3).reverse();
+  let extra = "";
+  last.forEach((e, i) => {
+    const age = easeOut(clamp((s - e.t) / 0.4, 0, 1));
+    const ly = y + 84 + i * 28 - (i === 0 ? (1 - age) * 10 : 0);
+    const o = (i === 0 ? age : 1) * [1, 0.62, 0.36][i];
+    extra += `<g opacity="${o.toFixed(3)}"><text x="${x + 30}" y="${ly}" class="logt">t=${e.t}</text>
+      <circle cx="${x + 106}" cy="${ly - 7}" r="6" fill="${e.proc ? BYNAME[e.proc].color : "#fff"}"/>
+      <text x="${x + 124}" y="${ly}" class="log">${e.text}</text></g>`;
+  });
+  return panel(x, y, 1108, 158, "СЪБИТИЯ", a, extra);
+}
+
+function avgAt(run, x) {
+  const done = PROCS.filter(p => run.completion[p.name] <= x);
+  if (!done.length) return null;
+  const m = k => done.reduce((acc, p) => acc + run.metrics[p.name][k], 0) / done.length;
+  return { wait: m("wait"), tat: m("tat"), resp: m("resp"), n: done.length };
+}
+
+function metricsPanel(run, s, a) {
+  const x = 1208, y = 874;
+  const times = PROCS.map(p => run.completion[p.name]).filter(c => c <= s).sort((p, q) => p - q);
+  const cur = avgAt(run, s);
+  let extra = "";
+  const k = Math.min(Math.floor(s), run.length - 1);
+  const sw = s >= run.length ? run.switches : run.steps[k].sw;
+  extra += `<text x="${x + 640 - 30}" y="${y + 46}" class="psub" text-anchor="end">завършени ${cur ? cur.n : 0}/5 · превключвания ${sw}</text>`;
+  const cols = [["wait", "ср. чакане"], ["tat", "ср. обработка"], ["resp", "ср. отговор"]];
+  cols.forEach(([key, lbl], i) => {
+    const cx = x + 120 + i * 200;
+    let txt = "–";
+    if (cur) {
+      const lastC = times[times.length - 1];
+      const prev = avgAt(run, lastC - 0.5);
+      const e = ease(clamp((s - lastC) / 0.5, 0, 1));
+      txt = fmt(prev ? lerp(prev[key], cur[key], e) : cur[key]);
+    }
+    extra += `<text x="${cx}" y="${y + 108}" class="mv">${txt}</text><text x="${cx}" y="${y + 136}" class="ml">${lbl}</text>`;
+  });
+  const endA = easeOut(clamp((s - run.length - 0.2) / 0.8, 0, 1));
+  extra += `<rect x="${x + 1}" y="${y + 1}" width="638" height="156" rx="21" fill="none" stroke="rgba(255,255,255,${(0.35 * endA).toFixed(3)})" stroke-width="2"/>`;
+  return panel(x, y, 640, 158, "СРЕДНИ ВРЕМЕНА", a, extra);
+}
+
+function frame(alg, tau) {
+  const run = DATA.runs[alg];
+  const s = clamp((tau - INTRO) / U, 0, run.length + OUTRO / U);
+  const ap = i => easeOut(clamp((tau - 0.15 - i * 0.09) / 0.7, 0, 1));
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${defs()}
+    <rect width="${W}" height="${H}" fill="url(#bgg)"/>
+    ${header(run, s, ap(0))}${table(run, alg, s, ap(1))}${queuePanel(run, s, ap(2))}${cpuPanel(run, alg, s, ap(3))}
+    ${gantt(run, s, ap(4))}${logPanel(run, s, ap(5))}${metricsPanel(run, s, ap(6))}
+    <g opacity="${ap(3)}">${cards(run, alg, s)}</g>`;
+  if (RECORD) {
+    const fade = Math.max(1 - clamp(tau / 0.35, 0, 1), clamp((tau - (duration(alg) - 0.45)) / 0.45, 0, 1));
+    if (fade > 0) svg += `<rect width="${W}" height="${H}" fill="#0b0f17" opacity="${fade.toFixed(3)}"/>`;
+  }
+  return svg + "</svg>";
+}
+
+const stage = document.getElementById("stage");
+if (RECORD) document.body.classList.add("record");
+window.renderFrame = (alg, tau) => { stage.innerHTML = frame(alg, tau); return true; };
+window.durationOf = alg => duration(alg);
+window.ALGS = DATA.order;
+
+if (!RECORD) {
+  let alg = DATA.order[0], tau = 0, playing = true, speed = 1, last = null;
+  const tabs = document.getElementById("tabs"), play = document.getElementById("play"), scrub = document.getElementById("scrub");
+  DATA.order.forEach((a, i) => {
+    const b = document.createElement("button");
+    b.textContent = DATA.runs[a].short;
+    b.title = `${DATA.runs[a].label} (${i + 1})`;
+    b.onclick = () => select(a);
+    tabs.appendChild(b);
+  });
+  const select = a => { alg = a; tau = 0; playing = true; sync(); };
+  const sync = () => {
+    [...tabs.children].forEach((b, i) => b.classList.toggle("on", DATA.order[i] === alg));
+    play.textContent = playing ? "Пауза" : "Пусни";
+  };
+  play.onclick = () => { if (tau >= duration(alg)) tau = 0; playing = !playing; sync(); };
+  document.getElementById("restart").onclick = () => { tau = 0; playing = true; sync(); };
+  document.getElementById("speed").onchange = e => speed = parseFloat(e.target.value);
+  scrub.oninput = () => { tau = scrub.value / 1000 * duration(alg); playing = false; sync(); };
+  addEventListener("keydown", e => {
+    if (e.key === " ") { e.preventDefault(); play.onclick(); }
+    else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      const run = DATA.runs[alg], s = (tau - INTRO) / U;
+      const ns = e.key === "ArrowRight" ? Math.floor(s + 1e-6) + 1 : Math.ceil(s - 1e-6) - 1;
+      tau = clamp(INTRO + ns * U, 0, duration(alg)); playing = false; sync();
+    }
+    else if (e.key === "r" || e.key === "R") document.getElementById("restart").onclick();
+    else if (/^[1-9]$/.test(e.key) && DATA.order[+e.key - 1]) select(DATA.order[+e.key - 1]);
+  });
+  const loop = now => {
+    if (last !== null && playing) tau = Math.min(duration(alg), tau + (now - last) / 1000 * speed);
+    if (tau >= duration(alg)) { playing = false; sync(); }
+    last = now;
+    stage.innerHTML = frame(alg, tau);
+    scrub.value = Math.round(tau / duration(alg) * 1000);
+    requestAnimationFrame(loop);
+  };
+  sync();
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
