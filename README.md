@@ -43,7 +43,7 @@ Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_p
 
 ### PE: Programming Languages
 
-Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE/run.sh [DAY] taskN` · Test all tasks of a day: `III-kurs/PE/run.sh --test [DAY]` ([test.py](III-kurs/PE/test.py), cases in `<DAY>/tests/`)
+Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE/run.sh [DAY] taskN` · Test all tasks of a day: `III-kurs/PE/run.sh --test [DAY]` ([test.py](III-kurs/PE/test.py), cases in `<DAY>/tests/`) · Format like Vim `gg=G`: `III-kurs/PE/run.sh --format [DAY]`
 
 <!-- index:III-kurs/PE -->
 | Date | Type | Folder | Language | What's inside |
