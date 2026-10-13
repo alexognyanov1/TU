@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CPU Scheduling</title>
+<style>
+html, body { margin: 0; background: #eeebe5; }
+#stage { width: 1920px; height: 1080px; }
+#stage svg { display: block; }
+svg text { font-family: "SF Pro Display", -apple-system, system-ui, "Helvetica Neue", Arial, sans-serif; fill: #161616;
+  font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.cap { font-size: 17px; letter-spacing: 2.4px; font-weight: 600; fill: #7a766e; }
+.idx { font-size: 22px; font-weight: 500; fill: #7a766e; }
+.h1 { font-size: 78px; font-weight: 600; letter-spacing: -2px; }
+.desc { font-size: 29px; fill: #5f5b54; }
+.clock { font-size: 66px; font-weight: 500; letter-spacing: -1px; text-anchor: end; }
+.tag { font-size: 22px; fill: #7a766e; text-anchor: end; }
+.cn { font-size: 38px; font-weight: 600; fill: #fff; letter-spacing: -0.5px; }
+.cr { font-size: 26px; font-weight: 500; fill: rgba(255,255,255,0.88); text-anchor: end; }
+.cp { font-size: 17px; font-weight: 600; fill: rgba(255,255,255,0.9); text-anchor: end; letter-spacing: 0.5px; }
+.gl { font-size: 23px; font-weight: 600; fill: #fff; text-anchor: middle; }
+.tick { font-size: 18px; fill: #7a766e; text-anchor: middle; }
+.ev { font-size: 25px; text-anchor: end; }
+.evt { font-size: 18px; fill: #9a958c; text-anchor: end; }
+.ml { font-size: 16px; letter-spacing: 2px; font-weight: 600; fill: #7a766e; }
+.mv { font-size: 46px; font-weight: 500; letter-spacing: -0.5px; }
+.idle { font-size: 22px; fill: #9a958c; text-anchor: middle; }
+.next { font-size: 15px; letter-spacing: 2px; font-weight: 600; fill: #7a766e; }
+.t-cap { font-size: 19px; letter-spacing: 4px; font-weight: 600; fill: #7a766e; }
+.t-h { font-size: 104px; font-weight: 600; letter-spacing: -3.5px; }
+.t-sub { font-size: 32px; fill: #5f5b54; }
+.f-h { font-size: 64px; font-weight: 600; letter-spacing: -2px; }
+.f-sub { font-size: 28px; fill: #5f5b54; }
+.f-row { font-size: 27px; }
+.f-val { font-size: 25px; font-weight: 500; }
+.e-h { font-size: 58px; font-weight: 600; letter-spacing: -1.5px; text-anchor: middle; }
+.e-sub { font-size: 26px; fill: #5f5b54; text-anchor: middle; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const D = /*@DATA*/null;
+const W = 1920, H = 1080, PAGE = "#eeebe5", PAPER = "#f7f5f1", INK = "#161616", MUTED = "#7a766e", RULE = "#dcd8d0";
+const UNIT = 0.6, TRU = 0.6, ZIN = 1.5, PRE = 0.8, POST = 2.4, ZOUT = 1.4, GAP = 0.7, START = 4.8;
+const K = 0.25, TW = W * K, TH = H * K;
+const PROCS = D.processes, BY = Object.fromEntries(PROCS.map(p => [p.name, p]));
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const inOut = x => x < 0.5 ? 16 * x ** 5 : 1 - (-2 * x + 2) ** 5 / 2;
+const ease = x => x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
+const out = x => 1 - (1 - x) ** 3;
+const ramp = (t, a, d) => clamp((t - a) / d, 0, 1);
+const f2 = x => x.toFixed(2);
+
+const SEG = {};
+let T = START;
+D.order.forEach((a, i) => {
+  const r = D.runs[a], z0 = T, p0 = z0 + ZIN, sim0 = p0 + PRE, simEnd = sim0 + r.length * UNIT, z1 = simEnd + POST, end = z1 + ZOUT;
+  SEG[a] = { a, i, z0, p0, sim0, simEnd, z1, end };
+  T = end + GAP;
+});
+const FIN = T, END_CARD = FIN + 9.5, TOTAL = END_CARD + 4.5;
+
+const tileX = i => 200 + (i % 3) * (TW + 40);
+const tileY = i => 392 + Math.floor(i / 3) * (TH + 40);
+
+const SLOT = i => 120 + i * 152, SLOT_Y = 452, CPU_X = 1652, BOX = 132;
+const G = { x0: 120, x1: 1800, y: 768, h: 66 };
+
+function card(p, x, y, o, rem, prio) {
+  if (o <= 0.002) return "";
+  const frac = clamp(rem / p.burst, 0, 1);
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" opacity="${o.toFixed(3)}">
+    <rect width="${BOX}" height="${BOX}" rx="6" fill="${p.color}"/>
+    <text x="16" y="50" class="cn">${p.name}</text>
+    ${prio ? `<text x="${BOX - 14}" y="32" class="cp">p${p.priority}</text>` : ""}
+    <text x="${BOX - 14}" y="${BOX - 22}" class="cr">${Math.max(0, Math.ceil(rem - 1e-6))}</text>
+    <rect x="0" y="${BOX - 5}" width="${(BOX * frac).toFixed(1)}" height="5" fill="rgba(255,255,255,0.45)"/>
+  </g>`;
+}
+
+function layout(r, k) {
+  const res = {};
+  if (k < 0) { for (const p of PROCS) res[p.name] = { pending: true }; return res; }
+  const st = k < r.length ? r.steps[k] : null;
+  for (const p of PROCS) {
+    if (r.completion[p.name] <= k) res[p.name] = { x: CPU_X, y: SLOT_Y - 36, o: 0, done: true };
+    else if (st && st.run === p.name) res[p.name] = { x: CPU_X, y: SLOT_Y, o: 1 };
+    else if (st && st.ready.includes(p.name)) res[p.name] = { x: SLOT(st.ready.indexOf(p.name)), y: SLOT_Y, o: 1 };
+    else res[p.name] = { pending: true };
+  }
+  return res;
+}
+
+function remAt(r, name, s) {
+  if (s >= r.length) return 0;
+  const k = Math.floor(s), st = r.steps[k];
+  return st.run === name ? st.remaining[name] - (s - k) : st.remaining[name];
+}
+
+function cards(r, a, s) {
+  if (s < 0) return "";
+  const k = Math.min(Math.floor(s), r.length), t = inOut(clamp((s - k) / TRU, 0, 1));
+  const to = layout(r, k), from = layout(r, k - 1);
+  let back = "", front = "";
+  for (const p of PROCS) {
+    const b = to[p.name];
+    let f = from[p.name];
+    if (b.pending || (b.done && f.done)) continue;
+    if (f.pending) f = { x: b.x, y: b.y + 26, o: 0 };
+    const g = card(p, lerp(f.x, b.x, t), lerp(f.y, b.y, t), lerp(f.o, b.o, t), remAt(r, p.name, s), a.startsWith("prio"));
+    if (b.x === CPU_X) front += g; else back += g;
+  }
+  return back + front;
+}
+
+function avgAt(r, x) {
+  const done = PROCS.filter(p => r.completion[p.name] <= x);
+  if (!done.length) return null;
+  const m = key => done.reduce((acc, p) => acc + r.metrics[p.name][key], 0) / done.length;
+  return { wait: m("wait"), tat: m("tat"), resp: m("resp") };
+}
+
+function scene(a, s) {
+  const r = D.runs[a], n = r.length, sc = clamp(s, 0, n), k = Math.min(Math.max(Math.floor(s), 0), n - 1);
+  const live = s >= 0 && s < n, st = r.steps[k];
+  let g = `<rect width="${W}" height="${H}" fill="${PAPER}"/>`;
+  g += `<text x="120" y="150" class="idx">${String(r.index).padStart(2, "0")} / ${String(D.order.length).padStart(2, "0")}</text>
+    <text x="120" y="238" class="h1">${r.label}</text>
+    <text x="120" y="292" class="desc">${r.rule}</text>
+    <text x="1800" y="150" class="cap" text-anchor="end">TIME</text>
+    <text x="1800" y="238" class="clock">t = ${Math.min(Math.max(Math.floor(s), 0), n)}</text>
+    <text x="1800" y="292" class="tag">${r.pill}</text>
+    <line x1="120" x2="1800" y1="352" y2="352" stroke="${RULE}" stroke-width="1.5"/>
+    <text x="120" y="420" class="cap">READY QUEUE</text>
+    <text x="${120 + 5 * 152 - 20}" y="420" class="cap" text-anchor="end" style="letter-spacing:0;font-weight:400;font-size:20px">${r.order}</text>
+    <text x="${CPU_X}" y="420" class="cap">CPU</text>`;
+  for (let i = 0; i < 5; i++) g += `<rect x="${SLOT(i) + 0.75}" y="${SLOT_Y + 0.75}" width="${BOX - 1.5}" height="${BOX - 1.5}" rx="6" fill="none" stroke="${RULE}" stroke-width="1.5"/>`;
+  const hasNext = live && st.ready.length > 0;
+  g += `<text x="${SLOT(0)}" y="${SLOT_Y + BOX + 34}" class="next" opacity="${hasNext ? 1 : 0.35}">NEXT</text>`;
+  g += `<line x1="${SLOT(4) + BOX + 40}" x2="${CPU_X - 56}" y1="${SLOT_Y + BOX / 2}" y2="${SLOT_Y + BOX / 2}" stroke="${RULE}" stroke-width="1.5"/>
+    <path d="M${CPU_X - 64} ${SLOT_Y + BOX / 2 - 7} l9 7 l-9 7" fill="none" stroke="#b9b4aa" stroke-width="1.5"/>`;
+  g += `<rect x="${CPU_X - 16}" y="${SLOT_Y - 16}" width="${BOX + 32}" height="${BOX + 32}" rx="12" fill="none" stroke="${INK}" stroke-width="1.5"/>`;
+  if (!live || !st.run) g += `<text x="${CPU_X + BOX / 2}" y="${SLOT_Y + BOX / 2 + 8}" class="idle">idle</text>`;
+  if (r.quantum) {
+    const used = live && st.run ? st.used + (s - Math.floor(s)) : 0, pw = (BOX + 32 - 2 * 8) / r.quantum;
+    const col = live && st.run ? BY[st.run].color : INK;
+    for (let i = 0; i < r.quantum; i++) {
+      const x = CPU_X - 16 + i * (pw + 8);
+      g += `<rect x="${x}" y="${SLOT_Y + BOX + 30}" width="${pw}" height="4" fill="${RULE}"/>
+        <rect x="${x}" y="${SLOT_Y + BOX + 30}" width="${(pw * clamp(used - i, 0, 1)).toFixed(1)}" height="4" fill="${col}"/>`;
+    }
+    g += `<text x="${CPU_X - 16}" y="${SLOT_Y + BOX + 64}" class="next">TIME SLICE</text>`;
+  }
+  g += `<line x1="120" x2="1800" y1="682" y2="682" stroke="${RULE}" stroke-width="1.5"/>
+    <text x="120" y="740" class="cap">SCHEDULE</text>`;
+  const seen = r.events.filter(e => e.t <= s);
+  if (seen.length) {
+    const e = seen[seen.length - 1], age = out(ramp(s, e.t, 0.5));
+    g += `<g opacity="${age.toFixed(3)}" transform="translate(${((1 - age) * 14).toFixed(1)} 0)">
+      <text x="1800" y="740" class="ev">${e.text}</text></g>`;
+  }
+  const unit = (G.x1 - G.x0) / n;
+  for (const [name, a0, a1] of r.gantt) {
+    const x = G.x0 + a0 * unit + 1.5, w = (a1 - a0) * unit - 3;
+    g += `<rect x="${x.toFixed(1)}" y="${G.y}" width="${w.toFixed(1)}" height="${G.h}" fill="${name ? BY[name].color : RULE}" opacity="0.13"/>`;
+  }
+  const labels = new Set([0]);
+  for (const [name, a0, a1] of r.gantt) {
+    if (a0 >= sc) break;
+    const e = Math.min(a1, sc), x = G.x0 + a0 * unit + 1.5, w = (e - a0) * unit - 3;
+    if (w <= 0) continue;
+    g += `<rect x="${x.toFixed(1)}" y="${G.y}" width="${w.toFixed(1)}" height="${G.h}" fill="${name ? BY[name].color : RULE}"/>`;
+    if (name && w > 52) g += `<text x="${(x + w / 2).toFixed(1)}" y="${G.y + G.h / 2 + 8}" class="gl">${name}</text>`;
+    if (a1 <= sc) labels.add(a1);
+  }
+  for (let t = 0; t <= n; t++) g += `<line x1="${G.x0 + t * unit}" x2="${G.x0 + t * unit}" y1="${G.y + G.h + 8}" y2="${G.y + G.h + (labels.has(t) ? 18 : 13)}" stroke="${t <= sc ? "#b9b4aa" : RULE}" stroke-width="1.5"/>`;
+  for (const t of labels) g += `<text x="${G.x0 + t * unit}" y="${G.y + G.h + 46}" class="tick">${t}</text>`;
+  if (s > 0 && s < n + 0.5) {
+    const px = G.x0 + sc * unit, o = 1 - ramp(s, n, 0.5);
+    g += `<line x1="${px}" x2="${px}" y1="${G.y - 12}" y2="${G.y + G.h + 12}" stroke="${INK}" stroke-width="2" opacity="${o}"/>`;
+  }
+  g += `<line x1="120" x2="1800" y1="904" y2="904" stroke="${RULE}" stroke-width="1.5"/>`;
+  const cur = avgAt(r, s);
+  const times = PROCS.map(p => r.completion[p.name]).filter(c => c <= s).sort((x, y) => x - y);
+  const cols = [["wait", "AVG WAITING"], ["tat", "AVG TURNAROUND"], ["resp", "AVG RESPONSE"]];
+  cols.forEach(([key, lbl], i) => {
+    const x = 120 + i * 440;
+    let v = "–";
+    if (cur) {
+      const last = times[times.length - 1], prev = avgAt(r, last - 0.5), e = ease(ramp(s, last, 0.6));
+      v = f2(prev ? lerp(prev[key], cur[key], e) : cur[key]);
+    }
+    g += `<text x="${x}" y="958" class="ml">${lbl}</text><text x="${x}" y="1018" class="mv">${v}</text>`;
+  });
+  const sw = s >= n ? r.switches : (s < 0 ? 0 : st.sw);
+  g += `<text x="1440" y="958" class="ml">CONTEXT SWITCHES</text><text x="1440" y="1018" class="mv">${sw}</text>`;
+  const doneA = out(ramp(s, n + 0.3, 0.8));
+  if (doneA > 0) g += `<text x="1800" y="958" class="ml" text-anchor="end" opacity="${doneA}">ALL DONE AT t = ${n}</text>`;
+  return g + cards(r, a, s);
+}
+
+function sceneTime(a, t) {
+  return (t - SEG[a].sim0) / UNIT;
+}
+
+function camera(t) {
+  for (const a of D.order) {
+    const s = SEG[a];
+    if (t >= s.z0 && t < s.end) {
+      const e = t < s.p0 ? inOut(ramp(t, s.z0, ZIN)) : t < s.z1 ? 1 : 1 - inOut(ramp(t, s.z1, ZOUT));
+      return { e, i: s.i };
+    }
+  }
+  return { e: 0, i: 0 };
+}
+
+function overview(t) {
+  const { e, i: ci } = camera(t);
+  const S1 = 1 / K, S = Math.exp(e * Math.log(S1)), f = (S - 1) / (S1 - 1);
+  const tx = tileX(ci), ty = tileY(ci);
+  const ox = lerp(tx, 0, f) - tx * S, oy = lerp(ty, 0, f) - ty * S;
+  const titleA = out(ramp(t, 0.25, 0.9)) * (1 - ramp(e, 0, 0.35));
+  let g = `<g transform="translate(${ox.toFixed(2)} ${oy.toFixed(2)}) scale(${S.toFixed(5)})">`;
+  g += `<g opacity="${titleA.toFixed(3)}" transform="translate(0 ${((1 - out(ramp(t, 0.25, 0.9))) * 18).toFixed(1)})">
+    <text x="200" y="168" class="t-cap">OPERATING SYSTEMS</text>
+    <text x="194" y="272" class="t-h">CPU Scheduling</text>
+    <text x="1720" y="272" class="t-sub" text-anchor="end">Six algorithms. Five processes. One CPU.</text></g>`;
+  D.order.forEach((a, i) => {
+    const x = tileX(i), y = tileY(i);
+    const sx = x * S + ox, sy = y * S + oy;
+    if (sx > W || sy > H || sx + TW * S < 0 || sy + TH * S < 0) return;
+    const appear = out(ramp(t, 1.1 + i * 0.12, 0.8));
+    const st = sceneTime(a, t);
+    const border = i === ci ? 1 - e : 1;
+    g += `<g opacity="${appear.toFixed(3)}" transform="translate(0 ${((1 - appear) * 20).toFixed(1)})">
+      <svg x="${x}" y="${y}" width="${TW}" height="${TH}" viewBox="0 0 ${W} ${H}">${scene(a, st)}</svg>
+      <rect x="${x}" y="${y}" width="${TW}" height="${TH}" fill="none" stroke="#cfcac0" stroke-width="${(1.5 / S).toFixed(3)}" opacity="${border.toFixed(3)}"/></g>`;
+  });
+  return g + "</g>";
+}
+
+function finale(t) {
+  const a = out(ramp(t, FIN + 0.5, 0.9)) * (1 - ramp(t, END_CARD - 0.6, 0.6));
+  if (a <= 0) return "";
+  const rows = D.order.map(k => ({ k, r: D.runs[k] }));
+  const max = Math.max(...rows.map(x => Math.max(x.r.avg.wait, x.r.avg.resp)));
+  const best = key => Math.min(...rows.map(x => x.r.avg[key]));
+  let g = `<g opacity="${a.toFixed(3)}"><rect width="${W}" height="${H}" fill="${PAPER}"/>
+    <text x="120" y="190" class="f-h">Same workload, different trade-offs.</text>
+    <text x="120" y="244" class="f-sub">Average time in units over the five processes. Lower is better.</text>`;
+  [["wait", "AVERAGE WAITING TIME", 120], ["resp", "AVERAGE RESPONSE TIME", 1000]].forEach(([key, lbl, x0], c) => {
+    g += `<text x="${x0}" y="352" class="cap">${lbl}</text><line x1="${x0}" x2="${x0 + 800}" y1="378" y2="378" stroke="${RULE}" stroke-width="1.5"/>`;
+    rows.forEach(({ r }, i) => {
+      const y = 440 + i * 92, grow = ease(ramp(t, FIN + 1.2 + c * 0.25 + i * 0.16, 0.8));
+      const v = r.avg[key], w = 430 * v / max * grow, isBest = Math.abs(v - best(key)) < 1e-9;
+      g += `<text x="${x0}" y="${y + 9}" class="f-row"${isBest ? ' font-weight="600"' : ""}>${r.short}</text>
+        <rect x="${x0 + 270}" y="${y - 18}" width="${w.toFixed(1)}" height="30" fill="${isBest ? INK : "#bdb8ae"}"/>
+        <text x="${x0 + 284 + w}" y="${y + 8}" class="f-val" opacity="${grow.toFixed(3)}"${isBest ? ' font-weight="650"' : ""}>${f2(v)}</text>`;
+    });
+  });
+  return g + "</g>";
+}
+
+function endCard(t) {
+  const a = out(ramp(t, END_CARD, 0.9));
+  if (a <= 0) return "";
+  return `<g opacity="${a.toFixed(3)}"><rect width="${W}" height="${H}" fill="${PAPER}"/>
+    <text x="960" y="520" class="e-h" transform="translate(0 ${((1 - a) * 14).toFixed(1)})">Alex Ognyanov</text>
+    <text x="960" y="576" class="e-sub">Operating Systems · Technical University of Sofia · 2026</text></g>`;
+}
+
+function frame(t) {
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${PAGE}"/>`;
+  const gridA = 1 - ramp(t, FIN, 0.8);
+  if (gridA > 0) g += `<g opacity="${gridA.toFixed(3)}">${overview(t)}</g>`;
+  g += finale(t) + endCard(t);
+  const fade = Math.max(1 - ramp(t, 0, 0.4), ramp(t, TOTAL - 0.8, 0.8));
+  if (fade > 0) g += `<rect width="${W}" height="${H}" fill="${PAGE}" opacity="${fade.toFixed(3)}"/>`;
+  return g + "</svg>";
+}
+
+function cues() {
+  const c = [{ t: 0.3, type: "pad" }];
+  D.order.forEach((a, i) => c.push({ t: 1.1 + i * 0.12, type: "tile" }));
+  for (const a of D.order) {
+    const s = SEG[a];
+    c.push({ t: s.z0, type: "zoom_in" }, { t: s.z1, type: "zoom_out" });
+    for (const e of D.runs[a].events) c.push({ t: s.sim0 + e.t * UNIT, type: e.kind, note: e.proc ? PROCS.indexOf(BY[e.proc]) : 0 });
+  }
+  D.order.forEach((k, i) => [0, 1].forEach(col => c.push({ t: FIN + 1.2 + col * 0.25 + i * 0.16, type: "bar" })));
+  c.push({ t: END_CARD, type: "pad_end" });
+  return c;
+}
+
+const stage = document.getElementById("stage");
+window.renderAt = t => { stage.innerHTML = frame(t); return true; };
+window.TOTAL = TOTAL;
+window.cues = cues;
+renderAt(new URLSearchParams(location.search).has("t") ? parseFloat(new URLSearchParams(location.search).get("t")) : 2.6);
+</script>
+</body>
+</html>
