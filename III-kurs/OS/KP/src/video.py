@@ -6,8 +6,9 @@ comparison of the average times -> end card. Every frame is rendered from sim.py
 traces (same data as the реферат); the sounds are generated here from sine waves
 and filtered noise, no audio files are used.
 
-  python3 video.py                   # renders ../anim/cpu_scheduling_en.mp4 (about 9 min)
+  python3 video.py                   # renders ../anim/cpu_scheduling_en_4k.mp4 (3840x2160, about 20 min)
   python3 video.py --frame 30 x.png  # one frame at t = 30 s, for checking the layout
+  python3 video.py --audio x.wav     # only the sound track
 """
 import array
 import json
@@ -25,7 +26,7 @@ import sim
 SRC = Path(__file__).resolve().parent
 OUT = SRC.parent / "anim"
 PAGE = OUT / ".video.html"
-FINAL = OUT / "cpu_scheduling_en.mp4"
+FINAL = OUT / "cpu_scheduling_en_4k.mp4"
 FPS = 60
 RATE = 48000
 
@@ -133,21 +134,46 @@ def tone(freqs, dur, decay, vol, attack=0.003, glide=None):
     return [vol * e[i] * out[i] for i in range(n)]
 
 
-def whoosh(dur, f0, f1, vol, seed):
+def air(dur, shape, pan0, pan1, vol, seed):
+    """Soft air movement: warm low-passed noise whose brightness follows the camera, panned in stereo."""
     rnd = random.Random(seed)
     n = int(dur * RATE)
-    low = band = 0.0
-    out = []
+    brown = lp1 = lp2 = 0.0
+    left, right = [], []
     for i in range(n):
         x = i / n
-        fc = f0 * (f1 / f0) ** x
-        f = 2 * math.sin(math.pi * fc / RATE)
-        noise = rnd.uniform(-1, 1)
-        high = noise - low - 0.9 * band
-        band += f * high
-        low += f * band
-        out.append(band * vol * math.sin(math.pi * x) ** 2)
-    return out
+        if shape == "rise":
+            e = math.sin(math.pi / 2 * min(1, x / 0.85)) ** 2 * (1 - max(0, (x - 0.85) / 0.15)) ** 2
+        elif shape == "fall":
+            e = math.sin(math.pi / 2 * min(1, (1 - x) / 0.85)) ** 2 * (1 - max(0, (0.15 - x) / 0.15)) ** 2
+        else:
+            e = math.sin(math.pi * x) ** 2
+        brown = 0.985 * brown + 0.15 * rnd.uniform(-1, 1)
+        fc = 180 + 1400 * e
+        k = 1 - math.exp(-2 * math.pi * fc / RATE)
+        lp1 += k * (brown - lp1)
+        lp2 += k * (lp1 - lp2)
+        p = lerp_pan(pan0, pan1, x)
+        v = vol * e * lp2
+        left.append(v * math.cos((p + 1) * math.pi / 4))
+        right.append(v * math.sin((p + 1) * math.pi / 4))
+    return left, right
+
+
+def lerp_pan(a, b, x):
+    x = x * x * (3 - 2 * x)
+    return a + (b - a) * x
+
+
+LAND = [130.81, 146.83, 164.81, 196.0, 220.0, 261.63, 98.0]
+
+
+def land(note):
+    f = LAND[min(note, len(LAND) - 1)]
+    body = tone([(f, 1.0), (2 * f, 0.32), (3 * f, 0.1)], 0.7, 11, 0.26, attack=0.002,
+                glide=lambda t: 1 + 0.12 * math.exp(-t * 55))
+    click = tone([(2400, 1.0)], 0.025, 180, 0.025)
+    return [body[i] + (click[i] if i < len(click) else 0) for i in range(len(body))]
 
 
 def pad(dur, notes, vol):
@@ -174,7 +200,6 @@ def sounds():
     return {
         "arrive": tick, "dispatch": tock, "preempt": pre, "done": chimes, "bar": bar,
         "tile": tone([(2093, 1.0)], 0.05, 80, 0.035),
-        "zoom_in": whoosh(1.3, 250, 2600, 0.22, 1), "zoom_out": whoosh(1.2, 2400, 220, 0.18, 2),
         "pad": pad(4.6, [130.81, 196.0, 329.63, 493.88], 0.022),
         "pad_end": pad(4.2, [146.83, 220.0, 349.23, 523.25], 0.020),
     }
@@ -182,18 +207,34 @@ def sounds():
 
 def mix(cues, total, path):
     sfx = sounds()
-    buf = array.array("f", bytes(4 * int((total + 2) * RATE)))
+    n = int((total + 2) * RATE)
+    left = array.array("f", bytes(4 * n))
+    right = array.array("f", bytes(4 * n))
+
+    def add(start, l, r):
+        for i in range(min(len(l), n - start)):
+            left[start + i] += l[i]
+            right[start + i] += r[i]
+
     for c in cues:
+        start = int(c["t"] * RATE)
+        if c["type"] in ("zoom_in", "trans", "zoom_out"):
+            shape = {"zoom_in": "rise", "trans": "swell", "zoom_out": "fall"}[c["type"]]
+            add(start, *air(c["dur"], shape, c["pan0"], c["pan1"], 0.12, c["note"]))
+            s = land(c["note"] if c["type"] != "zoom_out" else len(LAND) - 1)
+            add(int((c["t"] + c["dur"] * (0.9 if c["type"] != "zoom_out" else 0.95)) * RATE), s, s)
+            continue
         s = sfx[c["type"]]
         if c["type"] == "done":
             s = s[c.get("note", 0)]
-        start = int(c["t"] * RATE)
-        for i, v in enumerate(s):
-            if start + i < len(buf):
-                buf[start + i] += v
-    pcm = array.array("h", (int(32767 * math.tanh(1.2 * v) / math.tanh(1.2)) for v in buf))
+        add(start, s, s)
+    pcm = array.array("h")
+    norm = math.tanh(1.2)
+    for l, r in zip(left, right):
+        pcm.append(int(32767 * math.tanh(1.2 * l) / norm))
+        pcm.append(int(32767 * math.tanh(1.2 * r) / norm))
     with wave.open(str(path), "wb") as w:
-        w.setnchannels(1)
+        w.setnchannels(2)
         w.setsampwidth(2)
         w.setframerate(RATE)
         w.writeframes(pcm.tobytes())
@@ -205,15 +246,15 @@ def render():
     write_page()
     chrome = anim.Chrome()
     try:
-        chrome.open(PAGE.as_uri(), 1920, 1080)
+        chrome.open(PAGE.as_uri(), 1920, 1080, scale=2)
         total = chrome.eval("TOTAL")
         cues = chrome.eval("cues()")
         with tempfile.TemporaryDirectory() as tmp:
             wav = Path(tmp) / "sfx.wav"
             mix(cues, total, wav)
             enc = subprocess.Popen(["ffmpeg", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(FPS),
-                                    "-c:v", "png", "-i", "-", "-i", str(wav), "-c:v", "libx264", "-preset", "slow",
-                                    "-crf", "17", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest",
+                                    "-c:v", "png", "-i", "-", "-i", str(wav), "-c:v", "libx264", "-preset", "medium",
+                                    "-crf", "16", "-profile:v", "high", "-level", "5.2", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest",
                                     "-movflags", "+faststart", str(FINAL)], stdin=subprocess.PIPE)
             frames = round(total * FPS)
             for f in range(frames):
@@ -234,7 +275,7 @@ def frame(t, out):
     write_page()
     chrome = anim.Chrome()
     try:
-        chrome.open(PAGE.as_uri(), 1920, 1080)
+        chrome.open(PAGE.as_uri(), 1920, 1080, scale=2)
         chrome.eval(f"renderAt({float(t)})")
         Path(out).write_bytes(chrome.shot())
         print(f"total {chrome.eval('TOTAL'):.1f} s")
@@ -243,8 +284,21 @@ def frame(t, out):
         PAGE.unlink(missing_ok=True)
 
 
+def audio(out):
+    write_page()
+    chrome = anim.Chrome()
+    try:
+        chrome.open(PAGE.as_uri(), 1920, 1080)
+        mix(chrome.eval("cues()"), chrome.eval("TOTAL"), Path(out))
+    finally:
+        chrome.close()
+        PAGE.unlink(missing_ok=True)
+
+
 if __name__ == "__main__":
-    if "--frame" in sys.argv:
+    if "--audio" in sys.argv:
+        audio(sys.argv[sys.argv.index("--audio") + 1])
+    elif "--frame" in sys.argv:
         i = sys.argv.index("--frame")
         frame(sys.argv[i + 1], sys.argv[i + 2])
     else:

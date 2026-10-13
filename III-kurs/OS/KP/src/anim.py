@@ -191,10 +191,10 @@ class Chrome:
                 seen = True
         return result
 
-    def open(self, url, width, height):
+    def open(self, url, width, height, scale=1):
         target = self.call("Target.createTarget", url="about:blank")["targetId"]
         self.session = self.call("Target.attachToTarget", targetId=target, flatten=True)["sessionId"]
-        self.call("Emulation.setDeviceMetricsOverride", width=width, height=height, deviceScaleFactor=1, mobile=False)
+        self.call("Emulation.setDeviceMetricsOverride", width=width, height=height, deviceScaleFactor=scale, mobile=False)
         self.call("Page.enable")
         self.call("Page.navigate", wait_event="Page.loadEventFired", url=url)
         self.eval("document.fonts.ready.then(() => true)")
@@ -205,8 +205,11 @@ class Chrome:
             raise RuntimeError(r["exceptionDetails"])
         return r["result"].get("value")
 
-    def shot(self):
-        return base64.b64decode(self.call("Page.captureScreenshot", format="png", optimizeForSpeed=True)["data"])
+    def shot(self, fmt="png"):
+        params = {"format": fmt, "optimizeForSpeed": True}
+        if fmt == "jpeg":
+            params["quality"] = 96
+        return base64.b64decode(self.call("Page.captureScreenshot", **params)["data"])
 
     def close(self):
         try:

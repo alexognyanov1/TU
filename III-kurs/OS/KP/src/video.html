@@ -42,7 +42,7 @@ svg text { font-family: "SF Pro Display", -apple-system, system-ui, "Helvetica N
 <script>
 const D = /*@DATA*/null;
 const W = 1920, H = 1080, PAGE = "#eeebe5", PAPER = "#f7f5f1", INK = "#161616", MUTED = "#7a766e", RULE = "#dcd8d0";
-const UNIT = 0.6, TRU = 0.6, ZIN = 1.5, PRE = 0.8, POST = 2.4, ZOUT = 1.4, GAP = 0.7, START = 4.8;
+const UNIT = 0.55, TRU = 0.6, ZIN = 1.1, PRE = 0.25, POST = 0.9, TRANS = 1.5, DIP = 0.62, ZOUT = 1.1, HOLD = 0.7, START = 3.3;
 const K = 0.25, TW = W * K, TH = H * K;
 const PROCS = D.processes, BY = Object.fromEntries(PROCS.map(p => [p.name, p]));
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -53,14 +53,19 @@ const out = x => 1 - (1 - x) ** 3;
 const ramp = (t, a, d) => clamp((t - a) / d, 0, 1);
 const f2 = x => x.toFixed(2);
 
-const SEG = {};
+const SEG = {}, MOVES = [];
 let T = START;
+MOVES.push({ type: "zoom_in", t0: T, t1: T + ZIN, from: 0, to: 0 });
+T += ZIN;
 D.order.forEach((a, i) => {
-  const r = D.runs[a], z0 = T, p0 = z0 + ZIN, sim0 = p0 + PRE, simEnd = sim0 + r.length * UNIT, z1 = simEnd + POST, end = z1 + ZOUT;
-  SEG[a] = { a, i, z0, p0, sim0, simEnd, z1, end };
-  T = end + GAP;
+  const r = D.runs[a], sim0 = T + PRE, simEnd = sim0 + r.length * UNIT, leave = simEnd + POST;
+  SEG[a] = { a, i, sim0, simEnd, leave };
+  const last = i === D.order.length - 1;
+  MOVES.push(last ? { type: "zoom_out", t0: leave, t1: leave + ZOUT, from: i, to: i }
+                  : { type: "trans", t0: leave, t1: leave + TRANS, from: i, to: i + 1 });
+  T = leave + (last ? ZOUT : TRANS);
 });
-const FIN = T, END_CARD = FIN + 9.5, TOTAL = END_CARD + 4.5;
+const FIN = T + HOLD, END_CARD = FIN + 6.4, TOTAL = END_CARD + 3.6;
 
 const tileX = i => 200 + (i % 3) * (TW + 40);
 const tileY = i => 392 + Math.floor(i / 3) * (TH + 40);
@@ -197,7 +202,7 @@ function scene(a, s) {
   const sw = s >= n ? r.switches : (s < 0 ? 0 : st.sw);
   g += `<text x="1440" y="958" class="ml">CONTEXT SWITCHES</text><text x="1440" y="1018" class="mv">${sw}</text>`;
   const doneA = out(ramp(s, n + 0.3, 0.8));
-  if (doneA > 0) g += `<text x="1800" y="958" class="ml" text-anchor="end" opacity="${doneA}">ALL DONE AT t = ${n}</text>`;
+  if (doneA > 0) g += `<text x="1800" y="1016" class="tag" opacity="${doneA}">all done at t = ${n}</text>`;
   return g + cards(r, a, s);
 }
 
@@ -206,20 +211,24 @@ function sceneTime(a, t) {
 }
 
 function camera(t) {
-  for (const a of D.order) {
-    const s = SEG[a];
-    if (t >= s.z0 && t < s.end) {
-      const e = t < s.p0 ? inOut(ramp(t, s.z0, ZIN)) : t < s.z1 ? 1 : 1 - inOut(ramp(t, s.z1, ZOUT));
-      return { e, i: s.i };
-    }
+  const first = MOVES[0], lastMove = MOVES[MOVES.length - 1];
+  if (t < first.t0) return { e: 0, x: tileX(0), y: tileY(0), i: 0 };
+  if (t >= lastMove.t1) return { e: 0, x: tileX(lastMove.to), y: tileY(lastMove.to), i: lastMove.to };
+  for (const m of MOVES) {
+    if (t >= m.t1) continue;
+    if (t < m.t0) return { e: 1, x: tileX(m.from), y: tileY(m.from), i: m.from };
+    const u = ramp(t, m.t0, m.t1 - m.t0);
+    if (m.type === "zoom_in") return { e: inOut(u), x: tileX(0), y: tileY(0), i: 0 };
+    if (m.type === "zoom_out") return { e: 1 - inOut(u), x: tileX(m.from), y: tileY(m.from), i: m.from };
+    const p = inOut(u);
+    return { e: 1 - DIP * Math.sin(Math.PI * ease(u)) ** 2, x: lerp(tileX(m.from), tileX(m.to), p), y: lerp(tileY(m.from), tileY(m.to), p), i: u < 0.5 ? m.from : m.to };
   }
-  return { e: 0, i: 0 };
+  return { e: 0, x: tileX(0), y: tileY(0), i: 0 };
 }
 
 function overview(t) {
-  const { e, i: ci } = camera(t);
+  const { e, x: tx, y: ty } = camera(t);
   const S1 = 1 / K, S = Math.exp(e * Math.log(S1)), f = (S - 1) / (S1 - 1);
-  const tx = tileX(ci), ty = tileY(ci);
   const ox = lerp(tx, 0, f) - tx * S, oy = lerp(ty, 0, f) - ty * S;
   const titleA = out(ramp(t, 0.25, 0.9)) * (1 - ramp(e, 0, 0.35));
   let g = `<g transform="translate(${ox.toFixed(2)} ${oy.toFixed(2)}) scale(${S.toFixed(5)})">`;
@@ -233,7 +242,7 @@ function overview(t) {
     if (sx > W || sy > H || sx + TW * S < 0 || sy + TH * S < 0) return;
     const appear = out(ramp(t, 1.1 + i * 0.12, 0.8));
     const st = sceneTime(a, t);
-    const border = i === ci ? 1 - e : 1;
+    const border = 1 - e;
     g += `<g opacity="${appear.toFixed(3)}" transform="translate(0 ${((1 - appear) * 20).toFixed(1)})">
       <svg x="${x}" y="${y}" width="${TW}" height="${TH}" viewBox="0 0 ${W} ${H}">${scene(a, st)}</svg>
       <rect x="${x}" y="${y}" width="${TW}" height="${TH}" fill="none" stroke="#cfcac0" stroke-width="${(1.5 / S).toFixed(3)}" opacity="${border.toFixed(3)}"/></g>`;
@@ -284,9 +293,10 @@ function frame(t) {
 function cues() {
   const c = [{ t: 0.3, type: "pad" }];
   D.order.forEach((a, i) => c.push({ t: 1.1 + i * 0.12, type: "tile" }));
+  const pan = i => (i % 3 - 1) * 0.55;
+  MOVES.forEach((m, n) => c.push({ t: m.t0, type: m.type, dur: m.t1 - m.t0, pan0: pan(m.from), pan1: pan(m.to), note: n }));
   for (const a of D.order) {
     const s = SEG[a];
-    c.push({ t: s.z0, type: "zoom_in" }, { t: s.z1, type: "zoom_out" });
     for (const e of D.runs[a].events) c.push({ t: s.sim0 + e.t * UNIT, type: e.kind, note: e.proc ? PROCS.indexOf(BY[e.proc]) : 0 });
   }
   D.order.forEach((k, i) => [0, 1].forEach(col => c.push({ t: FIN + 1.2 + col * 0.25 + i * 0.16, type: "bar" })));
