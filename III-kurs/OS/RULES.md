@@ -1,0 +1,36 @@
+# OS: Subject Rules
+
+> Follows the repo-wide [RULES.md](../../RULES.md). Rules here override it for this subject only.
+
+| | |
+| --- | --- |
+| **Full name (BG)** | Операционни системи (ОС) |
+| **Full name (EN)** | Operating Systems |
+| **Course / semester** | III-kurs, winter semester (2026/27) |
+| **Lecturer / assistant** | TODO |
+
+Timetable (group 43): lecture Mon 08:30–11:15, room 1152; lab Tue 10:30–13:15, room 1407 (43а even weeks, 43б odd weeks). Labs start from week 2.
+
+## Required language(s)
+
+- **Bash** (POSIX shell commands and shell scripts), run on Linux.
+
+## Required techniques / libraries / tools
+
+- Standard Linux command-line tools: file system navigation and manipulation (`ls`, `cd`, `mkdir`, `touch`, `cp`, `mv`, `rm`), permissions (`chmod`), text tools.
+- Shell scripts start with `#!/bin/bash` and are made executable with `chmod +x`.
+
+## Not allowed
+
+- TODO (fill in when the lecturer states restrictions)
+
+## Folder layout
+
+- `III-kurs/OS/YYYY.MM.DD/`: one folder per lab day. Keep any directory tree the lab asks you to build (e.g. `bin/`, `docs/`, `pics/`) as-is; scripts go in `taskN.sh` or where the handout says.
+- Create a day with `python3 scripts/tu.py new-day III-kurs OS --type Lab --lang Bash`.
+
+## How to run
+
+```sh
+bash III-kurs/OS/2026.10.13/bin/script.sh
+```

@@ -38,6 +38,7 @@ Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_p
 | [PE](III-kurs/PE) | Програмни езици / Programming Languages | C++17 | [rules](III-kurs/PE/RULES.md) |
 | [KP](III-kurs/KP) | Компютърна периферия / Computer Peripherals | HTML → PDF (Bulgarian documents) | [rules](III-kurs/KP/RULES.md) |
 | [ASLS](III-kurs/ASLS) | Анализ и синтез на логически схеми / Analysis and Synthesis of Logic Circuits | Multisim, Python | [rules](III-kurs/ASLS/RULES.md) |
+| [OS](III-kurs/OS) | Операционни системи / Operating Systems | Bash | [rules](III-kurs/OS/RULES.md) |
 
 <!-- /subjects:III-kurs -->
 
@@ -73,6 +74,17 @@ Rules: [III-kurs/ASLS/RULES.md](III-kurs/ASLS/RULES.md) · Check answers: `pytho
 | 2026.10.07 | Lab | [III-kurs/ASLS/2026.10.07](III-kurs/ASLS/2026.10.07) | Multisim, Python | Lab 1 – logic functions and Boolean algebra (handout `Lab1_2026.pdf`, answers in the folder's README). B1 – simplifying 6 functions step by step with Boolean algebra laws (De Morgan, absorption, reduction, consensus / redundant implicants, adding a missing variable): f1 = A ∨ BC, f2 = AD, f3 = AB ∨ ĀC, f4 = A ∨ BC, f5 = AB̄ ∨ BC̄ ∨ ĀC, f6 = A ∨ BC̄. B2 – Multisim: truth table of two-input gates AND/NAND/OR/NOR/XOR/XNOR (7408, 7400, 7432, 7402, 74S86, 74LS266 open-collector pull-up); XOR cascades = 3-bit odd parity generator and 4-bit even parity checker; Word Generator (up counter) + Logic Analyzer timing diagrams; f6 circuit vs minimized form. `verify.py` brute-forces every simplification and prints all truth tables |
 
 <!-- /index:III-kurs/ASLS -->
+
+### OS: Operating Systems
+
+Rules: [III-kurs/OS/RULES.md](III-kurs/OS/RULES.md)
+
+<!-- index:III-kurs/OS -->
+| Date | Type | Folder | Language | What's inside |
+| --- | --- | --- | --- | --- |
+| 2026.10.13 | Lab | [III-kurs/OS/2026.10.13](III-kurs/OS/2026.10.13) | Bash | Lab 1 – Linux file system basics: directory tree `bin/`, `docs/`, `pics/` with files `script.sh`, `file1.txt`, `file2.txt`, `image1.png`, `image2.png` (create directories and empty files from the shell: `mkdir`, `touch`, `ls`, `cd`, relative and absolute paths) |
+
+<!-- /index:III-kurs/OS -->
 
 <!-- /course:III-kurs -->
 
