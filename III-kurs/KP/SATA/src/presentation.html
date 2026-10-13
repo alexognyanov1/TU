@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<title>SATA (Serial ATA) – презентация</title>
+<style>
+@page { size: 13.333in 7.5in; margin: 0 }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1f2a37; counter-reset: s; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+.slide { width: 13.333in; height: 7.5in; page-break-after: always; break-after: page; overflow: hidden; box-sizing: border-box; position: relative; counter-increment: s; background: #fff }
+.slide:last-child { page-break-after: auto; break-after: auto }
+.slide::before { content: "SATA – Компютърна периферия"; position: absolute; left: 48px; bottom: 12px; font-size: 15px; color: #64748b }
+.slide::after { content: counter(s) " / 50"; position: absolute; right: 48px; bottom: 12px; font-size: 15px; color: #64748b; font-weight: 600 }
+.slide h2 { margin: 0; background: #0b3d63; color: #fff; font-size: 34px; font-weight: 700; padding: 20px 48px 18px; border-bottom: 6px solid #f28c28; letter-spacing: .2px }
+.slide h2 small { font-size: 20px; font-weight: 400; color: #bcd4ea; margin-left: 14px }
+.c { padding: 22px 48px 0; font-size: 22px; line-height: 1.38; height: 590px }
+.c ul { margin: 6px 0; padding-left: 28px }
+.c li { margin: 5px 0 }
+.c li::marker { color: #f28c28 }
+.c p { margin: 6px 0 10px }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; align-items: start }
+.cols.w37 { grid-template-columns: 3fr 4fr }
+.cols.w73 { grid-template-columns: 4fr 3fr }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px }
+table { border-collapse: collapse; width: 100%; font-size: 19px }
+th { background: #0b3d63; color: #fff; text-align: left; font-weight: 600 }
+th, td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top }
+.tight td, .tight th { padding: 4px 10px }
+tr:nth-child(even) td { background: #f1f5f9 }
+.box { background: #fff6ec; border-left: 6px solid #f28c28; padding: 10px 16px; margin: 10px 0; font-size: 20px }
+.box.b { background: #eaf2fa; border-left-color: #0b3d63 }
+.k { color: #0b3d63; font-weight: 700 }
+.o { color: #c2610c; font-weight: 700 }
+code, .m { font-family: Menlo, "Courier New", monospace; font-size: .9em; background: #eef2f7; padding: 1px 5px; border-radius: 3px }
+.small { font-size: 18px }
+.note { font-size: 17px; color: #475569 }
+svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans-serif }
+.title { background: linear-gradient(135deg, #0b3d63 0%, #072640 100%); color: #fff }
+.title::before, .title::after { color: #9fb7cf }
+.title .inner { padding: 110px 90px 0 }
+.title h1 { font-size: 54px; margin: 0 0 18px; line-height: 1.15 }
+.title .bar { width: 160px; height: 8px; background: #f28c28; margin: 18px 0 30px }
+.title .sub { font-size: 28px; color: #d5e3f0; margin: 0 0 50px }
+.title .meta { font-size: 22px; line-height: 1.6; color: #fff }
+.end { background: linear-gradient(135deg, #0b3d63 0%, #072640 100%); color: #fff }
+.end::before, .end::after { color: #9fb7cf }
+.toc { columns: 2; column-gap: 60px; font-size: 24px; margin: 20px 0 0; padding-left: 36px }
+.toc li { margin: 0 0 22px; break-inside: avoid }
+.toc span { color: #64748b; font-size: 18px; white-space: nowrap }
+.authors, .authors td, .authors tr { border: none !important; background: none !important; font-size: inherit !important; color: inherit !important; line-height: inherit; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide title">
+  <img src="tu-sofia-logo-white.png" alt="ТУ – София" style="position:absolute; top:0.55in; right:0.7in; height:1.15in">
+  <div class="inner">
+    <h1>SATA (Serial ATA) –<br>архитектура, протокол и приложение</h1>
+    <div class="bar"></div>
+    <p class="sub">Реферат и презентация по дисциплината „Компютърна периферия“</p>
+    <div class="meta">
+      <table class="authors" style="border-collapse:collapse;margin:0 0 0.4em;font:inherit;color:inherit;width:auto">
+        <tr><td style="padding:0 0.6em 0 0;vertical-align:top">Изготвили:</td><td style="padding:0 1.2em 0 0"><b>Алекс Огнянов</b><br><b>Йордан Начев</b><br><b>Магдалена Джисова</b></td><td style="padding:0">фак. № 121224052<br>фак. № 121224053<br>фак. № 121224210</td><td style="padding:0 0 0 1.2em">група 43<br>група 43<br>група 40</td></tr>
+      </table>
+      КСИ, III курс<br>
+      Технически университет – София, ФКСТ<br>
+      2026/2027 г.
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2>Съдържание</h2>
+  <div class="c">
+    <ol class="toc">
+      <li>Увод и история на ATA <span>(3–7)</span></li>
+      <li>Поколения SATA и скорости <span>(8–12)</span></li>
+      <li>Архитектура и слоеве на протокола <span>(13–14)</span></li>
+      <li>Физически слой: LVDS, 8b/10b, OOB <span>(15–21)</span></li>
+      <li>Канален слой: примитиви, рамки, CRC <span>(22–25)</span></li>
+      <li>Транспортен слой: FIS <span>(26–27)</span></li>
+      <li>Команден слой: ATA команди, PIO, DMA <span>(28–30)</span></li>
+      <li>NCQ, TRIM, hot-plug <span>(31–34)</span></li>
+      <li>Управление на енергията <span>(35)</span></li>
+      <li>Кабели, конектори и форм-фактори <span>(36–40)</span></li>
+      <li>Хост контролери и AHCI <span>(41–43)</span></li>
+      <li>Port Multiplier, SAS, RAID <span>(44–46)</span></li>
+      <li>SATA срещу NVMe <span>(47)</span></li>
+      <li>Диагностика: S.M.A.R.T. <span>(48)</span></li>
+      <li>Приложение днес и бъдеще <span>(49)</span></li>
+      <li>Заключение и литература <span>(50)</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>Увод: какво е SATA и защо е важен</h2>
+  <div class="c cols w73">
+    <div>
+      <ul>
+        <li><span class="k">SATA (Serial AT Attachment)</span> – сериен интерфейс за свързване на запомнящи устройства: HDD, SSD, оптични устройства</li>
+        <li>Наследник на паралелния <span class="k">ATA (PATA / IDE)</span></li>
+        <li>Запазва <span class="k">командния набор ATA</span> → софтуерна съвместимост с драйверите и ОС</li>
+        <li>Сменя физическия интерфейс: от 40 паралелни линии към <span class="k">2 диференциални двойки</span></li>
+        <li>Връзка <span class="k">точка-точка</span> – едно устройство на порт</li>
+        <li>От 2003 г. – стандартен дисков интерфейс в настолни компютри, лаптопи и сървъри</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="440" height="380" viewBox="0 0 440 380">
+        <rect x="20" y="20" width="160" height="90" rx="10" fill="#0b3d63"/>
+        <text x="100" y="60" fill="#fff" font-size="20" text-anchor="middle" font-weight="700">Хост</text>
+        <text x="100" y="86" fill="#cfe0f0" font-size="15" text-anchor="middle">SATA контролер</text>
+        <rect x="260" y="20" width="160" height="90" rx="10" fill="#f28c28"/>
+        <text x="340" y="60" fill="#fff" font-size="20" text-anchor="middle" font-weight="700">Устройство</text>
+        <text x="340" y="86" fill="#fff" font-size="15" text-anchor="middle">HDD / SSD / ODD</text>
+        <line x1="180" y1="52" x2="260" y2="52" stroke="#1f2a37" stroke-width="3" marker-end="url(#a3)"/>
+        <line x1="260" y1="80" x2="180" y2="80" stroke="#1f2a37" stroke-width="3" marker-end="url(#a3)"/>
+        <defs><marker id="a3" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="220" y="140" font-size="16" text-anchor="middle" fill="#334155">TX / RX – 2 диф. двойки</text>
+        <rect x="40" y="180" width="360" height="170" rx="12" fill="#f1f5f9" stroke="#cbd5e1"/>
+        <text x="220" y="215" font-size="18" text-anchor="middle" font-weight="700" fill="#0b3d63">Ключови предимства</text>
+        <text x="60" y="250" font-size="16" fill="#1f2a37">• по-висока скорост (до 6 Gbit/s)</text>
+        <text x="60" y="278" font-size="16" fill="#1f2a37">• тънки кабели, по-добро охлаждане</text>
+        <text x="60" y="306" font-size="16" fill="#1f2a37">• hot-plug, NCQ, енергоспестяване</text>
+        <text x="60" y="334" font-size="16" fill="#1f2a37">• обратна софтуерна съвместимост</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>История: ATA / IDE / PATA</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li><span class="k">1986</span> – Western Digital и Compaq създават IDE (Integrated Drive Electronics): контролерът е вграден в диска</li>
+        <li>Интерфейсът произлиза от шината на IBM PC/AT → име <span class="k">AT Attachment</span></li>
+        <li><span class="k">1994</span> – стандартизиран като ATA-1 (ANSI) от комитета <span class="k">T13</span></li>
+        <li>EIDE, ATAPI (CD-ROM, лентови устройства), LBA адресиране</li>
+        <li>След появата на SATA старият интерфейс е преименуван на <span class="k">PATA</span> (Parallel ATA)</li>
+      </ul>
+    </div>
+    <div>
+      <table class="small">
+        <tr><th>Стандарт</th><th>Ключово нововъведение</th><th>Макс.</th></tr>
+        <tr><td>ATA-1</td><td>PIO 0–2, DMA</td><td>8,3 MB/s</td></tr>
+        <tr><td>ATA-2</td><td>PIO 3–4, LBA (EIDE)</td><td>16,6 MB/s</td></tr>
+        <tr><td>ATA-3</td><td>S.M.A.R.T., сигурност</td><td>16,6 MB/s</td></tr>
+        <tr><td>ATA/ATAPI-4</td><td>Ultra DMA/33, ATAPI</td><td>33 MB/s</td></tr>
+        <tr><td>ATA/ATAPI-5</td><td>UDMA/66, 80-жилен кабел</td><td>66 MB/s</td></tr>
+        <tr><td>ATA/ATAPI-6</td><td>UDMA/100, 48-bit LBA</td><td>100 MB/s</td></tr>
+        <tr><td>ATA/ATAPI-7</td><td>UDMA/133, включва SATA 1.0</td><td>133 MB/s</td></tr>
+        <tr><td>ATA8-ACS</td><td>само команден набор</td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Ограничения на паралелния ATA</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li><span class="k">Широк кабел</span>: 40 пина, 40 или 80 жила (допълнителни заземяващи жила срещу смущения)</li>
+        <li>Максимална дължина <span class="k">18 инча (≈ 46 cm)</span></li>
+        <li><span class="k">Master/Slave</span> – 2 устройства делят една шина, работят последователно</li>
+        <li><span class="k">Кръстосани смущения (crosstalk)</span> и разминаване (skew) между линиите</li>
+        <li>Таван <span class="k">UDMA/133 – 133 MB/s</span>; по-нататъшно ускоряване е непрактично</li>
+        <li>5 V сигнални нива, лош въздушен поток в кутията, няма hot-plug</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="540" height="420" viewBox="0 0 540 420">
+        <text x="270" y="24" font-size="18" font-weight="700" text-anchor="middle" fill="#0b3d63">PATA лентов кабел (40/80 жила)</text>
+        <rect x="30" y="40" width="480" height="110" fill="#d9dee5" stroke="#64748b"/>
+        <g stroke="#8a96a6" stroke-width="2">
+          <line x1="40" y1="45" x2="40" y2="145"/><line x1="52" y1="45" x2="52" y2="145"/><line x1="64" y1="45" x2="64" y2="145"/><line x1="76" y1="45" x2="76" y2="145"/><line x1="88" y1="45" x2="88" y2="145"/><line x1="100" y1="45" x2="100" y2="145"/><line x1="112" y1="45" x2="112" y2="145"/><line x1="124" y1="45" x2="124" y2="145"/><line x1="136" y1="45" x2="136" y2="145"/><line x1="148" y1="45" x2="148" y2="145"/><line x1="160" y1="45" x2="160" y2="145"/><line x1="172" y1="45" x2="172" y2="145"/><line x1="184" y1="45" x2="184" y2="145"/><line x1="196" y1="45" x2="196" y2="145"/><line x1="208" y1="45" x2="208" y2="145"/><line x1="220" y1="45" x2="220" y2="145"/><line x1="232" y1="45" x2="232" y2="145"/><line x1="244" y1="45" x2="244" y2="145"/><line x1="256" y1="45" x2="256" y2="145"/><line x1="268" y1="45" x2="268" y2="145"/><line x1="280" y1="45" x2="280" y2="145"/><line x1="292" y1="45" x2="292" y2="145"/><line x1="304" y1="45" x2="304" y2="145"/><line x1="316" y1="45" x2="316" y2="145"/><line x1="328" y1="45" x2="328" y2="145"/><line x1="340" y1="45" x2="340" y2="145"/><line x1="352" y1="45" x2="352" y2="145"/><line x1="364" y1="45" x2="364" y2="145"/><line x1="376" y1="45" x2="376" y2="145"/><line x1="388" y1="45" x2="388" y2="145"/><line x1="400" y1="45" x2="400" y2="145"/><line x1="412" y1="45" x2="412" y2="145"/><line x1="424" y1="45" x2="424" y2="145"/><line x1="436" y1="45" x2="436" y2="145"/><line x1="448" y1="45" x2="448" y2="145"/><line x1="460" y1="45" x2="460" y2="145"/><line x1="472" y1="45" x2="472" y2="145"/><line x1="484" y1="45" x2="484" y2="145"/><line x1="496" y1="45" x2="496" y2="145"/>
+        </g>
+        <line x1="40" y1="45" x2="40" y2="145" stroke="#c0392b" stroke-width="3"/>
+        <text x="270" y="175" font-size="15" text-anchor="middle" fill="#475569">ширина ≈ 5 cm, дължина ≤ 46 cm</text>
+        <text x="270" y="225" font-size="18" font-weight="700" text-anchor="middle" fill="#c2610c">SATA кабел за данни (7 жила)</text>
+        <rect x="235" y="240" width="70" height="150" rx="6" fill="#c2410c"/>
+        <line x1="255" y1="245" x2="255" y2="385" stroke="#fde2c8" stroke-width="2"/>
+        <line x1="270" y1="245" x2="270" y2="385" stroke="#fde2c8" stroke-width="2"/>
+        <line x1="285" y1="245" x2="285" y2="385" stroke="#fde2c8" stroke-width="2"/>
+        <text x="330" y="300" font-size="15" fill="#475569">ширина ≈ 8 mm</text>
+        <text x="330" y="325" font-size="15" fill="#475569">дължина до 1 m</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>Serial ATA Working Group и SATA-IO</h2>
+  <div class="c cols w73">
+    <div>
+      <ul>
+        <li><span class="k">2000 г.</span> – създадена е <span class="k">Serial ATA Working Group</span></li>
+        <li>Основатели: <span class="k">Intel, APT Technologies, Dell, IBM, Maxtor, Quantum, Seagate</span></li>
+        <li><span class="k">2001 г.</span> – публикувана спецификация Serial ATA 1.0</li>
+        <li><span class="k">2003 г.</span> – първите масови дънни платки и дискове със SATA</li>
+        <li><span class="k">2004 г.</span> – групата е преобразувана в <span class="k">SATA-IO</span> (Serial ATA International Organization)</li>
+        <li>SATA-IO поддържа спецификацията, логото и програмата за сертифициране (Plugfest, Interoperability)</li>
+        <li>Командният набор остава в T13 (ATA8-ACS, ACS-2 … ACS-5)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="box b"><b>Разделение на отговорностите</b><br><br>
+        <b>SATA-IO</b> – физически, канален и транспортен слой, конектори, кабели, AHCI взаимодействие<br><br>
+        <b>INCITS T13</b> – ATA команди (ACS): IDENTIFY, READ/WRITE, SMART, Security, TRIM…</div>
+      <div class="box">Целта: <b>„прозрачна“ замяна</b> – ОС вижда SATA диска като обикновен ATA диск.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>Хронология на ревизиите</h2>
+  <div class="c">
+    <svg width="1180" height="540" viewBox="0 0 1180 540">
+      <line x1="30" y1="160" x2="1160" y2="160" stroke="#0b3d63" stroke-width="5"/>
+      <g font-size="17" text-anchor="middle">
+        <circle cx="60" cy="160" r="12" fill="#f28c28"/><text x="60" y="140" font-weight="700" fill="#0b3d63">2001</text><text x="60" y="200" font-weight="700">1.0</text><text x="60" y="222" fill="#475569" font-size="15">1,5 Gbit/s</text>
+        <circle cx="180" cy="160" r="12" fill="#f28c28"/><text x="180" y="140" font-weight="700" fill="#0b3d63">2004</text><text x="180" y="200" font-weight="700">2.0</text><text x="180" y="222" fill="#475569" font-size="15">3 Gbit/s</text>
+        <circle cx="300" cy="160" r="12" fill="#f28c28"/><text x="300" y="140" font-weight="700" fill="#0b3d63">2005</text><text x="300" y="200" font-weight="700">2.5</text><text x="300" y="222" fill="#475569" font-size="15">обединена</text>
+        <circle cx="420" cy="160" r="12" fill="#f28c28"/><text x="420" y="140" font-weight="700" fill="#0b3d63">2007</text><text x="420" y="200" font-weight="700">2.6</text><text x="420" y="222" fill="#475569" font-size="15">slimline,</text><text x="420" y="244" fill="#475569" font-size="15">micro</text>
+        <circle cx="540" cy="160" r="12" fill="#f28c28"/><text x="540" y="140" font-weight="700" fill="#0b3d63">2009</text><text x="540" y="200" font-weight="700">3.0</text><text x="540" y="222" fill="#475569" font-size="15">6 Gbit/s</text>
+        <circle cx="660" cy="160" r="12" fill="#f28c28"/><text x="660" y="140" font-weight="700" fill="#0b3d63">2011</text><text x="660" y="200" font-weight="700">3.1</text><text x="660" y="222" fill="#475569" font-size="15">mSATA,</text><text x="660" y="244" fill="#475569" font-size="15">Queued TRIM</text>
+        <circle cx="790" cy="160" r="12" fill="#f28c28"/><text x="790" y="140" font-weight="700" fill="#0b3d63">2013</text><text x="790" y="200" font-weight="700">3.2</text><text x="790" y="222" fill="#475569" font-size="15">SATA Express,</text><text x="790" y="244" fill="#475569" font-size="15">M.2, DevSleep</text>
+        <circle cx="930" cy="160" r="12" fill="#f28c28"/><text x="930" y="140" font-weight="700" fill="#0b3d63">2016</text><text x="930" y="200" font-weight="700">3.3</text><text x="930" y="222" fill="#475569" font-size="15">SMR,</text><text x="930" y="244" fill="#475569" font-size="15">PWDIS</text>
+        <circle cx="1040" cy="160" r="12" fill="#f28c28"/><text x="1040" y="140" font-weight="700" fill="#0b3d63">2018</text><text x="1040" y="200" font-weight="700">3.4</text><text x="1040" y="222" fill="#475569" font-size="15">Durable</text><text x="1040" y="244" fill="#475569" font-size="15">Write</text>
+        <circle cx="1130" cy="160" r="12" fill="#f28c28"/><text x="1130" y="140" font-weight="700" fill="#0b3d63">2020</text><text x="1130" y="200" font-weight="700">3.5</text><text x="1130" y="222" fill="#475569" font-size="15">CDL</text>
+      </g>
+      <rect x="40" y="280" width="1110" height="230" rx="12" fill="#f1f5f9" stroke="#cbd5e1"/>
+      <g font-size="19" fill="#1f2a37">
+        <text x="70" y="320"><tspan font-weight="700" fill="#0b3d63">Gen1 / SATA I</tspan> – 1,5 Gbit/s, нужни са минимални промени в драйверите</text>
+        <text x="70" y="360"><tspan font-weight="700" fill="#0b3d63">Gen2 / SATA II</tspan> – 3 Gbit/s; функции NCQ, Port Multiplier, eSATA (част от тях като допълнения към 1.0)</text>
+        <text x="70" y="400"><tspan font-weight="700" fill="#0b3d63">Gen3 / SATA III</tspan> – 6 Gbit/s; последното увеличение на скоростта</text>
+        <text x="70" y="440"><tspan font-weight="700" fill="#0b3d63">3.1 – 3.5</tspan> – нови функции без нова скорост: форм-фактори, енергия, NCQ разширения</text>
+        <text x="70" y="480" fill="#475569" font-size="17">Терминът „SATA II/III“ е маркетингов; SATA-IO препоръчва „SATA 3 Gb/s“, „SATA 6 Gb/s“.</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>SATA 1.0 <small>Gen1 – 1,5 Gbit/s</small></h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Линейна скорост <span class="k">1,5 Gbit/s</span></li>
+        <li>8b/10b → полезни 1,2 Gbit/s ≈ <span class="k">150 MB/s</span></li>
+        <li>Тактова честота на символите: 1,5 GHz, UI ≈ 666,7 ps</li>
+        <li>Нов 7-пинов конектор за данни и 15-пинов захранващ конектор</li>
+        <li>Hot-plug на ниво физически слой</li>
+        <li>„Емулира“ PATA регистрите (Shadow Register Block) → съвместимост с IDE драйвери</li>
+        <li>Първоначално често чрез мостове PATA↔SATA (bridge chips)</li>
+      </ul>
+    </div>
+    <div>
+      <div class="box b"><b>Изчисление на пропускателна способност</b><br><br>
+        1,5 × 10<sup>9</sup> bit/s × 8/10 = 1,2 × 10<sup>9</sup> bit/s<br>
+        1,2 × 10<sup>9</sup> / 8 = <b>150 × 10<sup>6</sup> B/s</b></div>
+      <div class="box">Сравнение: PATA UDMA/133 – 133 MB/s, споделени между 2 устройства. SATA – 150 MB/s <b>за всяко</b> устройство.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>SATA 2.x <small>Gen2 – 3 Gbit/s</small></h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Линейна скорост <span class="k">3 Gbit/s</span> → <span class="k">300 MB/s</span></li>
+        <li><span class="k">NCQ</span> (Native Command Queuing) – до 32 команди в опашка</li>
+        <li><span class="k">Port Multiplier</span> – до 15 устройства към един порт</li>
+        <li><span class="k">Port Selector</span> – резервиран достъп от 2 хоста</li>
+        <li><span class="k">Staggered spin-up</span> – поетапно стартиране на дисковете</li>
+        <li><span class="k">eSATA</span> – външен SATA (рев. 2.5 / 2.6)</li>
+        <li>2.6: Slimline и micro SATA конектори, NCQ приоритет</li>
+      </ul>
+    </div>
+    <div>
+      <table>
+        <tr><th>Параметър</th><th>Gen1</th><th>Gen2</th></tr>
+        <tr><td>Линейна скорост</td><td>1,5 Gbit/s</td><td>3,0 Gbit/s</td></tr>
+        <tr><td>UI</td><td>666,7 ps</td><td>333,3 ps</td></tr>
+        <tr><td>Полезна скорост</td><td>150 MB/s</td><td>300 MB/s</td></tr>
+        <tr><td>Кабел</td><td colspan="2">същият 7-пинов</td></tr>
+        <tr><td>Съвместимост</td><td colspan="2">автоматично договаряне на скорост</td></tr>
+      </table>
+      <p class="note">Функциите NCQ, PM, hot-plug са по избор – наличието им се проверява чрез IDENTIFY DEVICE.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>SATA 3.x <small>Gen3 – 6 Gbit/s и разширения</small></h2>
+  <div class="c">
+    <table>
+      <tr><th style="width:120px">Ревизия</th><th style="width:110px">Година</th><th>Основни нововъведения</th></tr>
+      <tr><td><b>3.0</b></td><td>2009</td><td><b>6 Gbit/s → 600 MB/s</b>; изохронно NCQ стрийминг, NCQ управление; по-добро управление на енергията</td></tr>
+      <tr><td><b>3.1</b></td><td>2011</td><td><b>mSATA</b>; Queued TRIM (опашков TRIM); USM (Universal Storage Module); Zero-Power ODD; Hardware Control Features</td></tr>
+      <tr><td><b>3.2</b></td><td>2013</td><td><b>SATA Express</b> (PCIe); <b>M.2</b>; µSSD (BGA); <b>DevSleep</b>; SSHD (хибридни дискове); Transitional Energy Reporting</td></tr>
+      <tr><td><b>3.3</b></td><td>2016</td><td>Поддръжка на <b>SMR</b> (Shingled Magnetic Recording); <b>PWDIS</b> (Power Disable, пин P3); Rebuild Assist</td></tr>
+      <tr><td><b>3.4</b></td><td>2018</td><td>Durable/Ordered Write Notification; мониторинг на температурата без прекъсване на работата</td></tr>
+      <tr><td><b>3.5</b></td><td>2020</td><td>Device Transmit Emphasis; Defined Ordered NCQ Commands; Command Duration Limits</td></tr>
+    </table>
+    <div class="box">След 3.0 скоростта <b>не е увеличавана</b> – за по-бързи SSD индустрията преминава към PCIe/NVMe.</div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Скорости по поколения</h2>
+  <div class="c">
+    <svg width="1180" height="540" viewBox="0 0 1180 540">
+      <line x1="250" y1="20" x2="250" y2="480" stroke="#1f2a37" stroke-width="2"/>
+      <line x1="250" y1="480" x2="1130" y2="480" stroke="#1f2a37" stroke-width="2"/>
+      <g font-size="15" fill="#64748b" text-anchor="middle">
+        <line x1="390" y1="480" x2="390" y2="30" stroke="#e2e8f0"/><text x="390" y="505">100</text>
+        <line x1="530" y1="480" x2="530" y2="30" stroke="#e2e8f0"/><text x="530" y="505">200</text>
+        <line x1="670" y1="480" x2="670" y2="30" stroke="#e2e8f0"/><text x="670" y="505">300</text>
+        <line x1="810" y1="480" x2="810" y2="30" stroke="#e2e8f0"/><text x="810" y="505">400</text>
+        <line x1="950" y1="480" x2="950" y2="30" stroke="#e2e8f0"/><text x="950" y="505">500</text>
+        <line x1="1090" y1="480" x2="1090" y2="30" stroke="#e2e8f0"/><text x="1090" y="505">600</text>
+        <text x="250" y="505">0</text>
+        <text x="690" y="532" fill="#1f2a37" font-size="16">MB/s (полезна пропускателна способност)</text>
+      </g>
+      <g font-size="18" text-anchor="end" fill="#1f2a37">
+        <text x="238" y="72">PATA UDMA/66</text>
+        <text x="238" y="152">PATA UDMA/133</text>
+        <text x="238" y="232">SATA 1,5 Gbit/s</text>
+        <text x="238" y="312">SATA 3 Gbit/s</text>
+        <text x="238" y="392">SATA 6 Gbit/s</text>
+      </g>
+      <rect x="250" y="45" width="92" height="40" fill="#94a3b8"/><text x="352" y="72" font-size="17">66</text>
+      <rect x="250" y="125" width="186" height="40" fill="#94a3b8"/><text x="446" y="152" font-size="17">133</text>
+      <rect x="250" y="205" width="210" height="40" fill="#5b8fbf"/><text x="470" y="232" font-size="17">150</text>
+      <rect x="250" y="285" width="420" height="40" fill="#2b6699"/><text x="680" y="312" font-size="17">300</text>
+      <rect x="250" y="365" width="840" height="40" fill="#0b3d63"/><text x="1080" y="392" font-size="17" fill="#fff" text-anchor="end" font-weight="700">600</text>
+      <text x="260" y="455" font-size="16" fill="#c2610c">За сравнение: NVMe SSD с PCIe 4.0 x4 достигат ≈ 7 000 MB/s – извън мащаба на графиката</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>PATA срещу SATA</h2>
+  <div class="c">
+    <table>
+      <tr><th style="width:28%">Характеристика</th><th>PATA (ATA/ATAPI-7)</th><th>SATA (3.x)</th></tr>
+      <tr><td>Предаване</td><td>паралелно, 16 бита, едностранни сигнали</td><td>серийно, диференциални двойки (LVDS)</td></tr>
+      <tr><td>Макс. скорост</td><td>133 MB/s (споделена)</td><td>600 MB/s (на порт)</td></tr>
+      <tr><td>Топология</td><td>шина, 2 устройства (master/slave)</td><td>точка-точка, 1 устройство на порт</td></tr>
+      <tr><td>Кабел</td><td>40 пина, 40/80 жила, ≤ 46 cm</td><td>7 пина, ≤ 1 m (eSATA ≤ 2 m)</td></tr>
+      <tr><td>Захранване</td><td>4-пинов Molex (5 V, 12 V)</td><td>15-пинов (3,3 V, 5 V, 12 V)</td></tr>
+      <tr><td>Сигнални нива</td><td>5 V TTL (3,3 V допустими)</td><td>≈ 0,4 – 0,6 V диференциално</td></tr>
+      <tr><td>Hot-plug</td><td>не</td><td>да</td></tr>
+      <tr><td>Опашка от команди</td><td>TCQ (рядко поддържано)</td><td>NCQ, 32 команди</td></tr>
+      <tr><td>Конфигурация</td><td>джъмпери (master/slave/cable select)</td><td>не е нужна</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <h2>Обща архитектура хост – устройство</h2>
+  <div class="c cols w37">
+    <div>
+      <ul>
+        <li><span class="k">Хост</span>: SATA контролер (HBA) в чипсета или PCIe карта</li>
+        <li>Всеки <span class="k">порт</span> = отделна връзка точка-точка</li>
+        <li>Няма арбитраж на шина и master/slave</li>
+        <li>Двете страни имат еднакъв слоест протоколен стек</li>
+        <li>Хостът вижда устройството чрез регистрите на HBA (AHCI)</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="640" height="520" viewBox="0 0 640 520">
+        <defs><marker id="a13" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker></defs>
+        <rect x="200" y="10" width="240" height="60" rx="8" fill="#e2e8f0" stroke="#64748b"/><text x="320" y="47" text-anchor="middle" font-size="18">CPU + RAM</text>
+        <line x1="320" y1="70" x2="320" y2="110" stroke="#475569" stroke-width="3"/>
+        <rect x="160" y="110" width="320" height="60" rx="8" fill="#e2e8f0" stroke="#64748b"/><text x="320" y="147" text-anchor="middle" font-size="18">PCIe / чипсет (PCH)</text>
+        <line x1="320" y1="170" x2="320" y2="210" stroke="#475569" stroke-width="3"/>
+        <rect x="60" y="210" width="520" height="80" rx="10" fill="#0b3d63"/>
+        <text x="320" y="245" text-anchor="middle" font-size="20" fill="#fff" font-weight="700">SATA HBA (AHCI контролер)</text>
+        <text x="320" y="272" text-anchor="middle" font-size="15" fill="#cfe0f0">порт 0 · порт 1 · порт 2 · порт 3</text>
+        <g stroke="#f28c28" stroke-width="4">
+          <line x1="125" y1="290" x2="125" y2="390"/><line x1="255" y1="290" x2="255" y2="390"/><line x1="385" y1="290" x2="385" y2="390"/><line x1="515" y1="290" x2="515" y2="390"/>
+        </g>
+        <g font-size="16" text-anchor="middle">
+          <rect x="70" y="390" width="110" height="70" rx="8" fill="#f28c28"/><text x="125" y="430" fill="#fff" font-weight="700">HDD</text>
+          <rect x="200" y="390" width="110" height="70" rx="8" fill="#f28c28"/><text x="255" y="430" fill="#fff" font-weight="700">SSD</text>
+          <rect x="330" y="390" width="110" height="70" rx="8" fill="#f28c28"/><text x="385" y="430" fill="#fff" font-weight="700">ODD</text>
+          <rect x="460" y="390" width="110" height="70" rx="8" fill="#94a3b8"/><text x="515" y="430" fill="#fff" font-weight="700">празен</text>
+        </g>
+        <text x="320" y="500" text-anchor="middle" font-size="16" fill="#475569">всяка връзка е отделна и работи със собствената си скорост</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <h2>Слоеве на протокола SATA</h2>
+  <div class="c cols">
+    <div>
+      <svg width="560" height="520" viewBox="0 0 560 520">
+        <defs><marker id="a14" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f28c28"/></marker></defs>
+        <g font-size="18" text-anchor="middle" font-weight="700" fill="#fff">
+          <rect x="20" y="20" width="230" height="90" rx="8" fill="#0b3d63"/><text x="135" y="58">Приложен /</text><text x="135" y="82">команден</text>
+          <rect x="20" y="130" width="230" height="90" rx="8" fill="#1d5a8a"/><text x="135" y="180">Транспортен</text>
+          <rect x="20" y="240" width="230" height="90" rx="8" fill="#2f78b0"/><text x="135" y="290">Канален (Link)</text>
+          <rect x="20" y="350" width="230" height="90" rx="8" fill="#4f95cc"/><text x="135" y="400">Физически</text>
+          <rect x="310" y="20" width="230" height="90" rx="8" fill="#0b3d63"/><text x="425" y="58">Приложен /</text><text x="425" y="82">команден</text>
+          <rect x="310" y="130" width="230" height="90" rx="8" fill="#1d5a8a"/><text x="425" y="180">Транспортен</text>
+          <rect x="310" y="240" width="230" height="90" rx="8" fill="#2f78b0"/><text x="425" y="290">Канален (Link)</text>
+          <rect x="310" y="350" width="230" height="90" rx="8" fill="#4f95cc"/><text x="425" y="400">Физически</text>
+        </g>
+        <path d="M135,440 L135,480 L425,480 L425,440" fill="none" stroke="#f28c28" stroke-width="4"/>
+        <text x="280" y="505" text-anchor="middle" font-size="16" fill="#c2610c">кабел: 2 диференциални двойки</text>
+        <g stroke="#94a3b8" stroke-dasharray="6 5" stroke-width="2">
+          <line x1="250" y1="65" x2="310" y2="65"/><line x1="250" y1="175" x2="310" y2="175"/><line x1="250" y1="285" x2="310" y2="285"/>
+        </g>
+        <text x="135" y="14" font-size="15" text-anchor="middle" fill="#475569">Хост</text>
+        <text x="425" y="14" font-size="15" text-anchor="middle" fill="#475569">Устройство</text>
+      </svg>
+    </div>
+    <div class="small">
+      <p><span class="k">Приложен (команден)</span> – ATA команди, протоколи PIO, DMA, FPDMA (NCQ)</p>
+      <p><span class="k">Транспортен</span> – изгражда и разбира <b>FIS</b> (Frame Information Structure); управлява shadow регистри</p>
+      <p><span class="k">Канален</span> – framing (SOF/EOF), CRC-32, scrambling, 8b/10b, примитиви, flow control</p>
+      <p><span class="k">Физически</span> – сериализация, LVDS приемо-предавател, OOB, синхронизация и договаряне на скорост, възстановяване на такта</p>
+      <div class="box b">Пунктираните линии показват логическата („peer-to-peer“) комуникация между еднаквите слоеве.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <h2>Физически слой – общ преглед</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Два еднопосочни канала: <span class="k">TX</span> и <span class="k">RX</span> (по една диференциална двойка)</li>
+        <li>Логически работи <span class="k">полудуплексно</span>: в даден момент данни тече в една посока, а обратната носи примитиви</li>
+        <li><span class="k">SerDes</span>: паралелно ↔ серийно преобразуване (10-битови символи)</li>
+        <li><span class="k">CDR</span> – възстановяване на такта от потока данни (няма отделна тактова линия)</li>
+        <li>OOB сигнали за ресет и събуждане</li>
+        <li>Договаряне на скорост, hot-plug откриване</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="560" height="480" viewBox="0 0 560 480">
+        <defs><marker id="a15" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <g font-size="16" text-anchor="middle">
+          <rect x="20" y="30" width="150" height="60" rx="6" fill="#e2e8f0" stroke="#64748b"/><text x="95" y="66">Link слой</text>
+          <rect x="20" y="130" width="150" height="60" rx="6" fill="#dbeafe" stroke="#2f78b0"/><text x="95" y="166">SerDes</text>
+          <rect x="20" y="230" width="150" height="60" rx="6" fill="#dbeafe" stroke="#2f78b0"/><text x="95" y="258">TX драйвер</text><text x="95" y="278" font-size="13">/ RX + CDR</text>
+          <rect x="20" y="330" width="150" height="60" rx="6" fill="#fde2c8" stroke="#f28c28"/><text x="95" y="366">OOB детектор</text>
+        </g>
+        <line x1="95" y1="90" x2="95" y2="130" stroke="#1f2a37" stroke-width="2" marker-end="url(#a15)"/>
+        <line x1="95" y1="190" x2="95" y2="230" stroke="#1f2a37" stroke-width="2" marker-end="url(#a15)"/>
+        <line x1="170" y1="250" x2="390" y2="250" stroke="#0b3d63" stroke-width="3" marker-end="url(#a15)"/>
+        <line x1="390" y1="275" x2="170" y2="275" stroke="#c2610c" stroke-width="3" marker-end="url(#a15)"/>
+        <text x="280" y="240" font-size="15" text-anchor="middle" fill="#0b3d63">TX+ / TX−</text>
+        <text x="280" y="300" font-size="15" text-anchor="middle" fill="#c2610c">RX+ / RX−</text>
+        <rect x="390" y="220" width="150" height="80" rx="8" fill="#f28c28"/><text x="465" y="266" text-anchor="middle" font-size="17" fill="#fff" font-weight="700">Отсрещна страна</text>
+        <text x="280" y="440" font-size="16" text-anchor="middle" fill="#475569">10 бита на символ · 40 бита на dword (4 символа)</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <h2>Диференциално предаване (LVDS-подобно)</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Информацията е в <span class="k">разликата</span> V+ − V−, не в абсолютното ниво</li>
+        <li>Синфазните смущения (common-mode noise) се компенсират</li>
+        <li>Диференциална амплитуда при Gen1/Gen2 предавател: прибл. <span class="k">400 – 600 mV</span> (peak-to-peak диф.)</li>
+        <li>Импеданс на линията: <span class="k">100 Ω</span> диференциално</li>
+        <li><span class="k">AC свързване</span> – кондензатори в линията, независимост от DC нивата</li>
+        <li>Gen3: <span class="k">de-emphasis / изравняване</span> за компенсиране на загубите</li>
+        <li>Ниска консумация и малко електромагнитно излъчване (EMI)</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="560" height="480" viewBox="0 0 560 480">
+        <text x="20" y="30" font-size="17" font-weight="700" fill="#0b3d63">Сигнали в двойката</text>
+        <polyline points="40,80 120,80 120,140 220,140 220,80 300,80 300,140 380,140 380,80 520,80" fill="none" stroke="#0b3d63" stroke-width="3"/>
+        <polyline points="40,140 120,140 120,80 220,80 220,140 300,140 300,80 380,80 380,140 520,140" fill="none" stroke="#f28c28" stroke-width="3" stroke-dasharray="7 4"/>
+        <text x="525" y="85" font-size="15" fill="#0b3d63">V+</text><text x="525" y="145" font-size="15" fill="#c2610c">V−</text>
+        <text x="20" y="200" font-size="17" font-weight="700" fill="#0b3d63">Диференциален сигнал V+ − V−</text>
+        <line x1="40" y1="290" x2="520" y2="290" stroke="#cbd5e1"/>
+        <polyline points="40,240 120,240 120,340 220,340 220,240 300,240 300,340 380,340 380,240 520,240" fill="none" stroke="#1f2a37" stroke-width="3"/>
+        <text x="60" y="232" font-size="14">„1“</text><text x="150" y="360" font-size="14">„0“</text>
+        <line x1="535" y1="240" x2="535" y2="340" stroke="#475569" stroke-width="1.5"/>
+        <text x="400" y="380" font-size="14" fill="#475569">≈ 0,4 – 0,6 V p-p</text>
+        <rect x="40" y="410" width="480" height="56" rx="8" fill="#eaf2fa"/>
+        <text x="280" y="444" font-size="16" text-anchor="middle">Смущение, наложено на V+ и V−, се изважда</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <h2>Кодиране 8b/10b</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Всеки байт (8 бита) се кодира с <span class="k">10-битов символ</span> (IBM, Widmer & Franaszek)</li>
+        <li><span class="k">25 % излишък</span>: 1,5 Gbit/s → 1,2 Gbit/s полезни</li>
+        <li><span class="k">DC баланс</span>: брой „1“ ≈ брой „0“ – нужно при AC свързване</li>
+        <li>Не повече от 5 еднакви бита подред → достатъчно преходи за CDR</li>
+        <li><span class="k">Running disparity (RD)</span> – всеки символ има 2 варианта (RD− / RD+)</li>
+        <li>Символи <span class="k">Dxx.y</span> (данни) и <span class="k">Kxx.y</span> (управляващи)</li>
+        <li>Грешен код или грешна disparity → откриване на грешка</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="560" height="250" viewBox="0 0 560 250">
+        <text x="10" y="24" font-size="16" font-weight="700" fill="#0b3d63">Байт HGF EDCBA → abcdei fghj</text>
+        <g font-size="16" text-anchor="middle" font-family="Menlo, monospace">
+          <rect x="20" y="40" width="150" height="44" fill="#e2e8f0" stroke="#64748b"/><text x="95" y="68">HGF (3 b)</text>
+          <rect x="170" y="40" width="250" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="295" y="68">EDCBA (5 b)</text>
+          <rect x="20" y="150" width="300" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="170" y="178">abcdei (6 b)</text>
+          <rect x="320" y="150" width="200" height="44" fill="#e2e8f0" stroke="#64748b"/><text x="420" y="178">fghj (4 b)</text>
+        </g>
+        <line x1="295" y1="84" x2="170" y2="150" stroke="#2f78b0" stroke-width="2"/>
+        <line x1="95" y1="84" x2="420" y2="150" stroke="#64748b" stroke-width="2"/>
+        <text x="300" y="112" font-size="14" fill="#2f78b0">5b/6b</text>
+        <text x="110" y="112" font-size="14" fill="#475569">3b/4b</text>
+        <text x="20" y="230" font-size="15" fill="#475569">Dxx.y: xx = EDCBA (десетично), y = HGF</text>
+      </svg>
+      <table class="small">
+        <tr><th>Символ</th><th>RD−</th><th>RD+</th></tr>
+        <tr><td><b>K28.5</b> (comma)</td><td class="m">001111 1010</td><td class="m">110000 0101</td></tr>
+        <tr><td>D10.2</td><td class="m">010101 0101</td><td class="m">010101 0101</td></tr>
+      </table>
+      <p class="note">K28.5 съдържа уникална последователност (comma) за символно подравняване.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <h2>Примитиви на каналния слой</h2>
+  <div class="c cols w73">
+    <div>
+      <table class="small tight" style="font-size:17px">
+        <tr><th>Примитив</th><th>Предназначение</th></tr>
+        <tr><td><b>ALIGN</b></td><td>подравняване, компенсация на тактовете; ≥ 2 на всеки 256 dword</td></tr>
+        <tr><td><b>SYNC</b></td><td>покой (idle) на канала</td></tr>
+        <tr><td><b>X_RDY / R_RDY</b></td><td>„имам рамка за предаване“ / „готов съм да приема“</td></tr>
+        <tr><td><b>SOF / EOF</b></td><td>начало / край на рамка</td></tr>
+        <tr><td><b>R_IP</b></td><td>приемането е в ход</td></tr>
+        <tr><td><b>HOLD / HOLDA</b></td><td>временно спиране / потвърждение (flow control)</td></tr>
+        <tr><td><b>WTRM</b></td><td>предавателят чака резултат от приемника</td></tr>
+        <tr><td><b>R_OK / R_ERR</b></td><td>рамката е приета успешно / с грешка (CRC)</td></tr>
+        <tr><td><b>CONT</b></td><td>„повтаря се предишният примитив“ – намалява EMI</td></tr>
+        <tr><td><b>PMREQ_P / PMREQ_S, PMACK, PMNAK</b></td><td>заявка за Partial / Slumber и отговор</td></tr>
+        <tr><td><b>DMAT</b></td><td>прекратяване на DMA трансфер</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="box b"><b>Какво е примитив?</b><br>Един <b>dword</b> (4 символа = 40 бита), започващ с управляващ символ <b>K28.x</b>.</div>
+      <svg width="440" height="150" viewBox="0 0 440 150">
+        <text x="10" y="22" font-size="15" font-weight="700" fill="#0b3d63">ALIGN примитив</text>
+        <g font-size="16" text-anchor="middle" font-family="Menlo, monospace">
+          <rect x="10" y="36" width="100" height="44" fill="#f28c28"/><text x="60" y="64" fill="#fff">K28.5</text>
+          <rect x="110" y="36" width="100" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="160" y="64">D10.2</text>
+          <rect x="210" y="36" width="100" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="260" y="64">D10.2</text>
+          <rect x="310" y="36" width="100" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="360" y="64">D27.3</text>
+        </g>
+        <text x="10" y="115" font-size="15" fill="#475569">Останалите примитиви започват с K28.3.</text>
+        <text x="10" y="140" font-size="15" fill="#475569">Към примитивите не се прилага scrambling.</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <h2>OOB сигнализация <small>COMRESET · COMINIT · COMWAKE</small></h2>
+  <div class="c">
+    <p class="small">OOB (Out-Of-Band) сигналите се разпознават по <b>продължителността на паузите</b> между пакети (bursts) от сигнал. Burst ≈ <b>106,7 ns</b> (160 Gen1 UI); всеки OOB сигнал се състои от 6 burst-а.</p>
+    <svg width="1180" height="350" viewBox="0 0 1180 350">
+      <g font-size="17" font-weight="700" fill="#0b3d63">
+        <text x="0" y="60">COMRESET</text><text x="0" y="78" font-size="13" fill="#475569" font-weight="400">(хост → устройство)</text>
+        <text x="0" y="170">COMINIT</text><text x="0" y="188" font-size="13" fill="#475569" font-weight="400">(устройство → хост)</text>
+        <text x="0" y="280">COMWAKE</text><text x="0" y="298" font-size="13" fill="#475569" font-weight="400">(и двете посоки)</text>
+      </g>
+      <g fill="#0b3d63">
+        <rect x="170" y="35" width="40" height="40"/><rect x="330" y="35" width="40" height="40"/><rect x="490" y="35" width="40" height="40"/><rect x="650" y="35" width="40" height="40"/><rect x="810" y="35" width="40" height="40"/><rect x="970" y="35" width="40" height="40"/>
+      </g>
+      <g fill="#f28c28">
+        <rect x="170" y="145" width="40" height="40"/><rect x="330" y="145" width="40" height="40"/><rect x="490" y="145" width="40" height="40"/><rect x="650" y="145" width="40" height="40"/><rect x="810" y="145" width="40" height="40"/><rect x="970" y="145" width="40" height="40"/>
+      </g>
+      <g fill="#2f78b0">
+        <rect x="170" y="255" width="40" height="40"/><rect x="250" y="255" width="40" height="40"/><rect x="330" y="255" width="40" height="40"/><rect x="410" y="255" width="40" height="40"/><rect x="490" y="255" width="40" height="40"/><rect x="570" y="255" width="40" height="40"/>
+      </g>
+      <g stroke="#94a3b8" stroke-width="2"><line x1="160" y1="55" x2="1030" y2="55"/><line x1="160" y1="165" x2="1030" y2="165"/><line x1="160" y1="275" x2="620" y2="275"/></g>
+      <g font-size="15" fill="#334155" text-anchor="middle">
+        <text x="270" y="100">пауза ≈ 320 ns</text>
+        <text x="270" y="210">пауза ≈ 320 ns</text>
+        <text x="230" y="320">≈ 106,7 ns</text>
+        <text x="190" y="25" fill="#475569">burst</text>
+      </g>
+      <text x="1045" y="105" font-size="15" fill="#475569">еднаква</text>
+      <text x="1045" y="125" font-size="15" fill="#475569">форма,</text>
+      <text x="1045" y="145" font-size="15" fill="#475569">различна</text>
+      <text x="1045" y="165" font-size="15" fill="#475569">посока</text>
+      <text x="645" y="282" font-size="15" fill="#475569">по-къси паузи (≈ 106,7 ns) → различен сигнал</text>
+    </svg>
+    <p class="note">Burst-овете се състоят от ALIGN примитиви (или еквивалентен сигнал) на Gen1 скорост; паузите са състояние „electrical idle“. Приемникът използва прозорци на допуск за паузите.</p>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <h2>Инициализация на връзката и договаряне на скоростта</h2>
+  <div class="c cols">
+    <div>
+      <svg width="560" height="540" viewBox="0 0 560 540">
+        <defs><marker id="a20" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="80" y="22" font-size="18" font-weight="700" text-anchor="middle" fill="#0b3d63">Хост</text>
+        <text x="480" y="22" font-size="18" font-weight="700" text-anchor="middle" fill="#c2610c">Устройство</text>
+        <line x1="80" y1="32" x2="80" y2="530" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="480" y1="32" x2="480" y2="530" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="16" text-anchor="middle" stroke-width="2">
+          <line x1="80" y1="60" x2="478" y2="85" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="62">1. COMRESET</text>
+          <line x1="480" y1="115" x2="82" y2="140" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="117">2. COMINIT</text>
+          <line x1="80" y1="170" x2="478" y2="195" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="172">3. COMWAKE</text>
+          <line x1="480" y1="225" x2="82" y2="250" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="227">4. COMWAKE</text>
+          <line x1="80" y1="280" x2="478" y2="305" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="282">5. D10.2 (непрекъснато)</text>
+          <line x1="480" y1="335" x2="82" y2="360" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="337">6. ALIGN на най-висока скорост</text>
+          <line x1="80" y1="390" x2="478" y2="415" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="392">7. ALIGN (хостът се е заключил)</text>
+          <line x1="480" y1="445" x2="82" y2="470" stroke="#1f2a37" marker-end="url(#a20)"/><text x="280" y="447">8. SYNC ↔ SYNC</text>
+        </g>
+        <text x="280" y="515" font-size="16" text-anchor="middle" fill="#0b3d63" font-weight="700">Връзката е установена (PHY Ready)</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li>COMRESET/COMINIT – „има ли устройство?“</li>
+        <li>COMWAKE – двете страни излизат от покой</li>
+        <li>Хостът изпраща <span class="k">D10.2</span> (101010…) – сигнал за калибриране и заключване на CDR</li>
+        <li>Устройството предлага <span class="k">най-високата си скорост</span> с ALIGN</li>
+        <li>Ако хостът не отговори в отделеното време (≈ 54,6 µs), устройството опитва <span class="k">по-ниска скорост</span></li>
+        <li>Резултат: в AHCI <code>PxSSTS.DET = 3</code>, <code>SPD</code> = договорената скорост</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide">
+  <h2>Scrambling и Spread-Spectrum Clocking</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">Scrambling</p>
+      <ul>
+        <li>Данните (FIS + CRC) се XOR-ват с псевдослучайна последователност</li>
+        <li>LFSR с полином <span class="o">G(x) = x<sup>16</sup> + x<sup>15</sup> + x<sup>13</sup> + x<sup>4</sup> + 1</span></li>
+        <li>Генераторът се инициализира при всеки <span class="k">SOF</span></li>
+        <li>Премахва повтарящи се шаблони → разпръсква спектъра, намалява EMI</li>
+        <li>Към примитивите не се прилага scrambling (освен данните след CONT)</li>
+      </ul>
+    </div>
+    <div>
+      <p class="k">Spread-Spectrum Clocking (SSC)</p>
+      <ul>
+        <li>Честотата на предавателя се модулира бавно надолу (down-spread)</li>
+        <li>Отклонение до <span class="k">−5000 ppm</span> (0,5 %), модулация ≈ 30–33 kHz</li>
+        <li>Пиковете на излъчване се „размазват“ → по-лесно преминаване на EMC тестове</li>
+        <li>Поддръжката от устройството е по избор; приемникът трябва да толерира SSC</li>
+      </ul>
+      <svg width="520" height="150" viewBox="0 0 520 150">
+        <line x1="20" y1="120" x2="500" y2="120" stroke="#94a3b8"/>
+        <text x="20" y="145" font-size="13" fill="#475569">честота</text>
+        <rect x="245" y="20" width="12" height="100" fill="#c0392b"/>
+        <text x="180" y="15" font-size="13" fill="#c0392b">без SSC – тесен пик</text>
+        <path d="M300,120 L310,80 L460,80 L470,120 z" fill="#2f78b0" opacity=".75"/>
+        <text x="310" y="70" font-size="13" fill="#2f78b0">със SSC – по-нисък, разлят</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <h2>Канален слой (Link Layer) – функции</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Приема FIS от транспортния слой и извършва <span class="k">framing</span></li>
+        <li>Изчислява и проверява <span class="k">CRC-32</span></li>
+        <li><span class="k">Scrambling / descrambling</span></li>
+        <li>Кодиране / декодиране <span class="k">8b/10b</span></li>
+        <li>Генерира и разпознава <span class="k">примитиви</span></li>
+        <li><span class="k">Flow control</span> (HOLD/HOLDA)</li>
+        <li>Решава <span class="k">конфликт</span> при едновременно X_RDY (хостът отстъпва)</li>
+        <li>Управление на енергийните състояния на връзката</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="540" height="480" viewBox="0 0 540 480">
+        <defs><marker id="a22" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <g font-size="17" text-anchor="middle">
+          <rect x="130" y="10" width="280" height="54" rx="8" fill="#1d5a8a"/><text x="270" y="43" fill="#fff">FIS от транспортния слой</text>
+          <rect x="130" y="95" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="128">+ CRC-32</text>
+          <rect x="130" y="180" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="213">scrambling</text>
+          <rect x="130" y="265" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="298">+ SOF … EOF, примитиви</text>
+          <rect x="130" y="350" width="280" height="54" rx="8" fill="#dbeafe" stroke="#2f78b0"/><text x="270" y="383">8b/10b кодиране</text>
+          <rect x="130" y="425" width="280" height="50" rx="8" fill="#4f95cc"/><text x="270" y="456" fill="#fff">към физическия слой</text>
+        </g>
+        <g stroke="#1f2a37" stroke-width="2">
+          <line x1="270" y1="64" x2="270" y2="93" marker-end="url(#a22)"/><line x1="270" y1="149" x2="270" y2="178" marker-end="url(#a22)"/><line x1="270" y1="234" x2="270" y2="263" marker-end="url(#a22)"/><line x1="270" y1="319" x2="270" y2="348" marker-end="url(#a22)"/><line x1="270" y1="404" x2="270" y2="423" marker-end="url(#a22)"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="slide">
+  <h2>Структура на рамка (frame)</h2>
+  <div class="c">
+    <svg width="1180" height="200" viewBox="0 0 1180 200">
+      <g font-size="20" text-anchor="middle" font-weight="700">
+        <rect x="20" y="40" width="150" height="70" fill="#f28c28"/><text x="95" y="83" fill="#fff">SOF</text>
+        <rect x="170" y="40" width="160" height="70" fill="#1d5a8a"/><text x="250" y="72" fill="#fff">FIS Type</text><text x="250" y="96" fill="#cfe0f0" font-size="14" font-weight="400">1 байт</text>
+        <rect x="330" y="40" width="520" height="70" fill="#2f78b0"/><text x="590" y="72" fill="#fff">FIS съдържание</text><text x="590" y="96" fill="#cfe0f0" font-size="14" font-weight="400">до 2048 dword (8 KB) за Data FIS</text>
+        <rect x="850" y="40" width="160" height="70" fill="#0b3d63"/><text x="930" y="83" fill="#fff">CRC-32</text>
+        <rect x="1010" y="40" width="150" height="70" fill="#f28c28"/><text x="1085" y="83" fill="#fff">EOF</text>
+      </g>
+      <path d="M170,130 L170,150 L1010,150 L1010,130" fill="none" stroke="#475569" stroke-width="2"/>
+      <text x="590" y="175" font-size="16" text-anchor="middle" fill="#475569">част със scrambling (FIS + CRC)</text>
+      <text x="20" y="25" font-size="15" fill="#475569">примитив</text>
+      <text x="1160" y="25" font-size="15" fill="#475569" text-anchor="end">примитив</text>
+    </svg>
+    <div class="cols">
+      <ul>
+        <li>Цялата рамка е съставена от <span class="k">dwords</span> (32 бита)</li>
+        <li>CRC се изчислява върху FIS-а (преди scrambling)</li>
+        <li>Между рамките линията носи SYNC / ALIGN</li>
+        <li>По време на рамката могат да се вмъкват HOLD, ALIGN, CONT</li>
+      </ul>
+      <div class="box b"><b>CRC-32 в SATA</b><br>Полином: <span class="m">0x04C11DB7</span> (както в Ethernet)<br>Начална стойност: <span class="m">0x52325032</span><br>Грешна CRC → приемникът отговаря с <b>R_ERR</b>, транспортният слой може да повтори FIS-а.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 -->
+<section class="slide">
+  <h2>Предаване на рамка – последователност (handshake)</h2>
+  <div class="c cols w73">
+    <div>
+      <svg width="660" height="540" viewBox="0 0 660 540">
+        <defs><marker id="a24" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="90" y="22" font-size="18" font-weight="700" text-anchor="middle" fill="#0b3d63">Предавател</text>
+        <text x="570" y="22" font-size="18" font-weight="700" text-anchor="middle" fill="#c2610c">Приемник</text>
+        <line x1="90" y1="32" x2="90" y2="530" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="570" y1="32" x2="570" y2="530" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="16" text-anchor="middle" stroke-width="2">
+          <line x1="90" y1="60" x2="568" y2="80" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="60">X_RDY X_RDY …</text>
+          <line x1="570" y1="110" x2="92" y2="130" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="110">R_RDY R_RDY …</text>
+          <line x1="90" y1="160" x2="568" y2="180" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="160">SOF</text>
+          <line x1="90" y1="210" x2="568" y2="230" stroke="#2f78b0" stroke-width="6" marker-end="url(#a24)"/><text x="330" y="208" fill="#2f78b0" font-weight="700">FIS данни + CRC</text>
+          <line x1="570" y1="250" x2="92" y2="270" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="252">R_IP R_IP … (паралелно)</text>
+          <line x1="90" y1="300" x2="568" y2="320" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="300">EOF</text>
+          <line x1="90" y1="350" x2="568" y2="370" stroke="#1f2a37" marker-end="url(#a24)"/><text x="330" y="350">WTRM WTRM …</text>
+          <line x1="570" y1="400" x2="92" y2="420" stroke="#15803d" marker-end="url(#a24)"/><text x="330" y="400" fill="#15803d" font-weight="700">R_OK (или R_ERR)</text>
+          <line x1="90" y1="450" x2="568" y2="470" stroke="#94a3b8" marker-end="url(#a24)"/><text x="330" y="450" fill="#64748b">SYNC</text>
+          <line x1="570" y1="490" x2="92" y2="510" stroke="#94a3b8" marker-end="url(#a24)"/><text x="330" y="492" fill="#64748b">SYNC</text>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li>Предавателят обявява рамка с <span class="k">X_RDY</span></li>
+        <li>Приемникът е готов – <span class="k">R_RDY</span></li>
+        <li>Рамката: <span class="k">SOF … EOF</span></li>
+        <li>Докато приема – <span class="k">R_IP</span></li>
+        <li>Предавателят чака с <span class="k">WTRM</span></li>
+        <li>Резултат: <span class="k">R_OK</span> / <span class="k">R_ERR</span></li>
+        <li>Обратно в покой – <span class="k">SYNC</span></li>
+      </ul>
+      <p class="note">Повтарящите се примитиви могат да се кодират с CONT.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide">
+  <h2>Управление на потока: HOLD / HOLDA</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Всяка страна има <span class="k">буфер (FIFO)</span> с ограничен размер</li>
+        <li>Ако приемникът се напълни → изпраща <span class="k">HOLD</span></li>
+        <li>Предавателят спира данните и отговаря с <span class="k">HOLDA</span></li>
+        <li>Когато приемникът освободи място → отново R_IP, данните продължават</li>
+        <li>Предавателят също може да изпрати HOLD, ако няма готови данни (опразнен буфер)</li>
+        <li>Закъснение в кабела → приемникът трябва да има резерв (≈ 20 dword) след HOLD</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="540" height="400" viewBox="0 0 540 400">
+        <text x="10" y="30" font-size="16" font-weight="700" fill="#0b3d63">Предавател → </text>
+        <g font-size="13" text-anchor="middle" font-family="Menlo, monospace">
+          <rect x="10" y="45" width="60" height="36" fill="#f28c28"/><text x="40" y="68" fill="#fff">SOF</text>
+          <rect x="70" y="45" width="60" height="36" fill="#2f78b0"/><text x="100" y="68" fill="#fff">D</text>
+          <rect x="130" y="45" width="60" height="36" fill="#2f78b0"/><text x="160" y="68" fill="#fff">D</text>
+          <rect x="190" y="45" width="60" height="36" fill="#2f78b0"/><text x="220" y="68" fill="#fff">D</text>
+          <rect x="250" y="45" width="70" height="36" fill="#94a3b8"/><text x="285" y="68" fill="#fff">HOLDA</text>
+          <rect x="320" y="45" width="70" height="36" fill="#94a3b8"/><text x="355" y="68" fill="#fff">HOLDA</text>
+          <rect x="390" y="45" width="60" height="36" fill="#2f78b0"/><text x="420" y="68" fill="#fff">D</text>
+          <rect x="450" y="45" width="60" height="36" fill="#f28c28"/><text x="480" y="68" fill="#fff">EOF</text>
+        </g>
+        <text x="10" y="140" font-size="16" font-weight="700" fill="#c2610c">← Приемник</text>
+        <g font-size="13" text-anchor="middle" font-family="Menlo, monospace">
+          <rect x="10" y="155" width="60" height="36" fill="#cbd5e1"/><text x="40" y="178">R_IP</text>
+          <rect x="70" y="155" width="60" height="36" fill="#cbd5e1"/><text x="100" y="178">R_IP</text>
+          <rect x="130" y="155" width="60" height="36" fill="#cbd5e1"/><text x="160" y="178">R_IP</text>
+          <rect x="190" y="155" width="60" height="36" fill="#c0392b"/><text x="220" y="178" fill="#fff">HOLD</text>
+          <rect x="250" y="155" width="70" height="36" fill="#c0392b"/><text x="285" y="178" fill="#fff">HOLD</text>
+          <rect x="320" y="155" width="70" height="36" fill="#cbd5e1"/><text x="355" y="178">R_IP</text>
+          <rect x="390" y="155" width="60" height="36" fill="#cbd5e1"/><text x="420" y="178">R_IP</text>
+          <rect x="450" y="155" width="60" height="36" fill="#cbd5e1"/><text x="480" y="178">R_IP</text>
+        </g>
+        <rect x="10" y="240" width="500" height="120" rx="10" fill="#eaf2fa"/>
+        <text x="30" y="275" font-size="16">Опростена времева диаграма: приемникът</text>
+        <text x="30" y="300" font-size="16">временно спира потока с HOLD, предавателят</text>
+        <text x="30" y="325" font-size="16">потвърждава с HOLDA и продължава след R_IP.</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 26 -->
+<section class="slide">
+  <h2>Транспортен слой – типове FIS</h2>
+  <div class="c">
+    <table>
+      <tr><th style="width:90px">Код</th><th style="width:300px">FIS</th><th style="width:130px">Посока</th><th>Предназначение</th></tr>
+      <tr><td class="m">27h</td><td><b>Register – Host to Device</b></td><td>H → D</td><td>изпраща команда или управление (20 байта)</td></tr>
+      <tr><td class="m">34h</td><td><b>Register – Device to Host</b></td><td>D → H</td><td>статус и грешка след команда (20 байта)</td></tr>
+      <tr><td class="m">39h</td><td><b>DMA Activate</b></td><td>D → H</td><td>„готов съм да приема данни“ при DMA запис</td></tr>
+      <tr><td class="m">41h</td><td><b>DMA Setup</b></td><td>H ↔ D</td><td>подготовка на First-party DMA (NCQ): таг, буфер, отместване</td></tr>
+      <tr><td class="m">46h</td><td><b>Data</b></td><td>H ↔ D</td><td>полезни данни, до 8192 байта</td></tr>
+      <tr><td class="m">58h</td><td><b>BIST Activate</b></td><td>H ↔ D</td><td>вграден самотест, loopback режими</td></tr>
+      <tr><td class="m">5Fh</td><td><b>PIO Setup</b></td><td>D → H</td><td>параметри на PIO трансфер (брой байтове, статус)</td></tr>
+      <tr><td class="m">A1h</td><td><b>Set Device Bits</b></td><td>D → H</td><td>обновява статус и SActive – завършване на NCQ команди</td></tr>
+    </table>
+    <div class="box b">FIS (Frame Information Structure) замества сигналите и регистрите на PATA. Транспортният слой поддържа <b>Shadow Register Block</b> – „огледало“ на ATA регистрите.</div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="slide">
+  <h2>Register – Host to Device FIS (27h)</h2>
+  <div class="c">
+    <svg width="1180" height="370" viewBox="0 0 1180 370">
+      <g font-size="15" text-anchor="middle" fill="#475569">
+        <text x="190" y="22">байт 3 (31:24)</text><text x="450" y="22">байт 2 (23:16)</text><text x="710" y="22">байт 1 (15:8)</text><text x="970" y="22">байт 0 (7:0)</text>
+      </g>
+      <g font-size="17" text-anchor="middle">
+        <text x="6" y="70" text-anchor="start" font-weight="700" fill="#0b3d63">DW0</text>
+        <rect x="60" y="40" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="190" y="74">Features (7:0)</text>
+        <rect x="320" y="40" width="260" height="56" fill="#fde2c8" stroke="#f28c28"/><text x="450" y="74" font-weight="700">Command</text>
+        <rect x="580" y="40" width="260" height="56" fill="#e2e8f0" stroke="#64748b"/><text x="710" y="66">C | R R R | PM Port</text><text x="710" y="86" font-size="13" fill="#475569">C = 1 → команда</text>
+        <rect x="840" y="40" width="260" height="56" fill="#0b3d63"/><text x="970" y="74" fill="#fff" font-weight="700">FIS Type = 27h</text>
+
+        <text x="6" y="136" text-anchor="start" font-weight="700" fill="#0b3d63">DW1</text>
+        <rect x="60" y="106" width="260" height="56" fill="#e2e8f0" stroke="#64748b"/><text x="190" y="140">Device</text>
+        <rect x="320" y="106" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="450" y="140">LBA (23:16)</text>
+        <rect x="580" y="106" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="710" y="140">LBA (15:8)</text>
+        <rect x="840" y="106" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="970" y="140">LBA (7:0)</text>
+
+        <text x="6" y="202" text-anchor="start" font-weight="700" fill="#0b3d63">DW2</text>
+        <rect x="60" y="172" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="190" y="206">Features (15:8)</text>
+        <rect x="320" y="172" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="450" y="206">LBA (47:40)</text>
+        <rect x="580" y="172" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="710" y="206">LBA (39:32)</text>
+        <rect x="840" y="172" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="970" y="206">LBA (31:24)</text>
+
+        <text x="6" y="268" text-anchor="start" font-weight="700" fill="#0b3d63">DW3</text>
+        <rect x="60" y="238" width="260" height="56" fill="#e2e8f0" stroke="#64748b"/><text x="190" y="272">Control</text>
+        <rect x="320" y="238" width="260" height="56" fill="#e2e8f0" stroke="#64748b"/><text x="450" y="272">ICC</text>
+        <rect x="580" y="238" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="710" y="272">Count (15:8)</text>
+        <rect x="840" y="238" width="260" height="56" fill="#dbeafe" stroke="#2f78b0"/><text x="970" y="272">Count (7:0)</text>
+
+        <text x="6" y="334" text-anchor="start" font-weight="700" fill="#0b3d63">DW4</text>
+        <rect x="60" y="304" width="1040" height="56" fill="#f1f5f9" stroke="#94a3b8"/><text x="580" y="338" fill="#64748b">Auxiliary / резервирано</text>
+      </g>
+    </svg>
+    <ul class="small">
+      <li><b>48-битов LBA</b> (до 2<sup>48</sup> сектора) и 16-битов Count → съответства на ATA регистрите</li>
+      <li><b>PM Port</b> (4 бита) – адрес на устройство зад Port Multiplier; при NCQ <b>таг</b>ът е в полето Count (7:3)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 28 -->
+<section class="slide">
+  <h2>Команден слой – основни ATA команди</h2>
+  <div class="c">
+    <table class="small">
+      <tr><th style="width:80px">Код</th><th style="width:330px">Команда</th><th style="width:150px">Протокол</th><th>Описание</th></tr>
+      <tr><td class="m">ECh</td><td>IDENTIFY DEVICE</td><td>PIO In</td><td>512 байта информация: модел, сериен №, капацитет, поддържани функции</td></tr>
+      <tr><td class="m">25h</td><td>READ DMA EXT</td><td>DMA</td><td>четене на сектори с 48-битов LBA</td></tr>
+      <tr><td class="m">35h</td><td>WRITE DMA EXT</td><td>DMA</td><td>запис на сектори с 48-битов LBA</td></tr>
+      <tr><td class="m">60h</td><td>READ FPDMA QUEUED</td><td>NCQ</td><td>опашково четене (First-party DMA)</td></tr>
+      <tr><td class="m">61h</td><td>WRITE FPDMA QUEUED</td><td>NCQ</td><td>опашков запис</td></tr>
+      <tr><td class="m">EAh</td><td>FLUSH CACHE EXT</td><td>Non-data</td><td>записва кеша на устройството върху носителя</td></tr>
+      <tr><td class="m">06h</td><td>DATA SET MANAGEMENT</td><td>DMA</td><td>TRIM – обявява блокове като неизползвани</td></tr>
+      <tr><td class="m">B0h</td><td>SMART</td><td>различни</td><td>четене на атрибути, самотестове, логове</td></tr>
+      <tr><td class="m">EFh</td><td>SET FEATURES</td><td>Non-data</td><td>включване на кеш, режим на трансфер, APM, DIPM…</td></tr>
+      <tr><td class="m">F4h</td><td>SECURITY ERASE UNIT</td><td>PIO Out</td><td>сигурно изтриване на целия диск</td></tr>
+      <tr><td class="m">E0h</td><td>STANDBY IMMEDIATE</td><td>Non-data</td><td>спиране на шпиндела / режим на готовност</td></tr>
+      <tr><td class="m">A0h</td><td>PACKET</td><td>ATAPI</td><td>SCSI команди (CDB) към оптични устройства</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="slide">
+  <h2>PIO протокол – последователност от FIS</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">PIO четене (напр. IDENTIFY DEVICE)</p>
+      <svg width="560" height="330" viewBox="0 0 560 330">
+        <defs><marker id="a29" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="70" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#0b3d63">Хост</text>
+        <text x="490" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#c2610c">Устройство</text>
+        <line x1="70" y1="30" x2="70" y2="320" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="490" y1="30" x2="490" y2="320" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="16" text-anchor="middle" stroke-width="2">
+          <line x1="70" y1="60" x2="488" y2="85" stroke="#1f2a37" marker-end="url(#a29)"/><text x="280" y="62">Register H2D (ECh)</text>
+          <line x1="490" y1="130" x2="72" y2="155" stroke="#1f2a37" marker-end="url(#a29)"/><text x="280" y="132">PIO Setup (D→H, 512 B)</text>
+          <line x1="490" y1="200" x2="72" y2="225" stroke="#2f78b0" stroke-width="5" marker-end="url(#a29)"/><text x="280" y="202" fill="#2f78b0">Data FIS (512 B)</text>
+        </g>
+        <text x="280" y="275" font-size="15" text-anchor="middle" fill="#475569">крайният статус идва в полето E_Status</text>
+        <text x="280" y="297" font-size="15" text-anchor="middle" fill="#475569">на PIO Setup FIS</text>
+      </svg>
+    </div>
+    <div>
+      <p class="k">PIO запис</p>
+      <ol class="small" style="padding-left:24px">
+        <li>Хост: <b>Register H2D</b> (команда)</li>
+        <li>Устройство: <b>PIO Setup</b> (готово за блок)</li>
+        <li>Хост: <b>Data FIS</b> с блока</li>
+        <li>Стъпки 2–3 се повтарят за всеки DRQ блок</li>
+        <li>Устройство: <b>Register D2H</b> – краен статус</li>
+      </ol>
+      <div class="box">PIO = процесорът (или HBA от негово име) участва във всеки блок; използва се за IDENTIFY, SMART logs, сигурност. За масови трансфери – DMA.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 30 -->
+<section class="slide">
+  <h2>DMA протокол</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">DMA четене (READ DMA EXT)</p>
+      <svg width="560" height="280" viewBox="0 0 560 280">
+        <defs><marker id="a30" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="70" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#0b3d63">Хост</text>
+        <text x="490" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#c2610c">Устройство</text>
+        <line x1="70" y1="30" x2="70" y2="270" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="490" y1="30" x2="490" y2="270" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="16" text-anchor="middle" stroke-width="2">
+          <line x1="70" y1="55" x2="488" y2="75" stroke="#1f2a37" marker-end="url(#a30)"/><text x="280" y="55">Register H2D (25h)</text>
+          <line x1="490" y1="110" x2="72" y2="130" stroke="#2f78b0" stroke-width="5" marker-end="url(#a30)"/><text x="280" y="110" fill="#2f78b0">Data FIS</text>
+          <line x1="490" y1="160" x2="72" y2="180" stroke="#2f78b0" stroke-width="5" marker-end="url(#a30)"/><text x="280" y="160" fill="#2f78b0">Data FIS …</text>
+          <line x1="490" y1="215" x2="72" y2="235" stroke="#15803d" marker-end="url(#a30)"/><text x="280" y="215" fill="#15803d">Register D2H (статус)</text>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <p class="k">DMA запис (WRITE DMA EXT)</p>
+      <svg width="560" height="280" viewBox="0 0 560 280">
+        <defs><marker id="a30b" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="70" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#0b3d63">Хост</text>
+        <text x="490" y="20" font-size="16" font-weight="700" text-anchor="middle" fill="#c2610c">Устройство</text>
+        <line x1="70" y1="30" x2="70" y2="270" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="490" y1="30" x2="490" y2="270" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="16" text-anchor="middle" stroke-width="2">
+          <line x1="70" y1="50" x2="488" y2="68" stroke="#1f2a37" marker-end="url(#a30b)"/><text x="280" y="50">Register H2D (35h)</text>
+          <line x1="490" y1="95" x2="72" y2="113" stroke="#c2610c" marker-end="url(#a30b)"/><text x="280" y="95" fill="#c2610c">DMA Activate</text>
+          <line x1="70" y1="140" x2="488" y2="158" stroke="#2f78b0" stroke-width="5" marker-end="url(#a30b)"/><text x="280" y="140" fill="#2f78b0">Data FIS (≤ 8 KB)</text>
+          <line x1="490" y1="185" x2="72" y2="203" stroke="#c2610c" marker-end="url(#a30b)"/><text x="280" y="185" fill="#c2610c">DMA Activate … Data …</text>
+          <line x1="490" y1="235" x2="72" y2="253" stroke="#15803d" marker-end="url(#a30b)"/><text x="280" y="235" fill="#15803d">Register D2H (статус)</text>
+        </g>
+      </svg>
+    </div>
+    <div class="box b" style="grid-column:1/3;margin-top:0">При DMA HBA копира данните директно в паметта по таблица PRD (Physical Region Descriptor) – процесорът не участва. Устройството контролира темпото чрез DMA Activate.</div>
+  </div>
+</section>
+
+<!-- 31 -->
+<section class="slide">
+  <h2>NCQ (Native Command Queuing) – принцип</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>Хостът изпраща <span class="k">до 32 команди</span> без да чака предишните</li>
+        <li>Устройството само избира <span class="k">оптимален ред</span> на изпълнение</li>
+        <li>При HDD: минимизира движението на главата и <span class="k">ротационното закъснение</span></li>
+        <li>При SSD: паралелна работа на NAND каналите</li>
+        <li>Завършване <span class="k">извън реда</span> на подаване</li>
+        <li>Изисква поддръжка от диска, контролера (AHCI) и драйвера</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="540" height="470" viewBox="0 0 540 470">
+        <text x="135" y="22" font-size="17" font-weight="700" text-anchor="middle" fill="#64748b">Без NCQ</text>
+        <text x="405" y="22" font-size="17" font-weight="700" text-anchor="middle" fill="#0b3d63">С NCQ</text>
+        <circle cx="135" cy="210" r="120" fill="#f1f5f9" stroke="#94a3b8" stroke-width="3"/>
+        <circle cx="135" cy="210" r="20" fill="#94a3b8"/>
+        <circle cx="405" cy="210" r="120" fill="#f1f5f9" stroke="#0b3d63" stroke-width="3"/>
+        <circle cx="405" cy="210" r="20" fill="#0b3d63"/>
+        <g font-size="16" font-weight="700" fill="#fff" text-anchor="middle">
+          <circle cx="135" cy="105" r="16" fill="#f28c28"/><text x="135" y="111">1</text>
+          <circle cx="135" cy="315" r="16" fill="#f28c28"/><text x="135" y="321">2</text>
+          <circle cx="235" cy="175" r="16" fill="#f28c28"/><text x="235" y="181">3</text>
+          <circle cx="45" cy="250" r="16" fill="#f28c28"/><text x="45" y="256">4</text>
+          <circle cx="405" cy="105" r="16" fill="#f28c28"/><text x="405" y="111">1</text>
+          <circle cx="405" cy="315" r="16" fill="#f28c28"/><text x="405" y="321">2</text>
+          <circle cx="505" cy="175" r="16" fill="#f28c28"/><text x="505" y="181">3</text>
+          <circle cx="315" cy="250" r="16" fill="#f28c28"/><text x="315" y="256">4</text>
+        </g>
+        <path d="M135,105 C 260,150 260,300 135,315 C 20,330 10,240 45,250 C 120,130 260,120 235,175" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <path d="M405,105 C 470,110 500,140 505,175 C 500,260 460,310 405,315 C 360,312 320,280 315,250" fill="none" stroke="#0b3d63" stroke-width="3"/>
+        <text x="135" y="370" font-size="15" text-anchor="middle" fill="#475569">ред: 1 → 2 → 4 → 3</text>
+        <text x="135" y="392" font-size="15" text-anchor="middle" fill="#475569">(по реда на подаване)</text>
+        <text x="405" y="370" font-size="15" text-anchor="middle" fill="#0b3d63">ред: 1 → 3 → 2 → 4</text>
+        <text x="405" y="392" font-size="15" text-anchor="middle" fill="#0b3d63">(по позиция на плочата)</text>
+        <text x="270" y="445" font-size="15" text-anchor="middle" fill="#475569">по-малко обиколки на плочата → по-висок IOPS</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 32 -->
+<section class="slide">
+  <h2>NCQ – последователност на протокола</h2>
+  <div class="c cols w73">
+    <div>
+      <svg width="660" height="540" viewBox="0 0 660 540">
+        <defs><marker id="a32" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="80" y="20" font-size="17" font-weight="700" text-anchor="middle" fill="#0b3d63">Хост</text>
+        <text x="580" y="20" font-size="17" font-weight="700" text-anchor="middle" fill="#c2610c">Устройство</text>
+        <line x1="80" y1="30" x2="80" y2="535" stroke="#0b3d63" stroke-width="3"/>
+        <line x1="580" y1="30" x2="580" y2="535" stroke="#c2610c" stroke-width="3"/>
+        <g font-size="15" text-anchor="middle" stroke-width="2">
+          <line x1="80" y1="50" x2="578" y2="66" stroke="#1f2a37" marker-end="url(#a32)"/><text x="330" y="50">H2D: READ FPDMA QUEUED, таг 5</text>
+          <line x1="580" y1="90" x2="82" y2="106" stroke="#1f2a37" marker-end="url(#a32)"/><text x="330" y="90">D2H: BSY = 0 (приета в опашката)</text>
+          <line x1="80" y1="130" x2="578" y2="146" stroke="#1f2a37" marker-end="url(#a32)"/><text x="330" y="130">H2D: READ FPDMA QUEUED, таг 9</text>
+          <line x1="580" y1="170" x2="82" y2="186" stroke="#1f2a37" marker-end="url(#a32)"/><text x="330" y="170">D2H: BSY = 0</text>
+          <line x1="580" y1="225" x2="82" y2="241" stroke="#c2610c" marker-end="url(#a32)"/><text x="330" y="225" fill="#c2610c" font-weight="700">DMA Setup (таг 9)</text>
+          <line x1="580" y1="265" x2="82" y2="281" stroke="#2f78b0" stroke-width="5" marker-end="url(#a32)"/><text x="330" y="265" fill="#2f78b0">Data FIS (таг 9)</text>
+          <line x1="580" y1="305" x2="82" y2="321" stroke="#c2610c" marker-end="url(#a32)"/><text x="330" y="305" fill="#c2610c" font-weight="700">DMA Setup (таг 5)</text>
+          <line x1="580" y1="345" x2="82" y2="361" stroke="#2f78b0" stroke-width="5" marker-end="url(#a32)"/><text x="330" y="345" fill="#2f78b0">Data FIS (таг 5)</text>
+          <line x1="580" y1="400" x2="82" y2="416" stroke="#15803d" marker-end="url(#a32)"/><text x="330" y="400" fill="#15803d" font-weight="700">Set Device Bits: SActive бит 5 и 9 = завършени</text>
+        </g>
+        <rect x="120" y="450" width="420" height="70" rx="8" fill="#eaf2fa"/>
+        <text x="330" y="480" font-size="15" text-anchor="middle">Таг 9 приключва преди таг 5 –</text>
+        <text x="330" y="503" font-size="15" text-anchor="middle">редът се определя от устройството</text>
+      </svg>
+    </div>
+    <div>
+      <ul class="small">
+        <li><b>First-party DMA</b>: устройството избира буфера чрез DMA Setup</li>
+        <li>Таг 0–31 → бит в регистъра <b>SActive</b></li>
+        <li>Командата се „освобождава“ веднага (BSY = 0)</li>
+        <li><b>Set Device Bits</b> може да потвърди няколко команди наведнъж → по-малко прекъсвания</li>
+        <li>При грешка: READ LOG EXT, лог 10h (NCQ Command Error)</li>
+        <li>При запис: DMA Setup → DMA Activate → Data</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 33 -->
+<section class="slide">
+  <h2>TRIM и SSD</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>NAND флаш: запис по <span class="k">страници</span>, изтриване по <span class="k">блокове</span></li>
+        <li>Без TRIM контролерът не знае, че файл е изтрит → пази „невалидни“ данни</li>
+        <li><span class="k">TRIM</span> = DATA SET MANAGEMENT (06h) с бит TRIM – списък от LBA диапазони</li>
+        <li>По-ефективен <span class="k">garbage collection</span>, по-малко write amplification</li>
+        <li>Запазва скоростта на запис и удължава живота на SSD</li>
+        <li>SATA 3.1: <span class="k">Queued TRIM</span> – като NCQ команда (SEND FPDMA QUEUED), не прекъсва опашката</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="520" height="420" viewBox="0 0 520 420">
+        <text x="10" y="24" font-size="16" font-weight="700" fill="#0b3d63">NAND блок (страници)</text>
+        <g>
+          <rect x="10" y="40" width="60" height="40" fill="#2f78b0"/><rect x="75" y="40" width="60" height="40" fill="#c0392b"/><rect x="140" y="40" width="60" height="40" fill="#2f78b0"/><rect x="205" y="40" width="60" height="40" fill="#c0392b"/><rect x="270" y="40" width="60" height="40" fill="#c0392b"/><rect x="335" y="40" width="60" height="40" fill="#2f78b0"/><rect x="400" y="40" width="60" height="40" fill="#e2e8f0" stroke="#94a3b8"/>
+        </g>
+        <g font-size="14"><rect x="10" y="100" width="18" height="18" fill="#2f78b0"/><text x="34" y="114">валидни</text>
+        <rect x="120" y="100" width="18" height="18" fill="#c0392b"/><text x="144" y="114">невалидни (TRIM)</text>
+        <rect x="290" y="100" width="18" height="18" fill="#e2e8f0" stroke="#94a3b8"/><text x="314" y="114">свободни</text></g>
+        <text x="10" y="170" font-size="16" font-weight="700" fill="#0b3d63">Garbage collection</text>
+        <text x="10" y="196" font-size="15" fill="#475569">валидните страници се копират в нов блок,</text>
+        <text x="10" y="218" font-size="15" fill="#475569">старият блок се изтрива изцяло</text>
+        <g><rect x="10" y="240" width="60" height="40" fill="#2f78b0"/><rect x="75" y="240" width="60" height="40" fill="#2f78b0"/><rect x="140" y="240" width="60" height="40" fill="#2f78b0"/><rect x="205" y="240" width="60" height="40" fill="#e2e8f0" stroke="#94a3b8"/><rect x="270" y="240" width="60" height="40" fill="#e2e8f0" stroke="#94a3b8"/><rect x="335" y="240" width="60" height="40" fill="#e2e8f0" stroke="#94a3b8"/><rect x="400" y="240" width="60" height="40" fill="#e2e8f0" stroke="#94a3b8"/></g>
+        <rect x="10" y="320" width="460" height="80" rx="8" fill="#fff6ec"/>
+        <text x="25" y="352" font-size="15">Linux: <tspan font-family="Menlo, monospace">fstrim -v /</tspan>  · Windows: „Optimize Drives“</text>
+        <text x="25" y="380" font-size="15">Проверка: IDENTIFY DEVICE, дума 169, бит 0</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 34 -->
+<section class="slide">
+  <h2>Hot-plug и staggered spin-up</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">Hot-plug (горещо включване)</p>
+      <ul>
+        <li>Свързване и изваждане на диск <span class="k">без изключване</span> на системата</li>
+        <li>Конекторите имат <span class="k">пинове с различна дължина</span>: първо заземяване, после захранване, накрая сигнали</li>
+        <li>Хостът открива устройството чрез COMINIT; в AHCI – <code>PxSERR.DIAG.X</code> и прекъсване</li>
+        <li>Изисква AHCI режим (не работи в IDE/legacy режим)</li>
+        <li>Типично в сървъри, NAS, кутии с „hot-swap“ слотове</li>
+      </ul>
+    </div>
+    <div>
+      <p class="k">Staggered spin-up (поетапно разгъване)</p>
+      <ul>
+        <li>При старт моторът на HDD консумира силен <span class="k">пусков ток</span> от 12 V</li>
+        <li>Много дискове едновременно → претоварване на захранването</li>
+        <li>Хостът стартира дисковете <span class="k">един по един</span></li>
+        <li>Управлява се чрез пин <span class="k">P11</span> на захранващия конектор и/или командата за разгъване</li>
+        <li>P11 се използва и за <span class="k">светодиод за активност</span> (activity LED)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 35 -->
+<section class="slide">
+  <h2>Управление на енергията</h2>
+  <div class="c cols">
+    <div>
+      <table class="small">
+        <tr><th>Състояние</th><th>Описание</th><th>Излизане</th></tr>
+        <tr><td><b>PHY Ready</b> (Active)</td><td>пълна работа</td><td>—</td></tr>
+        <tr><td><b>Partial</b></td><td>PHY частично изключен</td><td>≤ 10 µs</td></tr>
+        <tr><td><b>Slumber</b></td><td>по-дълбоко изключване</td><td>≤ 10 ms</td></tr>
+        <tr><td><b>DevSleep</b> (3.2)</td><td>почти пълно изключване на интерфейса, управлява се с пин P3</td><td>≈ 20 ms</td></tr>
+      </table>
+      <p class="note">DevSleep цели консумация от порядъка на няколко mW – важно за лаптопи и ultrabook-и.</p>
+    </div>
+    <div>
+      <ul>
+        <li><span class="k">HIPM</span> – Host-Initiated Power Management (хостът изпраща PMREQ)</li>
+        <li><span class="k">DIPM</span> – Device-Initiated Power Management</li>
+        <li><span class="k">ALPM</span> (AHCI) – Aggressive Link Power Management: HBA автоматично влиза в Partial/Slumber при неактивност</li>
+        <li>Отделно от състоянията на устройството: <span class="k">Active, Idle, Standby, Sleep</span> (ATA команди)</li>
+        <li><span class="k">APM</span> – Advanced Power Management на HDD (паркиране на главите)</li>
+      </ul>
+      <div class="box">Компромис: по-дълбоко състояние = по-ниска консумация, но по-голямо закъснение при събуждане.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 36 -->
+<section class="slide">
+  <h2>Кабел и конектор за данни (7 пина)</h2>
+  <div class="c cols">
+    <div>
+      <svg width="620" height="400" viewBox="0 0 560 360">
+        <path d="M30,60 L470,60 L470,150 L110,150 L110,120 L30,120 z" fill="#1f2a37"/>
+        <g fill="#e5b84c">
+          <rect x="135" y="72" width="26" height="40"/><rect x="180" y="72" width="26" height="40"/><rect x="225" y="72" width="26" height="40"/><rect x="270" y="72" width="26" height="40"/><rect x="315" y="72" width="26" height="40"/><rect x="360" y="72" width="26" height="40"/><rect x="405" y="72" width="26" height="40"/>
+        </g>
+        <g font-size="16" text-anchor="middle" font-weight="700">
+          <text x="148" y="180">S1</text><text x="193" y="180">S2</text><text x="238" y="180">S3</text><text x="283" y="180">S4</text><text x="328" y="180">S5</text><text x="373" y="180">S6</text><text x="418" y="180">S7</text>
+        </g>
+        <g font-size="14" text-anchor="middle">
+          <text x="148" y="205" fill="#475569">GND</text><text x="193" y="205" fill="#0b3d63">A+</text><text x="238" y="205" fill="#0b3d63">A−</text><text x="283" y="205" fill="#475569">GND</text><text x="328" y="205" fill="#c2610c">B−</text><text x="373" y="205" fill="#c2610c">B+</text><text x="418" y="205" fill="#475569">GND</text>
+        </g>
+        <path d="M187,225 L250,225" stroke="#0b3d63" stroke-width="4"/><text x="218" y="250" font-size="13" text-anchor="middle" fill="#0b3d63">двойка A</text>
+        <path d="M322,225 L385,225" stroke="#c2610c" stroke-width="4"/><text x="353" y="250" font-size="13" text-anchor="middle" fill="#c2610c">двойка B</text>
+        <text x="70" y="40" font-size="15" fill="#475569">L-образен ключ</text>
+        <line x1="70" y1="45" x2="70" y2="115" stroke="#f28c28" stroke-width="2"/>
+        <text x="20" y="300" font-size="15" fill="#475569">Хост: A = TX, B = RX; устройство: обратно.</text>
+        <text x="20" y="325" font-size="15" fill="#475569">GND пиновете са по-дълги (първи контакт при hot-plug).</text>
+      </svg>
+    </div>
+    <div>
+      <ul>
+        <li><span class="k">7 проводника</span>: 2 диференциални двойки + 3 заземяващи</li>
+        <li>Максимална дължина: <span class="k">1 m</span> (вътрешен)</li>
+        <li><span class="k">L-образен ключ</span> – не може да се включи обратно</li>
+        <li>Двойките са <span class="k">екранирани</span>, импеданс 100 Ω</li>
+        <li>Версии с метална <span class="k">скоба (latch)</span> срещу изпадане</li>
+        <li>Прав / ъглов (90°) накрайник</li>
+        <li>Един кабел = един диск (няма „верига“)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 37 -->
+<section class="slide">
+  <h2>Захранващ конектор (15 пина)</h2>
+  <div class="c cols">
+    <div>
+      <svg width="580" height="230" viewBox="0 0 580 230">
+        <path d="M20,30 L560,30 L560,110 L60,110 L60,85 L20,85 z" fill="#1f2a37"/>
+        <g>
+          <rect x="75" y="42" width="22" height="50" fill="#9b59b6"/><rect x="105" y="42" width="22" height="50" fill="#9b59b6"/><rect x="135" y="42" width="22" height="50" fill="#9b59b6"/>
+          <rect x="165" y="38" width="22" height="58" fill="#64748b"/><rect x="195" y="42" width="22" height="50" fill="#64748b"/><rect x="225" y="42" width="22" height="50" fill="#64748b"/>
+          <rect x="255" y="42" width="22" height="50" fill="#c0392b"/><rect x="285" y="42" width="22" height="50" fill="#c0392b"/><rect x="315" y="42" width="22" height="50" fill="#c0392b"/>
+          <rect x="345" y="42" width="22" height="50" fill="#64748b"/><rect x="375" y="42" width="22" height="50" fill="#2f78b0"/><rect x="405" y="38" width="22" height="58" fill="#64748b"/>
+          <rect x="435" y="42" width="22" height="50" fill="#e5b84c"/><rect x="465" y="42" width="22" height="50" fill="#e5b84c"/><rect x="495" y="42" width="22" height="50" fill="#e5b84c"/>
+        </g>
+        <g font-size="13" text-anchor="middle">
+          <text x="86" y="135">P1</text><text x="116" y="135">P2</text><text x="146" y="135">P3</text><text x="176" y="135">P4</text><text x="206" y="135">P5</text><text x="236" y="135">P6</text><text x="266" y="135">P7</text><text x="296" y="135">P8</text><text x="326" y="135">P9</text><text x="356" y="135">P10</text><text x="386" y="135">P11</text><text x="416" y="135">P12</text><text x="446" y="135">P13</text><text x="476" y="135">P14</text><text x="506" y="135">P15</text>
+        </g>
+        <g font-size="15" text-anchor="middle" font-weight="700">
+          <text x="116" y="165" fill="#7d3c98">3,3 V</text><text x="206" y="165" fill="#475569">GND</text><text x="296" y="165" fill="#c0392b">5 V</text><text x="386" y="165" fill="#2f78b0">SSU/LED</text><text x="476" y="165" fill="#b7950b">12 V</text>
+        </g>
+        <text x="20" y="205" font-size="14" fill="#475569">P4 и P12 – по-дълги („first mate“) за hot-plug</text>
+      </svg>
+      <table class="small">
+        <tr><th>Пинове</th><th>Сигнал</th></tr>
+        <tr><td>P1–P3</td><td>3,3 V (в рев. 3.3: P3 = <b>PWDIS</b>)</td></tr>
+        <tr><td>P4–P6, P10, P12</td><td>GND</td></tr>
+        <tr><td>P7–P9</td><td>5 V</td></tr>
+        <tr><td>P11</td><td>staggered spin-up / activity LED</td></tr>
+        <tr><td>P13–P15</td><td>12 V</td></tr>
+      </table>
+    </div>
+    <div>
+      <ul>
+        <li>Три напрежения – <span class="k">3,3 V, 5 V, 12 V</span>, всяко по <span class="k">3 пина</span> (паралелно, по-голям ток)</li>
+        <li>Всеки пин е оразмерен за около <span class="k">1,5 A</span></li>
+        <li>12 V – мотор на HDD; 5 V – електроника; 3,3 V – рядко използвано (някои SSD)</li>
+        <li><span class="k">PWDIS</span> (Power Disable): висок сигнал на P3 изключва диска дистанционно – за центрове за данни</li>
+        <li>Стари захранвания подават 3,3 V на P3 → диск с PWDIS не стартира (нужен адаптер)</li>
+        <li>Преходници Molex → SATA (без 3,3 V)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 38 -->
+<section class="slide">
+  <h2>Разновидности: Slimline, micro SATA, eSATA, eSATAp</h2>
+  <div class="c">
+    <table>
+      <tr><th style="width:190px">Вариант</th><th>Характеристики</th><th style="width:300px">Приложение</th></tr>
+      <tr><td><b>Slimline SATA</b></td><td>стандартен 7-пинов конектор за данни + <b>6-пинов</b> захранващ (само 5 V)</td><td>тънки оптични устройства (лаптопи)</td></tr>
+      <tr><td><b>Micro SATA</b></td><td>7-пинов за данни + <b>9-пинов</b> захранващ (3,3 V и 5 V), по-малка стъпка</td><td>1,8" дискове</td></tr>
+      <tr><td><b>eSATA</b></td><td>отделен конектор без L-ключ, <b>екраниран кабел до 2 m</b>, по-високи сигнални нива, по-здрав (до 5000 включвания); <b>не</b> пренася захранване</td><td>външни дискове (≈ 2004–2012)</td></tr>
+      <tr><td><b>eSATAp</b> (Power over eSATA)</td><td>комбиниран eSATA + USB порт, подава 5 V (и опционално 12 V)</td><td>лаптопи, външни кутии</td></tr>
+      <tr><td><b>xSATA</b> / mini-SAS</td><td>многопортови кабели (4 SATA линии в един кабел), напр. SFF-8087 → 4×SATA</td><td>сървъри, RAID контролери</td></tr>
+    </table>
+    <div class="box">eSATA е по-бърз от USB 2.0 и няма протоколно преобразуване, но е изместен от <b>USB 3.x</b> и <b>Thunderbolt</b>, които подават и захранване.</div>
+  </div>
+</section>
+
+<!-- 39 -->
+<section class="slide">
+  <h2>mSATA и M.2</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li><span class="k">mSATA</span> (SATA 3.1) – физически като Mini PCI Express (30 × 50,95 mm), но сигналите са SATA</li>
+        <li><span class="k">M.2</span> (NGFF, SATA 3.2) – гъвкав форм-фактор: ширина 22 mm, дължина 30–110 mm (2242, 2260, <b>2280</b>)</li>
+        <li>M.2 може да пренася <span class="k">SATA</span> или <span class="k">PCIe</span> (NVMe)</li>
+        <li>Ключове: <span class="k">B-key</span> (SATA или PCIe x2), <span class="k">M-key</span> (PCIe x4 / SATA), <span class="k">B+M</span> – обикновено SATA</li>
+        <li>M.2 SATA SSD е <span class="k">ограничен до 600 MB/s</span> – същият интерфейс</li>
+        <li>Важно: слотът трябва да поддържа съответния протокол</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="540" height="470" viewBox="0 0 540 470">
+        <text x="10" y="24" font-size="16" font-weight="700" fill="#0b3d63">mSATA (30 × 51 mm)</text>
+        <rect x="10" y="35" width="200" height="118" rx="4" fill="#1f6b3a"/>
+        <rect x="10" y="153" width="200" height="12" fill="#e5b84c"/>
+        <rect x="40" y="60" width="60" height="60" fill="#111"/><rect x="120" y="60" width="60" height="60" fill="#111"/>
+        <text x="10" y="215" font-size="16" font-weight="700" fill="#0b3d63">M.2 2280 (22 × 80 mm)</text>
+        <rect x="40" y="230" width="460" height="88" rx="4" fill="#1f6b3a"/>
+        <rect x="28" y="230" width="12" height="88" fill="#e5b84c"/>
+        <rect x="80" y="250" width="70" height="48" fill="#111"/><rect x="190" y="250" width="70" height="48" fill="#111"/><rect x="300" y="250" width="70" height="48" fill="#111"/>
+        <circle cx="490" cy="274" r="7" fill="#fff"/>
+        <text x="10" y="360" font-size="15" fill="#1f2a37" font-weight="700">Ключове на M.2 конектора:</text>
+        <g font-size="14">
+          <rect x="10" y="375" width="160" height="30" fill="#e2e8f0"/><rect x="40" y="375" width="8" height="30" fill="#fff"/><text x="90" y="425" text-anchor="middle">B-key</text>
+          <rect x="190" y="375" width="160" height="30" fill="#e2e8f0"/><rect x="320" y="375" width="8" height="30" fill="#fff"/><text x="270" y="425" text-anchor="middle">M-key</text>
+          <rect x="370" y="375" width="160" height="30" fill="#e2e8f0"/><rect x="400" y="375" width="8" height="30" fill="#fff"/><rect x="500" y="375" width="8" height="30" fill="#fff"/><text x="450" y="425" text-anchor="middle">B+M</text>
+        </g>
+        <text x="10" y="458" font-size="14" fill="#475569">SATA M.2 модулите обикновено са B+M; NVMe – M-key.</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 40 -->
+<section class="slide">
+  <h2>SATA Express и U.2</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">SATA Express (SATA 3.2, 2013)</p>
+      <ul>
+        <li>Конектор = <span class="k">2 SATA порта + PCIe x2</span> в общ корпус</li>
+        <li>Може да работи като 2×SATA или като PCIe x2 (AHCI или NVMe)</li>
+        <li>PCIe 3.0 x2 ≈ <span class="k">16 Gbit/s</span> (≈ 2 GB/s)</li>
+        <li>Отделен захранващ кабел, обемист конектор</li>
+        <li><span class="k">Не се налага</span> – почти няма устройства; изместен от M.2 и U.2</li>
+      </ul>
+    </div>
+    <div>
+      <p class="k">U.2 (SFF-8639)</p>
+      <ul>
+        <li>2,5" дискове за сървъри и работни станции</li>
+        <li>Един конектор поддържа <span class="k">SATA, SAS и PCIe x4 (NVMe)</span></li>
+        <li>Hot-swap, по-добро охлаждане от M.2</li>
+        <li>Наследен в центровете за данни от <span class="k">EDSFF</span> (E1.S, E3.S)</li>
+      </ul>
+      <div class="box b">Извод: SATA-IO насочва бъдещето на високоскоростните SSD към <b>PCIe</b>, вместо да вдигне скоростта на SATA.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 41 -->
+<section class="slide">
+  <h2>Хост контролери: IDE (legacy), AHCI, RAID</h2>
+  <div class="c">
+    <table>
+      <tr><th style="width:220px">Режим</th><th>Как работи</th><th style="width:330px">Последици</th></tr>
+      <tr><td><b>IDE / Legacy / Compatible</b></td><td>контролерът имитира стар PATA контролер (I/O портове 1F0h/170h, IRQ 14/15)</td><td>работи със стари ОС без драйвер; <b>няма NCQ, hot-plug, ALPM</b></td></tr>
+      <tr><td><b>AHCI</b></td><td>стандартен интерфейс на Intel (2004) – регистри в паметта (MMIO), структури за команди в RAM</td><td>NCQ, hot-plug, енергоспестяване; стандартен драйвер във всички съвременни ОС</td></tr>
+      <tr><td><b>RAID</b> (Intel RST и др.)</td><td>AHCI + фърмуер/драйвер за масиви</td><td>RAID 0/1/5/10 в BIOS/UEFI; нужен специфичен драйвер</td></tr>
+    </table>
+    <div class="cols" style="margin-top:14px">
+      <ul>
+        <li>Режимът се избира в <span class="k">BIOS/UEFI</span></li>
+        <li>Смяна на режима след инсталация на ОС може да доведе до неуспешно зареждане (липсва драйвер)</li>
+      </ul>
+      <ul>
+        <li>Linux: драйвер <code>ahci</code> в подсистемата <span class="k">libata</span></li>
+        <li>Windows: <code>storahci.sys</code> (Microsoft AHCI)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 42 -->
+<section class="slide">
+  <h2>AHCI – структури в паметта</h2>
+  <div class="c">
+    <svg width="1180" height="430" viewBox="0 0 1180 430">
+      <defs><marker id="a42" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+      <rect x="10" y="10" width="250" height="400" rx="8" fill="#0b3d63"/>
+      <text x="135" y="40" font-size="18" fill="#fff" font-weight="700" text-anchor="middle">HBA регистри (ABAR)</text>
+      <text x="135" y="62" font-size="14" fill="#cfe0f0" text-anchor="middle">PCI BAR5, MMIO</text>
+      <rect x="30" y="80" width="210" height="80" fill="#1d5a8a"/><text x="135" y="112" font-size="15" fill="#fff" text-anchor="middle">Generic Host Control</text><text x="135" y="134" font-size="13" fill="#cfe0f0" text-anchor="middle">CAP, GHC, IS, PI, VS</text>
+      <rect x="30" y="175" width="210" height="60" fill="#2f78b0"/><text x="135" y="210" font-size="15" fill="#fff" text-anchor="middle">Port 0 (100h)</text>
+      <rect x="30" y="245" width="210" height="60" fill="#2f78b0"/><text x="135" y="280" font-size="15" fill="#fff" text-anchor="middle">Port 1 (180h)</text>
+      <text x="135" y="335" font-size="18" fill="#fff" text-anchor="middle">⋮</text>
+      <text x="135" y="380" font-size="13" fill="#cfe0f0" text-anchor="middle">до 32 порта × 80h</text>
+
+      <rect x="340" y="20" width="260" height="250" rx="8" fill="#dbeafe" stroke="#2f78b0" stroke-width="2"/>
+      <text x="470" y="46" font-size="17" font-weight="700" text-anchor="middle" fill="#0b3d63">Command List</text>
+      <text x="470" y="66" font-size="13" text-anchor="middle" fill="#475569">32 слота × 32 B = 1 KB</text>
+      <rect x="360" y="80" width="220" height="40" fill="#fff" stroke="#2f78b0"/><text x="470" y="106" font-size="14" text-anchor="middle">Command Header 0</text>
+      <rect x="360" y="125" width="220" height="40" fill="#fff" stroke="#2f78b0"/><text x="470" y="151" font-size="14" text-anchor="middle">Command Header 1</text>
+      <text x="470" y="190" font-size="18" text-anchor="middle">⋮</text>
+      <rect x="360" y="210" width="220" height="40" fill="#fff" stroke="#2f78b0"/><text x="470" y="236" font-size="14" text-anchor="middle">Command Header 31</text>
+
+      <rect x="340" y="300" width="260" height="110" rx="8" fill="#fde2c8" stroke="#f28c28" stroke-width="2"/>
+      <text x="470" y="330" font-size="17" font-weight="700" text-anchor="middle" fill="#c2610c">Received FIS</text>
+      <text x="470" y="352" font-size="13" text-anchor="middle" fill="#475569">256 B: DMA Setup, PIO Setup,</text>
+      <text x="470" y="372" font-size="13" text-anchor="middle" fill="#475569">D2H Register, Set Device Bits</text>
+
+      <rect x="690" y="20" width="250" height="250" rx="8" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="815" y="46" font-size="17" font-weight="700" text-anchor="middle" fill="#0b3d63">Command Table</text>
+      <rect x="710" y="65" width="210" height="45" fill="#fff" stroke="#64748b"/><text x="815" y="93" font-size="14" text-anchor="middle">CFIS (до 64 B)</text>
+      <rect x="710" y="115" width="210" height="40" fill="#fff" stroke="#64748b"/><text x="815" y="141" font-size="14" text-anchor="middle">ACMD (ATAPI, 16 B)</text>
+      <rect x="710" y="160" width="210" height="95" fill="#fff" stroke="#64748b"/><text x="815" y="195" font-size="14" text-anchor="middle">PRDT</text><text x="815" y="218" font-size="13" text-anchor="middle" fill="#475569">до 65 535 записа,</text><text x="815" y="238" font-size="13" text-anchor="middle" fill="#475569">по 16 B</text>
+
+      <rect x="1010" y="120" width="160" height="150" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+      <text x="1090" y="185" font-size="16" font-weight="700" text-anchor="middle">Буфери</text>
+      <text x="1090" y="210" font-size="16" font-weight="700" text-anchor="middle">с данни</text>
+
+      <line x1="240" y1="200" x2="338" y2="120" stroke="#1f2a37" stroke-width="2" marker-end="url(#a42)"/>
+      <text x="262" y="150" font-size="13">PxCLB</text>
+      <line x1="240" y1="215" x2="338" y2="350" stroke="#1f2a37" stroke-width="2" marker-end="url(#a42)"/>
+      <text x="300" y="285" font-size="13">PxFB</text>
+      <line x1="580" y1="100" x2="688" y2="80" stroke="#1f2a37" stroke-width="2" marker-end="url(#a42)"/>
+      <text x="610" y="112" font-size="13">CTBA</text>
+      <line x1="920" y1="205" x2="1008" y2="195" stroke="#1f2a37" stroke-width="2" marker-end="url(#a42)"/>
+      <text x="935" y="185" font-size="13">DBA</text>
+      <text x="690" y="320" font-size="15" fill="#475569">Всички структури са в системната RAM;</text>
+      <text x="690" y="345" font-size="15" fill="#475569">HBA ги чете чрез DMA (bus master).</text>
+      <text x="690" y="380" font-size="15" fill="#475569">Един PRD запис описва до 4 MB.</text>
+    </svg>
+    <p class="small" style="margin:0">Драйверът попълва Command Header + Command Table, после задава бит в <code>PxCI</code> → HBA изпраща FIS-а.</p>
+  </div>
+</section>
+
+<!-- 43 -->
+<section class="slide">
+  <h2>AHCI – регистри на порт и SStatus / SControl / SError</h2>
+  <div class="c cols">
+    <div>
+      <table class="small">
+        <tr><th>Регистър</th><th>Предназначение</th></tr>
+        <tr><td class="m">PxCLB</td><td>адрес на Command List</td></tr>
+        <tr><td class="m">PxFB</td><td>адрес на Received FIS</td></tr>
+        <tr><td class="m">PxIS / PxIE</td><td>статус / разрешение на прекъсвания</td></tr>
+        <tr><td class="m">PxCMD</td><td>старт (ST), FIS приемане (FRE), спин-ъп, ALPM</td></tr>
+        <tr><td class="m">PxTFD</td><td>Task File: STS (BSY, DRQ, ERR) и ERR</td></tr>
+        <tr><td class="m">PxSIG</td><td>подпис на устройството (ATA, ATAPI, PM)</td></tr>
+        <tr><td class="m">PxSSTS</td><td>SStatus – състояние на връзката</td></tr>
+        <tr><td class="m">PxSCTL</td><td>SControl – ресет, ограничение на скоростта</td></tr>
+        <tr><td class="m">PxSERR</td><td>SError – грешки на връзката</td></tr>
+        <tr><td class="m">PxSACT</td><td>SActive – активни NCQ тагове</td></tr>
+        <tr><td class="m">PxCI</td><td>Command Issue – подадени слотове</td></tr>
+      </table>
+    </div>
+    <div>
+      <p class="k">SStatus (PxSSTS)</p>
+      <ul class="small">
+        <li><b>DET</b>: 0 – няма устройство; 1 – открито, без PHY; <b>3 – свързано</b>; 4 – изключено</li>
+        <li><b>SPD</b>: 1 – Gen1, 2 – Gen2, 3 – Gen3</li>
+        <li><b>IPM</b>: 1 – Active, 2 – Partial, 6 – Slumber, 8 – DevSleep</li>
+      </ul>
+      <p class="k">SControl (PxSCTL)</p>
+      <ul class="small">
+        <li><b>DET = 1</b> → изпраща <b>COMRESET</b></li>
+        <li><b>SPD</b> → ограничава максималната скорост</li>
+        <li><b>IPM</b> → забранява Partial / Slumber</li>
+      </ul>
+      <p class="k">SError (PxSERR)</p>
+      <ul class="small">
+        <li>ERR: протоколни, комуникационни грешки; DIAG: CRC (C), 10b→8b (B), промяна на PHY (N), обмен (X)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 44 -->
+<section class="slide">
+  <h2>Port Multiplier и Port Selector</h2>
+  <div class="c cols">
+    <div>
+      <svg width="560" height="330" viewBox="0 0 560 330">
+        <rect x="200" y="10" width="160" height="56" rx="8" fill="#0b3d63"/><text x="280" y="44" font-size="17" text-anchor="middle" fill="#fff" font-weight="700">Хост порт</text>
+        <line x1="280" y1="66" x2="280" y2="110" stroke="#f28c28" stroke-width="4"/>
+        <rect x="140" y="110" width="280" height="60" rx="8" fill="#2f78b0"/><text x="280" y="138" font-size="17" text-anchor="middle" fill="#fff" font-weight="700">Port Multiplier</text><text x="280" y="160" font-size="13" text-anchor="middle" fill="#dbeafe">контролен порт 15</text>
+        <g stroke="#f28c28" stroke-width="3"><line x1="160" y1="170" x2="60" y2="240"/><line x1="230" y1="170" x2="190" y2="240"/><line x1="330" y1="170" x2="370" y2="240"/><line x1="400" y1="170" x2="500" y2="240"/></g>
+        <g font-size="14" text-anchor="middle" fill="#fff">
+          <rect x="20" y="240" width="80" height="50" rx="6" fill="#f28c28"/><text x="60" y="270">порт 0</text>
+          <rect x="150" y="240" width="80" height="50" rx="6" fill="#f28c28"/><text x="190" y="270">порт 1</text>
+          <rect x="330" y="240" width="80" height="50" rx="6" fill="#f28c28"/><text x="370" y="270">…</text>
+          <rect x="460" y="240" width="80" height="50" rx="6" fill="#f28c28"/><text x="500" y="270">порт 14</text>
+        </g>
+        <text x="280" y="320" font-size="15" text-anchor="middle" fill="#475569">до 15 устройства; адрес = поле PM Port в FIS</text>
+      </svg>
+      <ul class="small">
+        <li><b>Command-based switching</b> – само едно устройство активно наведнъж</li>
+        <li><b>FIS-based switching</b> – FIS-ове към различни устройства се редуват → по-висока обща производителност</li>
+      </ul>
+    </div>
+    <div>
+      <svg width="520" height="250" viewBox="0 0 520 250">
+        <rect x="20" y="10" width="160" height="56" rx="8" fill="#0b3d63"/><text x="100" y="44" font-size="17" text-anchor="middle" fill="#fff" font-weight="700">Хост A</text>
+        <rect x="340" y="10" width="160" height="56" rx="8" fill="#0b3d63"/><text x="420" y="44" font-size="17" text-anchor="middle" fill="#fff" font-weight="700">Хост B</text>
+        <line x1="100" y1="66" x2="220" y2="120" stroke="#f28c28" stroke-width="4"/>
+        <line x1="420" y1="66" x2="300" y2="120" stroke="#f28c28" stroke-width="4" stroke-dasharray="8 6"/>
+        <rect x="170" y="110" width="180" height="50" rx="8" fill="#2f78b0"/><text x="260" y="142" font-size="16" text-anchor="middle" fill="#fff" font-weight="700">Port Selector</text>
+        <line x1="260" y1="160" x2="260" y2="190" stroke="#f28c28" stroke-width="4"/>
+        <rect x="200" y="190" width="120" height="50" rx="8" fill="#f28c28"/><text x="260" y="221" font-size="16" text-anchor="middle" fill="#fff" font-weight="700">Диск</text>
+      </svg>
+      <ul class="small">
+        <li><b>Port Selector</b>: 2 хоста → 1 устройство, само един активен</li>
+        <li>Резервиране (failover) в системи с висока надеждност</li>
+        <li>Избор на активния хост: чрез протокол (OOB последователност) или страничен сигнал</li>
+        <li>Port Multiplier изисква поддръжка от HBA (CAP.SPM в AHCI)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 45 -->
+<section class="slide">
+  <h2>SATA и SAS – съвместимост</h2>
+  <div class="c cols">
+    <div>
+      <table class="small">
+        <tr><th>Параметър</th><th>SATA</th><th>SAS</th></tr>
+        <tr><td>Команден набор</td><td>ATA</td><td>SCSI</td></tr>
+        <tr><td>Скорост</td><td>6 Gbit/s</td><td>12 / 22,5 Gbit/s (SAS-3/4)</td></tr>
+        <tr><td>Дуплекс</td><td>полудуплекс</td><td>пълен дуплекс</td></tr>
+        <tr><td>Портове на диска</td><td>1</td><td>2 (dual-port, резервиране)</td></tr>
+        <tr><td>Кабел</td><td>до 1 m</td><td>до ~10 m</td></tr>
+        <tr><td>Топология</td><td>точка-точка (+ PM)</td><td>expander-и, хиляди устройства</td></tr>
+        <tr><td>Цена / надеждност</td><td>ниска / настолна</td><td>висока / корпоративна</td></tr>
+      </table>
+    </div>
+    <div>
+      <ul>
+        <li>SAS контролер <span class="k">поддържа SATA дискове</span> – tunneling чрез <span class="k">STP</span> (Serial ATA Tunneling Protocol) през expander-и</li>
+        <li>SATA контролер <span class="k">не</span> поддържа SAS дискове</li>
+        <li>Механично: SAS дискът има „мост“ между конектора за данни и захранването → не влиза в SATA кабел</li>
+        <li>Общ физически слой и сходни електрически характеристики</li>
+      </ul>
+      <svg width="500" height="110" viewBox="0 0 500 110">
+        <rect x="10" y="20" width="140" height="50" rx="6" fill="#0b3d63"/><text x="80" y="51" font-size="15" text-anchor="middle" fill="#fff">SAS HBA</text>
+        <text x="200" y="40" font-size="22" fill="#15803d">✔</text><text x="230" y="40" font-size="15">SAS диск</text>
+        <text x="200" y="75" font-size="22" fill="#15803d">✔</text><text x="230" y="75" font-size="15">SATA диск (STP)</text>
+        <text x="10" y="102" font-size="15" fill="#c0392b">SATA HBA + SAS диск → ✘</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 46 -->
+<section class="slide">
+  <h2>RAID със SATA дискове</h2>
+  <div class="c">
+    <div class="cols3">
+      <div class="box b" style="margin:0"><b>RAID 0 (striping)</b><br><span class="small">данните се разпределят между ≥ 2 диска; максимална скорост, <b>няма защита</b></span></div>
+      <div class="box b" style="margin:0"><b>RAID 1 (mirroring)</b><br><span class="small">огледално копие; оцелява при отказ на диск; 50 % използваем капацитет</span></div>
+      <div class="box b" style="margin:0"><b>RAID 5</b><br><span class="small">striping + разпределен паритет; ≥ 3 диска; оцелява при отказ на 1 диск</span></div>
+      <div class="box b" style="margin:0"><b>RAID 6</b><br><span class="small">двоен паритет; ≥ 4 диска; оцелява при отказ на 2 диска</span></div>
+      <div class="box b" style="margin:0"><b>RAID 10</b><br><span class="small">огледални двойки + striping; ≥ 4 диска; скорост и надеждност</span></div>
+      <div class="box b" style="margin:0"><b>JBOD</b><br><span class="small">дисковете се ползват поотделно или слепени, без излишък</span></div>
+    </div>
+    <div class="cols" style="margin-top:18px">
+      <ul>
+        <li><span class="k">Хардуерен RAID</span>: отделен контролер с процесор и кеш (често SAS/SATA)</li>
+        <li><span class="k">Фърмуерен (fake) RAID</span>: Intel RST, AMD RAIDXpert</li>
+        <li><span class="k">Софтуерен RAID</span>: Linux mdadm, ZFS, Windows Storage Spaces</li>
+      </ul>
+      <ul>
+        <li>Голям обем SATA HDD + RAID → евтино хранилище (NAS)</li>
+        <li>Важно: <span class="k">TLER/ERC</span> – ограничено време за възстановяване на грешка, за да не „изпадне“ дискът от масива</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 47 -->
+<section class="slide">
+  <h2>SATA за HDD и SSD; сравнение с NVMe</h2>
+  <div class="c cols">
+    <div>
+      <ul>
+        <li>HDD 7200 rpm: ≈ 150–280 MB/s последователно → SATA 6 Gbit/s е <span class="k">достатъчен</span></li>
+        <li>SATA SSD: ≈ 500–560 MB/s → <span class="k">ограничен от интерфейса</span></li>
+        <li>AHCI е проектиран за въртящи се дискове – една опашка, MMIO достъпи в пътя на командата</li>
+        <li><span class="k">NVMe</span> – протокол директно върху PCIe, за флаш памет</li>
+      </ul>
+    </div>
+    <div>
+      <table class="small">
+        <tr><th>Параметър</th><th>SATA + AHCI</th><th>NVMe (PCIe)</th></tr>
+        <tr><td>Макс. скорост</td><td>600 MB/s</td><td>≈ 3,9 GB/s (Gen3 x4)<br>≈ 7,9 GB/s (Gen4 x4)</td></tr>
+        <tr><td>Опашки</td><td>1 опашка × 32 команди</td><td>до 65 535 опашки × 65 536 команди</td></tr>
+        <tr><td>Прекъсвания</td><td>едно (или малко)</td><td>MSI-X, по опашка/ядро</td></tr>
+        <tr><td>Латентност (протокол)</td><td>по-висока</td><td>по-ниска</td></tr>
+        <tr><td>Произволно 4K IOPS</td><td>≈ до 100 хил.</td><td>стотици хил. – милиони</td></tr>
+        <tr><td>Цена / GB</td><td>ниска</td><td>сходна при масовите модели</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 48 -->
+<section class="slide">
+  <h2>Диагностика: S.M.A.R.T. и инструменти</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">S.M.A.R.T. (Self-Monitoring, Analysis and Reporting Technology)</p>
+      <table class="small">
+        <tr><th>ID</th><th>Атрибут</th></tr>
+        <tr><td>5</td><td>Reallocated Sectors Count</td></tr>
+        <tr><td>9</td><td>Power-On Hours</td></tr>
+        <tr><td>187</td><td>Reported Uncorrectable Errors</td></tr>
+        <tr><td>194</td><td>Temperature</td></tr>
+        <tr><td>197</td><td>Current Pending Sector Count</td></tr>
+        <tr><td><b>199</b></td><td><b>UDMA_CRC_Error_Count</b> – грешки по кабела / конектора</td></tr>
+      </table>
+      <p class="note">Растящ атрибут 199 обикновено означава лош кабел, не лош диск.</p>
+    </div>
+    <div>
+      <p class="k">Инструменти (Linux)</p>
+      <ul class="small">
+        <li><code>smartctl -a /dev/sda</code> – атрибути, логове, самотестове (smartmontools)</li>
+        <li><code>smartctl -t long /dev/sda</code> – дълъг самотест</li>
+        <li><code>hdparm -I /dev/sda</code> – IDENTIFY: функции, NCQ дълбочина, TRIM</li>
+        <li><code>dmesg | grep ata</code> → „SATA link up 6.0 Gbps“</li>
+        <li><code>/sys/class/ata_link/*/sata_spd</code> – договорена скорост</li>
+        <li>Подсистема <span class="k">libata</span>: SCSI слой → ATA команди</li>
+      </ul>
+      <p class="k">Windows</p>
+      <ul class="small">
+        <li>CrystalDiskInfo, Device Manager, PowerShell <code>Get-PhysicalDisk</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 49 -->
+<section class="slide">
+  <h2>Приложение днес и бъдеще на SATA</h2>
+  <div class="c cols">
+    <div>
+      <p class="k">Къде се използва днес</p>
+      <ul>
+        <li><span class="k">HDD с голям капацитет</span> (20+ TB) – архив, видеонаблюдение, облачно „студено“ хранилище</li>
+        <li><span class="k">NAS</span> и домашни сървъри</li>
+        <li><span class="k">Бюджетни 2,5" SSD</span> – ъпгрейд на стари компютри</li>
+        <li>Оптични устройства, индустриални и вградени системи</li>
+        <li>Огромна инсталирана база и ниска цена</li>
+      </ul>
+    </div>
+    <div>
+      <p class="k">Бъдеще</p>
+      <ul>
+        <li>Няма <span class="k">SATA 12 Gbit/s</span> / „SATA 4.0“ – SATA-IO развива функции, не скорост</li>
+        <li>Клиентските SSD преминават изцяло към <span class="k">M.2 NVMe</span></li>
+        <li>Много лаптопи и дънни платки имат все по-малко SATA портове</li>
+        <li>В центровете за данни HDD остават на SATA/SAS още години</li>
+        <li>Командният набор ATA продължава да се развива (ACS) – напр. SMR, Command Duration Limits</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 50 -->
+<section class="slide end">
+  <div style="padding:46px 70px 0">
+    <h1 style="font-size:40px;margin:0 0 6px">Заключение</h1>
+    <div style="width:120px;height:6px;background:#f28c28;margin:10px 0 18px"></div>
+    <p style="font-size:21px;line-height:1.45;margin:0 0 20px;color:#e2ecf6">SATA превръща паралелния ATA в бърз сериен интерфейс точка-точка, запазвайки софтуерната съвместимост. Слоестият протокол (физически, канален, транспортен, команден), NCQ, hot-plug и енергоспестяването го правят стандарт за над 20 години. Днес SATA остава основен за HDD и евтини SSD, а високата производителност се поема от NVMe.</p>
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:40px">
+      <div>
+        <p style="font-size:20px;font-weight:700;margin:0 0 6px;color:#f9b46b">Използвана литература</p>
+        <ol style="font-size:16px;line-height:1.45;margin:0;padding-left:22px;color:#e2ecf6">
+          <li>SATA-IO, <i>Serial ATA Revision 3.x Specification</i> (3.0 – 3.5)</li>
+          <li>Intel, <i>Serial ATA AHCI Specification</i>, Rev. 1.3.1</li>
+          <li>INCITS T13, <i>ATA/ATAPI Command Set (ATA8-ACS, ACS-x)</i></li>
+          <li>INCITS T13, <i>ATA/ATAPI-7</i> (Volume 3 – Serial Transport)</li>
+          <li>Wikipedia, „Serial ATA“, „Advanced Host Controller Interface“, „8b/10b encoding“</li>
+          <li>Учебни материали по „Компютърна периферия“, ТУ – София, ФКСТ</li>
+        </ol>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center">
+        <div style="font-size:40px;font-weight:700;text-align:center;line-height:1.25">Благодаря<br>за вниманието!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

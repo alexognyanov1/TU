@@ -36,6 +36,7 @@ Timetable (winter 2026/27, КСИ): [stream 8 PDF](III-kurs/2026-27_winter_KSI_p
 | Subject | Name | Language(s) | Rules |
 | --- | --- | --- | --- |
 | [PE](III-kurs/PE) | Програмни езици / Programming Languages | C++17 | [rules](III-kurs/PE/RULES.md) |
+| [KP](III-kurs/KP) | Компютърна периферия / Computer Peripherals | HTML → PDF (Bulgarian documents) | [rules](III-kurs/KP/RULES.md) |
 | [ASLS](III-kurs/ASLS) | Анализ и синтез на логически схеми / Analysis and Synthesis of Logic Circuits | Multisim, Python | [rules](III-kurs/ASLS/RULES.md) |
 
 <!-- /subjects:III-kurs -->
@@ -51,6 +52,16 @@ Rules: [III-kurs/PE/RULES.md](III-kurs/PE/RULES.md) · Build & run: `III-kurs/PE
 
 <!-- /index:III-kurs/PE -->
 
+### KP: Computer Peripherals
+
+Rules: [III-kurs/KP/RULES.md](III-kurs/KP/RULES.md) · Build the PDFs: `python3 III-kurs/KP/SATA/src/build.py`
+
+<!-- index:III-kurs/KP -->
+| Date | Type | Folder | Language | What's inside |
+| --- | --- | --- | --- | --- |
+| — | Реферат + presentation | [III-kurs/KP/SATA](III-kurs/KP/SATA) | HTML/SVG → PDF | Реферат and 50-slide presentation in Bulgarian on SATA (Serial ATA): history ATA/IDE/PATA, SATA revisions 1.0–3.5 (1.5/3/6 Gb/s), layer model (physical, link, transport, command), LVDS differential signalling, 8b/10b encoding, OOB COMRESET/COMINIT/COMWAKE, speed negotiation, SSC, scrambler LFSR, CRC-32, primitives (ALIGN, SYNC, X_RDY, R_OK, HOLD), FIS types (Register H2D 27h, DMA Setup, Set Device Bits), ATA commands, PIO/DMA protocols, NCQ, TRIM, S.M.A.R.T., ATA Security, AHCI registers and command list/PRDT, hot-plug, staggered spin-up, power management (Partial/Slumber/DevSleep, ALPM), port multiplier/selector, connectors and power pinout (PWDIS), eSATA, mSATA, M.2, SATA Express, SATA vs SAS vs NVMe, RAID, smartctl/hdparm diagnostics. PDFs: `SATA_referat.pdf`, `SATA_prezentatsia.pdf`; sources in `src/`, built with headless Chrome (`src/build.py`) |
+
+<!-- /index:III-kurs/KP -->
 ### ASLS: Analysis and Synthesis of Logic Circuits
 
 Rules: [III-kurs/ASLS/RULES.md](III-kurs/ASLS/RULES.md) · Check answers: `python3 III-kurs/ASLS/<DAY>/verify.py`
