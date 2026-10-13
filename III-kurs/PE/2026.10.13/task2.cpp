@@ -104,7 +104,7 @@ double readDistance() {
 
 void printComparison(const char* carName, int passengers, const char* truckName, int weight, int t) {
     std::cout << "Comparing " << carName << " (" << passengers << " passengers) and "
-              << truckName << " (" << weight << " kg):\n";
+        << truckName << " (" << weight << " kg):\n";
     if (t < 0) std::cout << "Truck is faster.\n";
     else if (t == 0) std::cout << "Car and truck speed is the same.\n";
     else std::cout << "Car is faster.\n";
