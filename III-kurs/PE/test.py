@@ -14,14 +14,20 @@ Usage:
     III-kurs/PE/test.py 2026.09.29      test a specific day
     III-kurs/PE/test.py 2026.09.29 task2   test one task
 
-Exit code is non-zero if any build or expectation fails. The full report is also
+Every task must also be indented exactly as Vim's `gg=G` leaves it (filetype indent,
+shiftwidth=4, expandtab, cinoptions=g0,N-s). Fix with `run.sh --format [DAY]`.
+
+Exit code is non-zero if any build, format check or expectation fails. The full report is also
 written to III-kurs/PE/.build/<DAY>/test-report.txt.
 """
 
 import os
+import difflib
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 PE_DIR = Path(__file__).resolve().parent
@@ -29,6 +35,9 @@ BUILD_DIR = PE_DIR / ".build"
 CXX = os.environ.get("CXX", "clang++")
 CXXFLAGS = ["-std=c++17", "-Wall", "-Wextra", "-pedantic", "-g"]
 TIMEOUT = 10
+VIM_FORMAT = ["-E", "-s", "-u", "NONE", "-i", "NONE", "-N", "-c", "filetype plugin indent on",
+              "-c", "set shiftwidth=4 tabstop=4 expandtab cinoptions=g0,N-s",
+              "-c", "normal gg=G", "-c", "wq"]
 DAY_RE = re.compile(r"^\d{4}\.\d{2}\.\d{2}$")
 
 report = []
@@ -58,6 +67,21 @@ def build(src, day):
     binary.parent.mkdir(parents=True, exist_ok=True)
     result = subprocess.run([CXX, *CXXFLAGS, str(src), "-o", str(binary)], capture_output=True, text=True)
     return binary, result.returncode, result.stderr
+
+
+def format_diff(src):
+    vim = shutil.which("vim")
+    if not vim:
+        return None
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = Path(tmp) / src.name
+        copy.write_text(src.read_text())
+        subprocess.run([vim, *VIM_FORMAT, str(copy)], capture_output=True, timeout=30)
+        formatted = copy.read_text()
+    original = src.read_text()
+    if formatted == original:
+        return []
+    return [line.rstrip("\n") for line in difflib.unified_diff(original.splitlines(True), formatted.splitlines(True), "as written", "after gg=G", n=0)]
 
 
 def run_case(binary, case_in):
@@ -117,6 +141,16 @@ def main():
                 continue
         else:
             out(f"{src.name}: built")
+
+        diff = format_diff(src)
+        if diff is None:
+            out(f"{src.name}: format check skipped (vim not found)")
+        elif diff:
+            out(f"{src.name}: NOT FORMATTED (Vim gg=G changes it; run III-kurs/PE/run.sh --format {day})")
+            block("diff", "\n".join(diff[:40]))
+            totals["FAIL"] += 1
+        else:
+            out(f"{src.name}: formatted (gg=G leaves it unchanged)")
 
         case_dir = day_dir / "tests" / src.stem
         cases = sorted(case_dir.glob("*.in")) if case_dir.is_dir() else []

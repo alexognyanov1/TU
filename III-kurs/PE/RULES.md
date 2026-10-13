@@ -22,6 +22,21 @@
 - Standard library only (`<iostream>`, `<iomanip>`, `<string>`, `<cmath>`, `<limits>`, `<chrono>`, `<thread>`, …). No external libraries.
 - One file per task: `task1.cpp`, `task2.cpp`, … Each file is a complete program with its own `main()`.
 
+## Formatting (required for every task)
+
+- Code must be indented exactly the way Vim's `gg=G` leaves it, so that opening a file in Vim and pressing `gg=G` changes nothing. The reference settings are `filetype plugin indent on`, `shiftwidth=4`, `tabstop=4`, `expandtab`, `cinoptions=g0,N-s`. In practice:
+  - 4 spaces per level, no tabs.
+  - `public:` / `private:` / `protected:` at the same column as the `class` keyword (`g0`), members one level in.
+  - The contents of a `namespace { … }` are not indented (`N-s`).
+  - A statement continued on the next line (e.g. a `<<` chain) is indented 2 levels (8 spaces) deeper than the statement's first line, not aligned by hand under the first `<<`.
+- Don't format by hand: write the code, then run `III-kurs/PE/run.sh --format [DAY]` (Vim with the settings above). `III-kurs/PE/run.sh --test` fails any task that isn't formatted and shows the diff.
+- To get the same behaviour in your own Vim, put this in `~/.vimrc`:
+  ```vim
+  syntax on
+  filetype plugin indent on
+  autocmd FileType c,cpp setlocal tabstop=4 shiftwidth=4 expandtab cindent cinoptions=g0,N-s
+  ```
+
 ## Testing (required for every task)
 
 Every task must be **built, run and tested with various inputs** before it counts as done:
@@ -29,7 +44,7 @@ Every task must be **built, run and tested with various inputs** before it count
 - Add test cases in `III-kurs/PE/<DAY>/tests/<task>/`: `<case>.in` is fed to the program's stdin, and the optional `<case>.expect` lists lines that must appear in the output, in order. Control characters are written escaped, e.g. `\b`.
 - Cover at least: the normal case, boundary values (e.g. 0, maximum allowed), invalid values (out of range, negative, non-numeric, empty) and input that ends early. The program must never hang or crash on any of them.
 - If the lab handout or email contains concrete example inputs or outputs, add them as cases named `pdf-<name>` with matching `.expect` files.
-- Run `III-kurs/PE/run.sh --test` (or `III-kurs/PE/test.py [DAY] [TASK]`). It builds every task of the day, fails on compiler warnings, runs each case with a 10 s timeout and prints input, output and PASS/FAIL for each case. It exits non-zero if anything fails. The report is also saved to `III-kurs/PE/.build/<DAY>/test-report.txt`.
+- Run `III-kurs/PE/run.sh --test` (or `III-kurs/PE/test.py [DAY] [TASK]`). It builds every task of the day, fails on compiler warnings and on code that isn't formatted (see Formatting), runs each case with a 10 s timeout and prints input, output and PASS/FAIL for each case. It exits non-zero if anything fails. The report is also saved to `III-kurs/PE/.build/<DAY>/test-report.txt`.
 - All cases must pass before committing.
 
 ## Not allowed
@@ -56,6 +71,8 @@ III-kurs/PE/run.sh --build 2026.09.29     # compile every task of a day (warning
 III-kurs/PE/run.sh --list                 # list day folders and their tasks
 III-kurs/PE/run.sh --test                 # build + test every task of the latest day
 III-kurs/PE/run.sh --test 2026.09.29 task1   # test one task of a day
+III-kurs/PE/run.sh --format               # re-indent every task of the latest day like Vim's gg=G
+III-kurs/PE/run.sh --format all           # … of every day
 CXX=g++ III-kurs/PE/run.sh task1          # use a different compiler
 ```
 

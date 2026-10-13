@@ -14,6 +14,7 @@ Usage:
   ./run.sh --build [DAY]     compile every task in DAY (default: latest) without running
   ./run.sh --list            list day folders and their tasks
   ./run.sh --test [DAY] [TASK]  build every task and run all its test cases (see test.py)
+  ./run.sh --format [DAY|all]  re-indent every task of DAY (default: latest) the way Vim's gg=G does
 
 TASK is a file name with or without .cpp, e.g. task1 or task1.cpp.
 Binaries go to III-kurs/PE/.build/ (git-ignored).
@@ -28,6 +29,10 @@ day_dir() {
     local day="${1:-$(latest_day)}"
     [[ -n "$day" && -d "$PE_DIR/$day" ]] || { echo "No day folder '$day' in III-kurs/PE" >&2; exit 1; }
     echo "$PE_DIR/$day"
+}
+
+vim_format() {
+    vim -E -s -u NONE -i NONE -N -c 'filetype plugin indent on' -c 'set shiftwidth=4 tabstop=4 expandtab cinoptions=g0,N-s' -c 'normal gg=G' -c 'wq' "$1"
 }
 
 build() {
@@ -46,6 +51,21 @@ case "${1:-}" in
     --test)
         shift
         exec "$PE_DIR/test.py" "$@"
+        ;;
+    --format)
+        command -v vim >/dev/null || { echo "vim not found" >&2; exit 1; }
+        if [[ "${2:-}" == "all" ]]; then
+            dirs=("$PE_DIR"/[0-9][0-9][0-9][0-9].[0-9][0-9].[0-9][0-9])
+        else
+            dirs=("$(day_dir "${2:-}")")
+        fi
+        for dir in "${dirs[@]}"; do
+            for src in "$dir"/*.cpp; do
+                [[ -e "$src" ]] || continue
+                vim_format "$src"
+                echo "formatted $(basename "$dir")/$(basename "$src")"
+            done
+        done
         ;;
     --list)
         for d in "$PE_DIR"/[0-9]*.[0-9]*.[0-9]*/; do

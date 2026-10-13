@@ -64,13 +64,13 @@ public:
 
     void print() const {
         std::cout << "SSN: " << ssn << '\n'
-                  << "Name: " << name << '\n'
-                  << "Years of service: " << yearsOfService << '\n'
-                  << "Position: " << position << '\n'
-                  << "Salaries:";
+            << "Name: " << name << '\n'
+            << "Years of service: " << yearsOfService << '\n'
+            << "Position: " << position << '\n'
+            << "Salaries:";
         for (int i = 0; i < salaryCount; i++) std::cout << ' ' << salaries[i];
         std::cout << "\nAverage salary: " << averageSalary() << '\n'
-                  << "Minimum salary: " << minSalary() << "\n\n";
+            << "Minimum salary: " << minSalary() << "\n\n";
     }
 };
 

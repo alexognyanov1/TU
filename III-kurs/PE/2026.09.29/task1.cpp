@@ -40,16 +40,16 @@ public:
 
     void print24() const {
         std::cout << std::setfill('0') << std::setw(2) << hours << ':'
-                  << std::setw(2) << minutes << ':'
-                  << std::setw(2) << seconds << '\n';
+            << std::setw(2) << minutes << ':'
+            << std::setw(2) << seconds << '\n';
     }
 
     void print12() const {
         int h = hours % 12;
         if (h == 0) h = 12;
         std::cout << std::setfill('0') << std::setw(2) << h << ':'
-                  << std::setw(2) << minutes << ':'
-                  << std::setw(2) << seconds << (hours < 12 ? " AM" : " PM") << '\n';
+            << std::setw(2) << minutes << ':'
+            << std::setw(2) << seconds << (hours < 12 ? " AM" : " PM") << '\n';
     }
 };
 
