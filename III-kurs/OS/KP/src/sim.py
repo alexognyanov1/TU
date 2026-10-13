@@ -74,7 +74,7 @@ class Result:
         return sum(e - s for n, s, e in self.gantt if n == "CS")
 
 
-def simulate(procs, alg, quantum=None, cs_cost=0):
+def simulate(procs, alg, quantum=None, cs_cost=0, trace=None):
     if alg not in ALGORITHMS:
         raise ValueError(f"unknown algorithm: {alg}")
     if alg == "rr" and not quantum:
@@ -130,6 +130,10 @@ def simulate(procs, alg, quantum=None, cs_cost=0):
             if last is not None and current is not last:
                 res.switches += 1
                 cs_left = cs_cost
+
+        if trace is not None:
+            trace.append({"t": t, "run": None if current is None else ("CS" if cs_left else current.name),
+                          "ready": [p.name for p in ready], "remaining": dict(remaining), "used": used})
 
         if current is None:
             record(None)
