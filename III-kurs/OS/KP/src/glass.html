@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CPU Scheduling</title>
+<style>
+/*@FONTS*/
+html, body { margin: 0; background: #f4f3f8; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "Inter", sans-serif; color: #1d1d1f;
+  -webkit-font-smoothing: antialiased; }
+.abs { position: absolute; }
+.glass { position: absolute; box-sizing: border-box; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(30px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95); border-radius: 32px; overflow: hidden;
+  box-shadow: 0 28px 70px -18px rgba(52, 44, 96, 0.16), 0 2px 8px rgba(52, 44, 96, 0.05); }
+.lab { font-size: 15px; font-weight: 700; letter-spacing: 2.2px; text-transform: uppercase; color: #86868b; white-space: nowrap; }
+.intro { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.intro .lab { font-size: 19px; letter-spacing: 4px; }
+.intro .h { font-size: 96px; font-weight: 700; letter-spacing: -3.5px; margin-top: 26px; line-height: 1.05; }
+.intro .sub { font-size: 34px; color: #6e6e73; margin-top: 30px; max-width: 1400px; line-height: 1.35; }
+.pills { display: flex; gap: 14px; margin-top: 44px; height: 52px; }
+.pill { font-size: 21px; padding: 13px 26px; border-radius: 999px; background: rgba(29, 29, 31, 0.06); white-space: nowrap; }
+.head { position: absolute; left: 0; top: 0; box-sizing: border-box; padding: 34px 48px; }
+.head .h { font-size: 46px; font-weight: 700; letter-spacing: -1.2px; margin-top: 12px; white-space: nowrap; }
+.head .sub { font-size: 21px; color: #6e6e73; margin-top: 10px; white-space: nowrap; }
+.caret { position: relative; display: inline-block; width: 0; }
+.caret i { position: absolute; left: 3px; top: -0.86em; width: 3px; height: 1.02em; background: #1d1d1f; }
+.chip { position: absolute; width: 140px; height: 140px; border-radius: 26px; color: #fff; overflow: hidden;
+  box-shadow: 0 14px 30px -10px rgba(29, 29, 31, 0.35); }
+.chip b { position: absolute; left: 20px; top: 16px; font-size: 36px; font-weight: 700; letter-spacing: -0.5px; }
+.chip em { position: absolute; right: 18px; top: 22px; font-size: 18px; font-style: normal; font-weight: 700; opacity: 0.9; }
+.chip span { position: absolute; right: 20px; bottom: 22px; font-size: 32px; font-weight: 700; opacity: 0.92; }
+.chip u { position: absolute; left: 0; bottom: 0; height: 7px; background: rgba(255, 255, 255, 0.45); }
+.val, .chip { font-variant-numeric: tabular-nums; }
+.val { font-size: 52px; font-weight: 700; letter-spacing: -1px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const D = /*@DATA*/null;
+const W = 1920, H = 1080, INK = "#1d1d1f", GREY = "#86868b", SOFT = "#6e6e73", GREEN = "#34c759", LINE = "rgba(29,29,31,0.09)";
+const UNIT = 0.45, TRU = 0.6, CPS = 32, RF = 0.8, EX = 0.5, GAP = 0.2, CARDS = 1.2, HOLD = 2.0;
+const FULL = { x: 40, y: 40, w: 1840, h: 1000, r: 40 }, HEAD = { x: 96, y: 64, w: 1728, h: 176, r: 32 };
+const BIG = { x: 96, y: 272, w: 1728, h: 744 };
+const Q = { x: 96, y: 272, w: 1084, h: 316 }, CPU = { x: 1212, y: 272, w: 612, h: 316 };
+const GC = { x: 96, y: 620, w: 1728, h: 204 }, MC = { x: 96, y: 856, w: 1084, h: 160 }, FC = { x: 1212, y: 856, w: 612, h: 160 };
+const CMP = [{ x: 96, y: 272, w: 844, h: 744 }, { x: 980, y: 272, w: 844, h: 744 }];
+const PROCS = D.processes, BY = Object.fromEntries(PROCS.map(p => [p.name, p])), N = D.order.length, R = D.runs;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ramp = (t, a, d) => clamp((t - a) / d, 0, 1);
+const p3 = x => 1 - (1 - x) ** 3;
+const io = x => x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
+const f2 = x => x.toFixed(2);
+const pad2 = i => String(i).padStart(2, "0");
+const px = v => v.toFixed(2) + "px";
+
+const S = [];
+let T = 0.3;
+function section(o) {
+  const s = { ...o, t0: T };
+  s.type0 = T + 0.8;
+  s.type1 = s.type0 + o.intro.sub.length / CPS;
+  s.rf = s.type1 + (o.intro.pills ? 1.1 : 0.8);
+  s.b0 = s.rf + RF;
+  s.exit = s.b0 + o.body;
+  s.end = s.exit + EX;
+  T = s.end + GAP;
+  S.push(s);
+  return s;
+}
+
+section({ kind: "open", body: 0.6 + PROCS.length * 0.32 + 2.6,
+  intro: { label: "Operating Systems · Course Project", title: "CPU Scheduling", sub: "Six algorithms. Five processes. One CPU." },
+  head: { label: "The workload", title: "Five processes, one CPU",
+          sub: `Round Robin uses a time slice of q = ${R.rr.quantum} · a lower priority number is more important` } });
+D.order.forEach((a, i) => {
+  const r = R[a], idx = `${pad2(i + 1)} / ${pad2(N)}`;
+  const s = section({ kind: "alg", a, body: CARDS + r.length * UNIT + HOLD,
+    intro: { label: `Algorithm ${idx}`, title: r.label, sub: r.rule, pills: [r.pill, `ready queue ${r.order}`] },
+    head: { label: `${idx} · ${r.pill}`, title: r.label, sub: r.rule } });
+  s.sim0 = s.b0 + CARDS;
+});
+const BAR0 = 0.7, BSTEP = 0.14, BCOL = 0.35, BGROW = 0.9;
+const BEST_AT = BAR0 + BCOL + (N - 1) * BSTEP + BGROW + 0.3;
+const CMPS = section({ kind: "cmp", body: BEST_AT + 3.4,
+  intro: { label: "Results", title: "Same workload, different trade-offs.", sub: "Average time over the five processes, in time units. Lower is better." },
+  head: { label: "Results", title: "Same workload, different trade-offs.", sub: "Average over the five processes · lower is better" } });
+const TAKE = [
+  ["SRTF had the lowest waiting and response time",
+   `${f2(R.srtf.avg.wait)} and ${f2(R.srtf.avg.resp)} on average, but it has to know every burst length in advance`],
+  ["Round Robin gives everyone the CPU early",
+   `average response ${f2(R.rr.avg.resp)} without knowing any burst length, at the cost of ${R.rr.switches} context switches`],
+  ["FCFS is simple but suffers the convoy effect",
+   `the long P1 at the front makes everyone wait: ${f2(R.fcfs.avg.wait)} on average`],
+  ["Preemption helps the important work",
+   `priority scheduling waits ${f2(R.prio.avg.wait)} without preemption and ${f2(R["prio-p"].avg.wait)} with it`],
+];
+const TK0 = 0.5, TKSTEP = 1.05;
+section({ kind: "take", body: TK0 + TAKE.length * TKSTEP + 2.4,
+  intro: { label: "Takeaways", title: "What the numbers say", sub: "Four things this one example shows." },
+  head: { label: "Takeaways", title: "What the numbers say", sub: "From the shared example of the course project" } });
+const END0 = T, TOTAL = END0 + 5.4;
+
+function bg(t) {
+  const blobs = [[0.2, 0.25, "#c6dbff", 640, 0], [0.82, 0.28, "#e2d3ff", 600, 1.7], [0.62, 0.86, "#ffdac6", 620, 3.1], [0.1, 0.9, "#d9d0ff", 460, 4.4]];
+  const g = blobs.map(([x, y, c, r, ph]) => {
+    const cx = x * W + 70 * Math.sin(t * 0.11 + ph), cy = y * H + 45 * Math.cos(t * 0.09 + ph * 1.3);
+    return `radial-gradient(circle ${r}px at ${px(cx)} ${px(cy)}, ${c}, ${c}00)`;
+  }).join(",");
+  return `<div class="abs" style="inset:0;background:${g},linear-gradient(135deg,#f3f5fc,#f7f2f9 55%,#fbf4ef)"></div>`;
+}
+
+function vis(t, at, sec) {
+  const a = p3(ramp(t, at, 0.6)), e = p3(ramp(t, sec.exit, EX));
+  return { o: a * (1 - e), y: (1 - a) * 30 - e * 16, s: 0.96 + 0.04 * a };
+}
+
+function glass(rc, v, inner) {
+  if (v.o <= 0.001) return "";
+  return `<div class="glass" style="left:${rc.x}px;top:${rc.y}px;width:${rc.w}px;height:${rc.h}px;opacity:${v.o.toFixed(3)};transform:translateY(${px(v.y)}) scale(${v.s.toFixed(4)})">${inner}</div>`;
+}
+
+function at(x, y, inner, style = "") {
+  return `<div class="abs" style="left:${px(x)};top:${px(y)};${style}">${inner}</div>`;
+}
+
+function typed(text, t, t0) {
+  const n = clamp(Math.floor((t - t0) * CPS), 0, text.length), t1 = t0 + text.length / CPS;
+  const on = t >= t0 - 0.3 && t < t1 + 0.7 && (t < t1 || Math.floor((t - t1) * 3.4) % 2 === 0);
+  return `${text.slice(0, n)}${on ? '<span class="caret"><i></i></span>' : ""}<span style="color:transparent">${text.slice(n)}</span>`;
+}
+
+function check(x, y, size, t0, t) {
+  const a = p3(ramp(t, t0, 0.35)), d = p3(ramp(t, t0 + 0.12, 0.35));
+  return `<svg class="abs" style="left:${px(x)};top:${px(y)}" width="${size}" height="${size}" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="18.6" fill="none" stroke="#d2d2d7" stroke-width="1.6"/>
+    ${a > 0 ? `<circle cx="20" cy="20" r="${(20 * (0.6 + 0.4 * a)).toFixed(2)}" fill="${GREEN}" opacity="${a.toFixed(3)}"/>
+    <path d="M12 20.5l5.5 5.5L28.5 14" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${(1 - d).toFixed(3)}"/>` : ""}</svg>`;
+}
+
+function panel(s, t, right = "") {
+  if (t < s.t0 || t > s.end) return "";
+  const a = p3(ramp(t, s.t0, 0.7)), u = io(ramp(t, s.rf, RF)), e = p3(ramp(t, s.exit, EX));
+  const rc = { x: lerp(FULL.x, HEAD.x, u), y: lerp(FULL.y, HEAD.y, u), w: lerp(FULL.w, HEAD.w, u), h: lerp(FULL.h, HEAD.h, u), r: lerp(FULL.r, HEAD.r, u) };
+  const ia = a * (1 - ramp(u, 0, 0.45)), ha = ramp(u, 0.4, 0.5), blur = (1 - a) * 18;
+  let inner = "";
+  if (ia > 0.001) {
+    const k = lerp(1, 0.72, u), pills = s.intro.pills || [];
+    inner += `<div class="intro" style="left:${px((rc.w - FULL.w) / 2)};top:${px((rc.h - FULL.h) / 2)};width:${FULL.w}px;height:${FULL.h}px;opacity:${ia.toFixed(3)};transform:scale(${k.toFixed(4)});${blur > 0.05 ? `filter:blur(${px(blur)});` : ""}">
+      <div class="lab">${s.intro.label}</div><div class="h">${s.intro.title}</div>
+      <div class="sub">${typed(s.intro.sub, t, s.type0)}</div>
+      ${pills.length ? `<div class="pills">${pills.map((p, j) => {
+        const v = p3(ramp(t, s.type1 + 0.1 + j * 0.12, 0.6));
+        return `<div class="pill" style="opacity:${v.toFixed(3)};transform:translateY(${px((1 - v) * 20)})">${p}</div>`;
+      }).join("")}</div>` : ""}</div>`;
+  }
+  if (ha > 0.001) {
+    inner += `<div class="head" style="width:${HEAD.w}px;height:${HEAD.h}px;opacity:${ha.toFixed(3)}">
+      <div class="lab">${s.head.label}</div><div class="h">${s.head.title}</div><div class="sub">${s.head.sub}</div>
+      ${right}</div>`;
+  }
+  return `<div class="glass" style="left:${px(rc.x)};top:${px(rc.y)};width:${px(rc.w)};height:${px(rc.h)};border-radius:${px(rc.r)};opacity:${(a * (1 - e)).toFixed(3)};transform:translateY(${px(-e * 16)}) scale(${(0.96 + 0.04 * a).toFixed(4)})">${inner}</div>`;
+}
+
+function opening(s, t) {
+  const v = vis(t, s.b0 + 0.1, s), cols = [56, 470, 780, 1480];
+  let g = `<div class="lab abs" style="left:${cols[0]}px;top:52px">Process</div><div class="lab abs" style="left:${cols[1]}px;top:52px">Arrives at</div>
+    <div class="lab abs" style="left:${cols[2]}px;top:52px">CPU burst</div><div class="lab abs" style="left:${cols[3]}px;top:52px">Priority</div>`;
+  const maxB = Math.max(...PROCS.map(p => p.burst));
+  PROCS.forEach((p, i) => {
+    const t0 = s.b0 + 0.6 + i * 0.32, a = p3(ramp(t, t0, 0.6)), fill = p3(ramp(t, t0 + 0.15, 0.8)), y = 108 + i * 122;
+    if (a <= 0) return;
+    g += `<div class="abs" style="left:0;top:${y}px;width:${BIG.w}px;height:122px;opacity:${a.toFixed(3)};transform:translateY(${px((1 - a) * 24)})">
+      ${i ? `<div class="abs" style="left:56px;right:56px;top:0;height:1px;background:${LINE}"></div>` : ""}
+      <div class="chip" style="left:${cols[0]}px;top:27px;width:68px;height:68px;border-radius:18px;background:${p.color}"><b style="left:0;right:0;top:20px;font-size:23px;text-align:center">${p.name}</b></div>
+      <div class="val abs" style="left:${cols[1]}px;top:30px;font-size:44px">t = ${p.arrival}</div>
+      <div class="val abs" style="left:${cols[2]}px;top:30px;font-size:44px">${p.burst}</div>
+      <div class="abs" style="left:${cols[2] + 90}px;top:55px;width:520px;height:14px;border-radius:7px;background:rgba(29,29,31,0.07)"></div>
+      <div class="abs" style="left:${cols[2] + 90}px;top:55px;width:${px(520 * p.burst / maxB * fill)};height:14px;border-radius:7px;background:${p.color}"></div>
+      <div class="val abs" style="left:${cols[3]}px;top:30px;font-size:44px">${p.priority}</div></div>`;
+  });
+  return glass(BIG, v, g);
+}
+
+function layout(r, k) {
+  const res = {};
+  const st = k >= 0 && k < r.length ? r.steps[k] : null;
+  for (const p of PROCS) {
+    if (k < 0) res[p.name] = { pending: true };
+    else if (r.completion[p.name] <= k) res[p.name] = { x: CPU.x + 236, y: Q.y + 64, o: 0, done: true };
+    else if (st && st.run === p.name) res[p.name] = { x: CPU.x + 236, y: Q.y + 100, o: 1 };
+    else if (st && st.ready.includes(p.name)) res[p.name] = { x: Q.x + 40 + st.ready.indexOf(p.name) * 168, y: Q.y + 100, o: 1 };
+    else res[p.name] = { pending: true };
+  }
+  return res;
+}
+
+function remAt(r, name, s) {
+  if (s >= r.length) return 0;
+  const k = Math.floor(s), st = r.steps[k];
+  return st.run === name ? st.remaining[name] - (s - k) : st.remaining[name];
+}
+
+function chips(r, a, s, v) {
+  if (s < 0 || v.o <= 0.001) return "";
+  const k = Math.min(Math.floor(s), r.length), u = io(clamp((s - k) / TRU, 0, 1));
+  const to = layout(r, k), from = layout(r, k - 1);
+  let back = "", front = "";
+  for (const p of PROCS) {
+    const b = to[p.name];
+    let f = from[p.name];
+    if (b.pending || (b.done && f.done)) continue;
+    if (f.pending) f = { x: b.x, y: b.y + 30, o: 0 };
+    const x = lerp(f.x, b.x, u), y = lerp(f.y, b.y, u) + v.y, o = lerp(f.o, b.o, u) * v.o;
+    if (o <= 0.002) continue;
+    const rem = remAt(r, p.name, s), frac = clamp(rem / p.burst, 0, 1);
+    const g = `<div class="chip" style="left:${px(x)};top:${px(y)};opacity:${o.toFixed(3)};background:${p.color}">
+      <b>${p.name}</b>${a.startsWith("prio") ? `<em>p${p.priority}</em>` : ""}<span>${Math.max(0, Math.ceil(rem - 1e-6))}</span>
+      <u style="width:${px(140 * frac)}"></u></div>`;
+    if (b.x === CPU.x + 236) front += g; else back += g;
+  }
+  return back + front;
+}
+
+function avgAt(r, x) {
+  const done = PROCS.filter(p => r.completion[p.name] <= x);
+  if (!done.length) return null;
+  const m = key => done.reduce((acc, p) => acc + r.metrics[p.name][key], 0) / done.length;
+  return { wait: m("wait"), tat: m("tat"), resp: m("resp") };
+}
+
+function algorithm(s, t) {
+  const a = s.a, r = R[a], n = r.length, sv = (t - s.sim0) / UNIT, sc = clamp(sv, 0, n);
+  const k = clamp(Math.floor(sv), 0, n - 1), live = sv >= 0 && sv < n, st = r.steps[k];
+  const vq = vis(t, s.b0 + 0.2, s), vc = vis(t, s.b0 + 0.32, s), vg = vis(t, s.b0 + 0.44, s), vm = vis(t, s.b0 + 0.56, s), vf = vis(t, s.b0 + 0.68, s);
+  let g = "";
+
+  let q = `<div class="lab abs" style="left:40px;top:34px">Ready queue</div>
+    <div class="abs" style="right:40px;top:30px;font-size:20px;color:${SOFT}">${r.order}</div>`;
+  for (let i = 0; i < 5; i++) q += `<div class="abs" style="left:${40 + i * 168}px;top:100px;width:136px;height:136px;border-radius:26px;border:2px dashed rgba(29,29,31,0.13)"></div>`;
+  q += `<div class="lab abs" style="left:40px;top:262px;opacity:${live && st.ready.length ? 1 : 0.35}">Next</div>`;
+  g += glass(Q, vq, q);
+
+  let c = `<div class="lab abs" style="left:40px;top:34px">CPU</div>
+    <div class="abs" style="left:216px;top:80px;width:176px;height:176px;border-radius:36px;border:2px solid rgba(29,29,31,0.75)"></div>`;
+  if (!live || !st.run) c += `<div class="abs" style="left:216px;top:150px;width:180px;text-align:center;font-size:24px;color:${GREY}">idle</div>`;
+  if (r.quantum) {
+    const used = live && st.run ? st.used + (sv - Math.floor(sv)) : 0, col = live && st.run ? BY[st.run].color : INK;
+    const gap = 8, pw = (176 - gap * (r.quantum - 1)) / r.quantum;
+    for (let i = 0; i < r.quantum; i++) {
+      const x = 216 + i * (pw + gap);
+      c += `<div class="abs" style="left:${px(x)};top:276px;width:${px(pw)};height:8px;border-radius:4px;background:rgba(29,29,31,0.08);overflow:hidden">
+        <div style="width:${px(pw * clamp(used - i, 0, 1))};height:8px;background:${col}"></div></div>`;
+    }
+    c += `<div class="lab abs" style="right:40px;top:34px">Time slice</div>`;
+  }
+  g += glass(CPU, vc, c);
+
+  const x0 = 40, x1 = GC.w - 40, unit = (x1 - x0) / n, by = 74, bh = 64;
+  let gg = `<div class="lab abs" style="left:40px;top:34px">Schedule</div>`;
+  const seen = r.events.filter(e => e.t <= sv);
+  if (seen.length) {
+    const e = seen[seen.length - 1], et = s.sim0 + e.t * UNIT, ea = p3(ramp(t, et, 0.4));
+    const shown = e.text.slice(0, clamp(Math.floor((t - et) * 70), 0, e.text.length));
+    gg += `<div class="abs" style="right:40px;top:26px;font-size:24px;font-weight:700;opacity:${ea.toFixed(3)};white-space:nowrap">
+      <span style="display:inline-block;width:12px;height:12px;border-radius:6px;margin-right:12px;vertical-align:2px;background:${e.proc ? BY[e.proc].color : INK}"></span>${shown}<span style="color:transparent">${e.text.slice(shown.length)}</span></div>`;
+  }
+  for (const [name, a0, a1] of r.gantt) {
+    const x = x0 + a0 * unit + 2, w = (a1 - a0) * unit - 4;
+    gg += `<div class="abs" style="left:${px(x)};top:${by}px;width:${px(w)};height:${bh}px;border-radius:12px;background:${name ? BY[name].color : "#d2d2d7"};opacity:0.13"></div>`;
+  }
+  const labels = new Set([0]);
+  for (const [name, a0, a1] of r.gantt) {
+    if (a0 >= sc) break;
+    const e = Math.min(a1, sc), x = x0 + a0 * unit + 2, w = (e - a0) * unit - 4;
+    if (w <= 0) continue;
+    gg += `<div class="abs" style="left:${px(x)};top:${by}px;width:${px(w)};height:${bh}px;border-radius:12px;background:${name ? BY[name].color : "#d2d2d7"};overflow:hidden">
+      ${name && w > 56 ? `<div style="position:absolute;left:0;width:${px((a1 - a0) * unit - 4)};top:19px;text-align:center;color:#fff;font-size:23px;font-weight:700">${name}</div>` : ""}</div>`;
+    if (a1 <= sc) labels.add(a1);
+  }
+  for (const tk of labels) gg += `<div class="abs" style="left:${px(x0 + tk * unit - 30)};width:60px;top:${by + bh + 14}px;text-align:center;font-size:19px;color:${GREY}">${tk}</div>`;
+  if (sv > 0 && sv < n + 0.5) {
+    const o = 1 - ramp(sv, n, 0.5);
+    gg += `<div class="abs" style="left:${px(x0 + sc * unit - 1.5)};top:${by - 12}px;width:3px;height:${bh + 24}px;border-radius:2px;background:${INK};opacity:${o.toFixed(3)}"></div>`;
+  }
+  g += glass(GC, vg, gg);
+
+  const cur = avgAt(r, sv), times = PROCS.map(p => r.completion[p.name]).filter(x => x <= sv).sort((x, y) => x - y);
+  let m = "";
+  [["wait", "Avg waiting"], ["tat", "Avg turnaround"], ["resp", "Avg response"]].forEach(([key, lbl], i) => {
+    let val = "–";
+    if (cur) {
+      const last = times[times.length - 1], prev = avgAt(r, last - 0.5), e = io(ramp(sv, last, 0.6 / UNIT));
+      val = f2(prev ? lerp(prev[key], cur[key], e) : cur[key] * e);
+    }
+    m += `<div class="lab abs" style="left:${40 + i * 262}px;top:34px">${lbl}</div><div class="val abs" style="left:${40 + i * 262}px;top:66px">${val}</div>`;
+  });
+  const sw = sv >= n ? r.switches : (sv < 0 ? 0 : st.sw);
+  m += `<div class="lab abs" style="left:826px;top:34px">Switches</div><div class="val abs" style="left:826px;top:66px">${sw}</div>`;
+  g += glass(MC, vm, m);
+
+  let f = `<div class="lab abs" style="left:40px;top:34px">Finished</div>`;
+  const doneA = p3(ramp(sv, n + 0.3, 0.8 / UNIT));
+  if (doneA > 0) f += `<div class="abs" style="right:40px;top:30px;font-size:20px;color:${SOFT};opacity:${doneA.toFixed(3)}">all done at t = ${n}</div>`;
+  PROCS.forEach((p, i) => {
+    const x = 40 + i * 108;
+    f += check(x, 72, 44, s.sim0 + r.completion[p.name] * UNIT, t);
+    f += `<div class="abs" style="left:${x + 54}px;top:83px;font-size:20px;font-weight:700;color:${p.color}">${p.name}</div>`;
+  });
+  g += glass(FC, vf, f);
+  return g + chips(r, a, sv, vq);
+}
+
+function bestOf(key) {
+  return Math.min(...D.order.map(a => R[a].avg[key]));
+}
+
+function comparison(s, t) {
+  let g = "";
+  const max = Math.max(...D.order.map(a => Math.max(R[a].avg.wait, R[a].avg.resp)));
+  [["wait", "Average waiting time"], ["resp", "Average response time"]].forEach(([key, lbl], c) => {
+    const v = vis(t, s.b0 + 0.15 + c * 0.12, s), best = bestOf(key);
+    let h = `<div class="lab abs" style="left:48px;top:44px">${lbl}</div>`;
+    D.order.forEach((a, i) => {
+      const t0 = s.b0 + BAR0 + c * BCOL + i * BSTEP, grow = p3(ramp(t, t0, BGROW)), y = 112 + i * 104;
+      const val = R[a].avg[key], isBest = Math.abs(val - best) < 1e-9, w = 400 * val / max * grow;
+      const hl = isBest ? p3(ramp(t, s.b0 + BEST_AT, 0.5)) : 0;
+      h += `<div class="abs" style="left:48px;top:${y + 14}px;font-size:26px;font-weight:${isBest && hl > 0.5 ? 700 : 400}">${R[a].short}</div>
+        <div class="abs" style="left:322px;top:${y + 12}px;width:${px(w)};height:38px;border-radius:19px;background:${isBest ? `rgb(${lerp(199, 29, hl)},${lerp(199, 29, hl)},${lerp(204, 31, hl)})` : "#c7c7cc"}"></div>
+        <div class="val abs" style="left:${px(322 + w + 16)};top:${y + 14}px;font-size:28px;letter-spacing:0;opacity:${grow.toFixed(3)}">${f2(val * grow)}</div>`;
+      if (isBest && t >= s.b0 + BEST_AT) h += check(322 + 400 * val / max + 110, y + 9, 44, s.b0 + BEST_AT, t);
+    });
+    g += glass(CMP[c], v, h);
+  });
+  return g;
+}
+
+function takeaways(s, t) {
+  const v = vis(t, s.b0 + 0.1, s);
+  let g = "";
+  TAKE.forEach(([title, sub], i) => {
+    const t0 = s.b0 + TK0 + i * TKSTEP, a = p3(ramp(t, t0, 0.6)), y = 66 + i * 164;
+    if (a <= 0) return;
+    g += `<div class="abs" style="left:0;top:${y}px;width:${BIG.w}px;height:150px;opacity:${a.toFixed(3)};transform:translateY(${px((1 - a) * 24)})">
+      ${check(64, 22, 56, t0 + 0.3, t)}
+      <div class="abs" style="left:156px;top:16px;font-size:40px;font-weight:700;letter-spacing:-0.8px">${title}</div>
+      <div class="abs" style="left:156px;top:72px;font-size:26px;color:${SOFT}">${sub}</div></div>`;
+  });
+  return glass(BIG, v, g);
+}
+
+function endCard(t) {
+  if (t < END0) return "";
+  const a = p3(ramp(t, END0, 0.8)), rc = { x: 400, y: 350, w: 1120, h: 380 };
+  return glass(rc, { o: a, y: (1 - a) * 30, s: 0.96 + 0.04 * a }, `<div class="intro" style="inset:0">
+    <div class="lab">Operating Systems · Course Project</div>
+    <div style="font-size:84px;font-weight:700;letter-spacing:-2.5px;margin-top:22px">Alex Ognyanov</div>
+    <div style="font-size:30px;color:${SOFT};margin-top:18px">Technical University of Sofia · 2026</div></div>`);
+}
+
+function frame(t) {
+  const z = 1 + 0.06 * p3(ramp(t, CMPS.b0 + BEST_AT, 0.28)) * (1 - p3(ramp(t, CMPS.exit, EX)));
+  let body = "";
+  for (const s of S) {
+    if (t < s.t0 || t > s.end) continue;
+    if (s.kind === "open") body += opening(s, t);
+    if (s.kind === "alg") {
+      const n = R[s.a].length, k = clamp(Math.floor((t - s.sim0) / UNIT), 0, n);
+      body += algorithm(s, t);
+      body += panel(s, t, `<div class="abs" style="right:48px;top:34px;text-align:right"><div class="lab">Time</div>
+        <div class="val" style="font-size:72px;letter-spacing:-2px;margin-top:10px">t = ${k}</div></div>`);
+      continue;
+    }
+    if (s.kind === "cmp") body += comparison(s, t);
+    if (s.kind === "take") body += takeaways(s, t);
+    body += panel(s, t);
+  }
+  body += endCard(t);
+  const fade = ramp(t, TOTAL - 1.0, 1.0);
+  return `<div class="abs" style="inset:0;transform:scale(${z.toFixed(5)});transform-origin:960px 600px">${bg(t)}${body}</div>
+    ${fade > 0 ? `<div class="abs" style="inset:0;background:#f4f3f8;opacity:${fade.toFixed(3)}"></div>` : ""}`;
+}
+
+function cues() {
+  const c = [];
+  for (const s of S) {
+    if (s.kind === "open") PROCS.forEach((p, i) => c.push({ t: s.b0 + 0.6 + i * 0.32 + 0.05, type: "tick" }));
+    if (s.kind === "alg") {
+      const r = R[s.a], last = Math.max(...Object.values(r.completion));
+      for (const e of r.events) {
+        const tt = s.sim0 + e.t * UNIT;
+        c.push({ t: tt, type: { arrive: "pop", dispatch: "switch", preempt: "snap", done: "tick" }[e.kind] });
+        if (e.kind === "done" && e.t === last) c.push({ t: tt + 0.1, type: "success" });
+      }
+    }
+    if (s.kind === "cmp") {
+      [0, 1].forEach(col => {
+        c.push({ t: s.b0 + BAR0 + col * BCOL, type: "fill" });
+        c.push({ t: s.b0 + BAR0 + col * BCOL + 0.05, type: "counter" });
+        c.push({ t: s.b0 + BEST_AT + 0.05 + col * 0.06, type: "tick" });
+      });
+    }
+    if (s.kind === "take") TAKE.forEach((x, i) => c.push({ t: s.b0 + TK0 + i * TKSTEP + 0.35, type: "tick" }));
+  }
+  c.push({ t: END0 + 0.3, type: "chime" });
+  return c;
+}
+
+const stage = document.getElementById("stage");
+window.renderAt = t => { stage.innerHTML = frame(t); return true; };
+window.TOTAL = TOTAL;
+window.cues = cues;
+window.SECTIONS = S.map(s => ({ kind: s.kind, a: s.a || null, t0: s.t0, rf: s.rf, b0: s.b0, sim0: s.sim0 || null, exit: s.exit }));
+renderAt(new URLSearchParams(location.search).has("t") ? parseFloat(new URLSearchParams(location.search).get("t")) : 2.6);
+</script>
+</body>
+</html>

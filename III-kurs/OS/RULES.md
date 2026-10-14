@@ -32,6 +32,7 @@ Timetable (group 43): lecture Mon 08:30–11:15, room 1152; lab Tue 10:30–13:1
 - `III-kurs/OS/KP/anim/`: animations of the course project. `src/anim.html` is the scene (inline SVG + JavaScript, no external resources), `src/anim.py` fills it with the simulator data, writes `anim/scheduling.html` and, with `--video`, records MP4s with headless Chrome and **ffmpeg** (`brew install ffmpeg`).
 - `III-kurs/OS/KP/gitlab-issue/`: text to paste into the GitLab course-work issue (description and submission comment). Posting on GitLab is done by hand.
 - `src/video.html` + `src/video.py`: one English video of all algorithms (`anim/cpu_scheduling_en_4k.mp4`, 3840×2160, 60 fps). Sound effects are synthesized in `video.py` from sine waves and filtered noise (standard library only, no audio files).
+- `src/glass.html` + `src/glass.py`: a second 4K video in the **Liquid Glass** style of the Motion Graphics starter kit (frosted glass cards, Inter, calm power3 motion; blur-in, typewriter, reframe, rise, count-up, bar fill, checklist tick, punch-in) → `anim/cpu_scheduling_glass_4k.mp4` (3840×2160, 60 fps). Same headless Chrome + ffmpeg pipeline; the fonts (SIL OFL) and sound effects are the kit's files in `src/kit/`, embedded/mixed by `glass.py` (standard library only).
 
 ## How to run
 
@@ -41,4 +42,5 @@ python3 III-kurs/OS/KP/src/build.py   # renders the course project PDF (needs Go
 python3 III-kurs/OS/KP/src/sim.py     # prints the scheduling examples and experiments
 python3 III-kurs/OS/KP/src/anim.py --video   # rebuilds anim/scheduling.html and the MP4 animations
 python3 III-kurs/OS/KP/src/video.py          # renders anim/cpu_scheduling_en_4k.mp4 (about 20 min)
+python3 III-kurs/OS/KP/src/glass.py          # renders anim/cpu_scheduling_glass_4k.mp4 (Liquid Glass style)
 ```
