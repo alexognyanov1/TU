@@ -94,7 +94,7 @@
 | Оформление | A4; Times New Roman 13 pt; междуредие 1,5; полета 30 / 20 / 25 / 25 mm (горе / дясно / долу / ляво); номерация „стр. N от M“ в долния колонтитул |
 | Формат за предаване | PDF |
 | Краен срок | 22.12.2026 (край на семестъра, milestone „Зимен семестър 2026/2027“) |
-| Допълнителни указания | Към реферата има и видео с анимация на всички алгоритми (на английски, 4K): [OneDrive](https://tusofiabg-my.sharepoint.com/:v:/g/personal/alognyanov_tu-sofia_bg/IQABqcr3JqPiS7BZjP5NC9_WAbEtzzoE5cJj_vX0J26gJkw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=6Rk44S) |
+| Допълнителни указания | Към реферата има и видео с анимация на всички алгоритми (на английски, 4K): [OneDrive](https://tusofiabg-my.sharepoint.com/:v:/g/personal/alognyanov_tu-sofia_bg/IQBQdWNfgC2dRoyJacwQxj3fAQ2ZjKk0U-Rb3aC9W-QSOKE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=JyWHdC) |
 
 ## 5. Предварителни източници
 
@@ -122,7 +122,7 @@
 
 **Финален реферат:** [OS_121224052_AlexOgnyanov.pdf](ВРЪЗКА-КЪМ-ПРИКАЧЕНИЯ-PDF)
 
-**Анимация (видео, 4K, на английски):** [cpu_scheduling_en_4k.mp4](ВРЪЗКА-КЪМ-ПРИКАЧЕНОТО-MP4) · резервно копие в [OneDrive](https://tusofiabg-my.sharepoint.com/:v:/g/personal/alognyanov_tu-sofia_bg/IQABqcr3JqPiS7BZjP5NC9_WAbEtzzoE5cJj_vX0J26gJkw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=6Rk44S)
+**Анимация (видео, 4K, на английски):** [cpu_scheduling_glass_4k.mp4](ВРЪЗКА-КЪМ-ПРИКАЧЕНОТО-MP4) · резервно копие в [OneDrive](https://tusofiabg-my.sharepoint.com/:v:/g/personal/alognyanov_tu-sofia_bg/IQBQdWNfgC2dRoyJacwQxj3fAQ2ZjKk0U-Rb3aC9W-QSOKE?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=JyWHdC)
 
 **Бележки / обратна връзка:**
 [Коментари и препоръки от преподавателя.]
