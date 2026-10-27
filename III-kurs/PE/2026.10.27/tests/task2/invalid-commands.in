@@ -1,0 +1,9 @@
+2
+put 0 AB
+put x A
+get
+get 0 1
+show now
+hello
+
+put 1 #

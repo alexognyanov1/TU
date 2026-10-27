@@ -1,0 +1,6 @@
+Creating Point(3,4)
+Creating Point(10,4)
+Distance between Point(3,4) and Point(10,4) is 7
+Input ended
+Destructing Point(10,4)
+Destructing Point(3,4)

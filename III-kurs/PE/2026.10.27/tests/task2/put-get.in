@@ -1,0 +1,6 @@
+5
+put 0 A
+put 4 Z
+get 0
+get 4
+show

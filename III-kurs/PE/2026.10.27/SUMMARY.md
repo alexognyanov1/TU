@@ -1,14 +1,46 @@
 # PE Lab 3 (2026.10.27): references (псевдоними) and inheritance
 
-Handout: [`Lab3_PE-GM.pdf`](Lab3_PE-GM.pdf). It covers references as function parameters and return values (псевдоними) and inheritance with constructors of derived classes. Its "Задача 1–3" come with complete code and are worked examples (point distance with `const point&`, a bounds-checked `array` whose `put()` returns `char&`, and `vehicle` → `car` / `truck`). The only exercise is the self-study one ("Задачи за самостоятелна работа"), the **Media Collection Tool**, which is `task1`. The handout code is pre-standard Borland C++, so the task is written in standard C++17.
+Handout: [`Lab3_PE-GM.pdf`](Lab3_PE-GM.pdf). It covers references as function parameters and return values (псевдоними) and inheritance with constructors of derived classes. It has three tasks with complete code („Задача 1–3“) and one self-study exercise („Задачи за самостоятелна работа“). As the lecturer asked, all four are implemented: the three handout programs in `task1`–`task3`, with the errors in the handout code fixed, and the self-study **Media Collection Tool** in `task4`. The handout code is pre-standard Borland C++, so everything is written in standard C++17.
 
 | File | Exercise | Main concepts |
 | --- | --- | --- |
-| [task1.cpp](task1.cpp) | Self-study 1: Media Collection Tool (`Item` → `Movie`, `Game`, `Music`) | public inheritance, base-class constructor called from the derived constructor's initializer list, `protected` members, `static` member counter, virtual functions and `override`, abstract base class (pure virtual `play()`), virtual destructor, `const` references as parameters and return values, polymorphism through `Item*` / `const Item&` |
+| [task1.cpp](task1.cpp) | Handout task 1: distance between two points | `const` reference parameters (`const point&`), why passing by value creates copies whose destructors also run, `static` member function, `const` member function |
+| [task2.cpp](task2.cpp) | Handout task 2: bounds-checked `array` | reference as a return value (`char& put(int)` used on the left of `=`), dynamic memory with `new[]` / `delete[]`, bounds checking with `std::out_of_range`, deleted copy constructor (rule of three) |
+| [task3.cpp](task3.cpp) | Handout task 3: `vehicle` → `car` / `truck` | public inheritance, derived constructor passing arguments to the base constructor in its initializer list, calling a base member function (`showv()`) from the derived class |
+| [task4.cpp](task4.cpp) | Self-study 1: Media Collection Tool (`Item` → `Movie`, `Game`, `Music`) | public inheritance, base-class constructor called from the derived constructor's initializer list, `protected` members, `static` member counter, virtual functions and `override`, abstract base class (pure virtual `play()`), virtual destructor, `const` references as parameters and return values, polymorphism through `Item*` / `const Item&` |
 
-Build and run with `III-kurs/PE/run.sh task1`, and test with `III-kurs/PE/run.sh --test 2026.10.27`. There are 14 test cases in [`tests/`](tests) and all of them pass with no compiler warnings (also clean under AddressSanitizer/UBSan).
+Build and run with `III-kurs/PE/run.sh taskN`, and test with `III-kurs/PE/run.sh --test 2026.10.27`. There are 31 test cases in [`tests/`](tests) and all of them pass with no compiler warnings (also clean under AddressSanitizer/UBSan).
 
-## task1: Media Collection Tool
+## Fixes to the handout code (all three tasks)
+
+- `void main()` → `int main()`, `<math.h>` → `<cmath>`, and `cout` / `endl` → `std::cout` (the handout has no `using namespace std`, so it doesn't compile).
+- The typographic quotes `”…”` and `’X’` in the PDF are replaced with real `"…"` and `'X'`.
+- Member functions that don't change the object (`print()`, `get()`, `showv()`, `show()`) are `const`.
+- Members are initialised in the constructor's initializer list instead of being assigned in its body.
+
+## task1: `point` and a `const` reference parameter
+
+- **Fix:** `dist(const point&, const point&)` doesn't use the object it is called on (the handout calls it as `a.dist(a, b)`), so it is a `static` member function, called as `point::dist(a, b)`. As a member it can still read the private `x` and `y` of both points.
+- `main` first runs the handout example. The output matches the handout: `Creating Point(3,4)`, `Creating Point(10,4)`, `Distance between Point(3,4) and Point(10,4) is 7`, and at the end `Destructing Point(10,4)`, `Destructing Point(3,4)`.
+- `distByValue(point, point)` shows the problem from section 1 of the handout. Passed by value, the points are **copied**: no `Creating` line is printed for the copies (the copy constructor runs, not ours), but two extra `Destructing` lines appear when the function returns. `const point&` makes no copies.
+- Then the user enters two points as `x y` (any real numbers; invalid lines are asked for again) and their distance is printed.
+
+## task2: bounds-checked `array`
+
+- `char& put(int i)` returns a **reference** to `p[i]`, so `a.put(3) = 'X'` stores into the array. `char get(int i) const` returns a copy of the value.
+- **Fix:** the handout checks `if(i=size)`. That is an **assignment**, not a comparison: it sets `i` to 10, which is always true, so every call reports a bounds error. The check is now `i < 0 || i >= size`, in one private `check()` used by both functions.
+- **Fix:** `if(!p)` after `new` never fires, because `new` throws `std::bad_alloc` instead of returning a null pointer. The check is removed.
+- **Fix:** the handout calls `exit(1)` on a bounds error. That ends the program without running destructors, so the array's memory is never freed. `check()` throws `std::out_of_range` instead, and `main` catches it and prints `Bounds error!!! Index 11 is outside 0..9`.
+- **Fix:** the class owns memory from `new[]`, so the copy constructor and copy assignment are `= delete`d. A copy would share `p` and `delete[]` it twice.
+- **Fix:** the memory from `new char[num]` is not initialised, so `get()` on an unset index read random data. The constructor fills it with `.`, and a size below 1 becomes 1.
+- `main` runs the handout example (`X`, `R`, then the bounds error on `put(11)`), then reads a size (1–100) and the commands `put INDEX CHAR`, `get INDEX` and `show` until end of input.
+
+## task3: `vehicle` → `car` / `truck`
+
+- `car(int p, int w, int r) : vehicle(w, r), passengers(p)` and `truck(int l, int w, int r) : vehicle(w, r), loadlimit(l)` pass the wheels and range to the `vehicle` constructor, as the task asks. `num_wheels` and `range` are private in `vehicle`, so only its constructor can set them, and `car` / `truck` print them through `showv()`.
+- `main` creates the handout's `car c(5, 4, 500)` and `truck t(30000, 12, 1200)` and prints them in the handout's format. It then reads a car (passengers 1–50, wheels 2–30, range 1–10000) and a truck (load limit 1–100000, wheels 2–30, range 1–10000) from the keyboard and prints them.
+
+## task4: Media Collection Tool
 
 The class hierarchy follows the UML diagram on the last page of the handout.
 
@@ -42,4 +74,7 @@ The class hierarchy follows the UML diagram on the last page of the handout.
 
 | Task | Cases |
 | --- | --- |
-| task1 | the four sample items and the required message format (`pdf-item-message`), add a movie and play it, add a game and a music item and list them (count and total value), items on a medium they can't be played from, boundaries (price 0 and 100000, rating 0 and 10, difficulty 1 and 10, 29.02 of a leap year, 01.01.1900, 31.12.2100), invalid values (empty title, negative/non-numeric/too large price, format 0/4/text, 29.02.2025, 31.04, wrong date format, month 13, year 1899, rating 11/-1/text, difficulty 0/11/2.5, empty equipment), ID change (ID in use, unknown ID, same ID, then a new item gets the freed ID), unknown ID and invalid ID when playing, invalid menu choices, full collection (20 items), empty input, input ending in the middle of adding an item and of an ID change, non-numeric input |
+| task1 | the handout points and output (`pdf-handout-points`), copies made by passing by value, own points (0,0)–(3,4) = 5, the same point twice (distance 0, negative and fractional coordinates), invalid input (text, one number, three numbers, empty line), input ending early |
+| task2 | the handout example including the bounds error on `put(11)` (`pdf-handout-array`), `put` / `get` / `show`, out of bounds (index = size and -1, for both `put` and `get`), invalid commands, size validation (0, 101, text), the largest size 100 |
+| task3 | the handout car and truck (`pdf-handout-vehicles`), own vehicles, boundaries, invalid values (0, too large, text, 2.5), input ending early |
+| task4 | the four sample items and the required message format (`pdf-item-message`), add a movie and play it, add a game and a music item and list them (count and total value), items on a medium they can't be played from, boundaries (price 0 and 100000, rating 0 and 10, difficulty 1 and 10, 29.02 of a leap year, 01.01.1900, 31.12.2100), invalid values (empty title, negative/non-numeric/too large price, format 0/4/text, 29.02.2025, 31.04, wrong date format, month 13, year 1899, rating 11/-1/text, difficulty 0/11/2.5, empty equipment), ID change (ID in use, unknown ID, same ID, then a new item gets the freed ID), unknown ID and invalid ID when playing, invalid menu choices, full collection (20 items), empty input, input ending in the middle of adding an item and of an ID change, non-numeric input |
