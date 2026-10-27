@@ -14,7 +14,7 @@ Timetable (group 43): lecture Mon 08:30–11:15, room 1152; lab Tue 10:30–13:1
 ## Required language(s)
 
 - **Bash** (POSIX shell commands and shell scripts), run on Linux.
-- **C++17** for the threads lab (Lab 2 and later C++ labs), compiled with `g++ -std=c++17 -Wall -Wextra -pthread`, no warnings.
+- **C++17** for the threads lab (Lab 2 and later C++ labs), compiled with `g++ -std=c++17 -Wall -Wextra -pthread`, no warnings. Build and run with `III-kurs/OS/run.sh` (binaries go to the git-ignored `III-kurs/OS/.build/`).
 
 ## Required techniques / libraries / tools
 
@@ -40,7 +40,11 @@ Timetable (group 43): lecture Mon 08:30–11:15, room 1152; lab Tue 10:30–13:1
 
 ```sh
 bash III-kurs/OS/2026.10.13/bin/script.sh
-g++ -std=c++17 -Wall -Wextra -pthread -o /tmp/task1 III-kurs/OS/2026.10.27/task1.cpp && /tmp/task1
+III-kurs/OS/run.sh task1                 # build + run a C++ task from the latest day with .cpp files
+III-kurs/OS/run.sh 2026.10.27 task9      # … from a specific day (task9 deadlocks: stop it with Ctrl+C)
+III-kurs/OS/run.sh --build [DAY]         # compile every task of a day, don't run
+III-kurs/OS/run.sh --list                # list day folders and their C++ tasks
+CXX=clang++ III-kurs/OS/run.sh task1     # use a different compiler
 python3 III-kurs/OS/KP/src/build.py   # renders the course project PDF (needs Google Chrome and pdftotext)
 python3 III-kurs/OS/KP/src/sim.py     # prints the scheduling examples and experiments
 python3 III-kurs/OS/KP/src/anim.py --video   # rebuilds anim/scheduling.html and the MP4 animations

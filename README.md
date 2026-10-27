@@ -80,7 +80,7 @@ Rules: [III-kurs/ASLS/RULES.md](III-kurs/ASLS/RULES.md) · Check answers: `pytho
 
 ### OS: Operating Systems
 
-Rules: [III-kurs/OS/RULES.md](III-kurs/OS/RULES.md) · Build the course project PDF: `python3 III-kurs/OS/KP/src/build.py` · Run the scheduling simulator: `python3 III-kurs/OS/KP/src/sim.py` · Animations: `python3 III-kurs/OS/KP/src/anim.py [--video]` · English video: `python3 III-kurs/OS/KP/src/video.py` · Liquid Glass video: `python3 III-kurs/OS/KP/src/glass.py`
+Rules: [III-kurs/OS/RULES.md](III-kurs/OS/RULES.md) · Build + run a C++ task: `III-kurs/OS/run.sh task1` · Build the course project PDF: `python3 III-kurs/OS/KP/src/build.py` · Run the scheduling simulator: `python3 III-kurs/OS/KP/src/sim.py` · Animations: `python3 III-kurs/OS/KP/src/anim.py [--video]` · English video: `python3 III-kurs/OS/KP/src/video.py` · Liquid Glass video: `python3 III-kurs/OS/KP/src/glass.py`
 
 <!-- index:III-kurs/OS -->
 | Date | Type | Folder | Language | What's inside |
