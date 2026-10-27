@@ -1,0 +1,8 @@
+Distance (by value) is 7
+Creating Point(0,0)
+Creating Point(3,4)
+Distance between Point(0,0) and Point(3,4) is 5
+Destructing Point(3,4)
+Destructing Point(0,0)
+Destructing Point(10,4)
+Destructing Point(3,4)

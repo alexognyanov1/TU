@@ -1,0 +1,9 @@
+Car:
+Wheels:4
+Range:500
+Passengers:5
+Truck:
+Wheels:12
+Range:1200
+Loadlimit:30000
+Input ended

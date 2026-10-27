@@ -1,0 +1,3 @@
+Stored Z at 99
+At 99: Z
+Bounds error!!! Index 100 is outside 0..99
