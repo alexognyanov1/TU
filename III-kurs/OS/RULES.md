@@ -20,7 +20,7 @@ Timetable (group 43): lecture Mon 08:30–11:15, room 1152; lab Tue 10:30–13:1
 
 - Standard Linux command-line tools: file system navigation and manipulation (`ls`, `cd`, `mkdir`, `touch`, `cp`, `mv`, `rm`), permissions (`chmod`), text tools.
 - Shell scripts start with `#!/bin/bash` and are made executable with `chmod +x`.
-- C++ labs: standard library only (`<thread>`, `<mutex>`, `<atomic>`, `<chrono>`, …), written in the handout's style (`using namespace std;`). One program per task: `taskN.cpp`. Answers to the "explain why" questions go in the day folder's `README.md` (in Bulgarian).
+- C++ labs: standard library only (`<thread>`, `<mutex>`, `<atomic>`, `<chrono>`, …), written in the handout's style (`using namespace std;`). One program per task: `taskN.cpp`. Every `for` / `while` / `if` / `else` body is a `{ }` block, even a single statement. Answers to the "explain why" questions go in the day folder's `README.md` (in Bulgarian).
 
 ## Not allowed
 

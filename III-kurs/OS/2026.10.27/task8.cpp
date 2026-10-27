@@ -35,13 +35,15 @@ public:
     bool withdraw(int sum) {
         if (useMutex) {
             lock_guard<mutex> lock(m);
-            if (balance < sum)
+            if (balance < sum) {
                 return false;
+            }
             change(-sum);
             return true;
         }
-        if (balance < sum)
+        if (balance < sum) {
             return false;
+        }
         change(-sum);
         return true;
     }
@@ -53,25 +55,31 @@ public:
 };
 
 void client(Account &account) {
-    for (int i = 0; i < OPERATIONS; i++)
+    for (int i = 0; i < OPERATIONS; i++) {
         account.deposit(SUM);
-    for (int i = 0; i < OPERATIONS; i++)
+    }
+    for (int i = 0; i < OPERATIONS; i++) {
         account.withdraw(SUM);
+    }
 }
 
 void run(const char *name, bool useMutex) {
     Account account(START_BALANCE, useMutex);
     vector<thread> threads;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
         threads.emplace_back(client, ref(account));
-    for (thread &t : threads)
+    }
+    for (thread &t : threads) {
         t.join();
+    }
     cout << name << account.getBalance() << " лв. (expected " << START_BALANCE << " лв.)" << endl;
 }
 
 int main() {
-    for (int i = 1; i <= 3; i++)
+    for (int i = 1; i <= 3; i++) {
         run("С mutex:   ", true);
-    for (int i = 1; i <= 3; i++)
+    }
+    for (int i = 1; i <= 3; i++) {
         run("Без mutex: ", false);
+    }
 }

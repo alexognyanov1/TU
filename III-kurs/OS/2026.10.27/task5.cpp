@@ -15,8 +15,9 @@ void incrementSlow() {
 }
 
 void incrementFast() {
-    for (int i = 0; i < 1000000; i++)
+    for (int i = 0; i < 1000000; i++) {
         counter++;
+    }
 }
 
 int main() {
@@ -28,9 +29,11 @@ int main() {
 
     counter = 0;
     vector<thread> threads;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) {
         threads.emplace_back(incrementFast);
-    for (thread &t : threads)
+    }
+    for (thread &t : threads) {
         t.join();
+    }
     cout << "Без заспиване, 4 нишки x 1 000 000: " << counter << " (expected 4000000)" << endl;
 }

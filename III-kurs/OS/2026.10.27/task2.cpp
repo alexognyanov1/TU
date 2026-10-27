@@ -9,9 +9,11 @@ void worker(int id) {
 
 int main() {
     vector<thread> threads;
-    for (int i = 1; i <= 5; i++)
+    for (int i = 1; i <= 5; i++) {
         threads.emplace_back(worker, i);
+    }
 
-    for (thread &t : threads)
+    for (thread &t : threads) {
         t.join();
+    }
 }

@@ -21,17 +21,20 @@ void incrementMutex() {
 }
 
 void incrementAtomic() {
-    for (int i = 0; i < ITERATIONS; i++)
+    for (int i = 0; i < ITERATIONS; i++) {
         counterAtomic++;
+    }
 }
 
 long long measure(void (*f)()) {
     auto start = chrono::steady_clock::now();
     vector<thread> threads;
-    for (int i = 0; i < THREADS; i++)
+    for (int i = 0; i < THREADS; i++) {
         threads.emplace_back(f);
-    for (thread &t : threads)
+    }
+    for (thread &t : threads) {
         t.join();
+    }
     return chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - start).count();
 }
 

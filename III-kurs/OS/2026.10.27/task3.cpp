@@ -4,8 +4,9 @@ using namespace std;
 
 void sum(long long n, long long &result) {
     result = 0;
-    for (long long i = 1; i <= n; i++)
+    for (long long i = 1; i <= n; i++) {
         result += i;
+    }
 }
 
 int main() {
