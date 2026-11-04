@@ -20,6 +20,8 @@ DATE_RE = re.compile(r"^\d{4}\.\d{2}\.\d{2}$")
 GROUPS = {"Lab", "Seminar", "ExampleTest"}
 SUBJECT_META = {"RULES.md", "README.md", "run.sh", "test.py"}
 IGNORED = {".DS_Store", ".idea", ".vscode", "__pycache__"}
+# Course-level folders that are not subjects, so they need no RULES.md or README section
+NON_SUBJECTS = {"Schedule"}
 
 
 def children(path):
@@ -35,7 +37,7 @@ def courses():
 
 
 def subjects():
-    return [s for c in courses() for s in children(c) if s.is_dir()]
+    return [s for c in courses() for s in children(c) if s.is_dir() and s.name not in NON_SUBJECTS]
 
 
 def work_items():

@@ -19,6 +19,7 @@ Non-university side projects go in `Personal/<ProjectName>/`, never inside a cou
 
 - Each subject gets its own folder under its course, named with its **upper-case Latin abbreviation**: `III-kurs/PE/`, `II-kurs/BD/`.
 - No spaces or Cyrillic in folder names, so paths stay easy to type and link on GitHub.
+- Exception: `<course>/Schedule/` holds timetables and make-up plans. It is not a subject, so it needs no `RULES.md` or README section.
 
 ## R3. One folder per working day
 
