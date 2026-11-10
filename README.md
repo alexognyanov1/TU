@@ -41,6 +41,7 @@ Faculty GitLab (lab 1407: OS, PE/OOP, Secure code): [links and contacts](III-kur
 | [KP](III-kurs/KP) | Компютърна периферия / Computer Peripherals | HTML → PDF (Bulgarian documents) | [rules](III-kurs/KP/RULES.md) |
 | [ASLS](III-kurs/ASLS) | Анализ и синтез на логически схеми / Analysis and Synthesis of Logic Circuits | Multisim, Python | [rules](III-kurs/ASLS/RULES.md) |
 | [OS](III-kurs/OS) | Операционни системи / Operating Systems | Bash, C++17 | [rules](III-kurs/OS/RULES.md) |
+| [KA](III-kurs/KA) | Компютърни архитектури / Computer Architectures | CPU-OS Simulator, HTML → PDF | [rules](III-kurs/KA/RULES.md) |
 
 <!-- /subjects:III-kurs -->
 
@@ -91,6 +92,17 @@ Rules: [III-kurs/OS/RULES.md](III-kurs/OS/RULES.md) · Build + run a C++ task: `
 | — | Курсова работа (реферат) | [III-kurs/OS/KP](III-kurs/OS/KP) | HTML/SVG → PDF, Python | Course project in Bulgarian (GitLab os/course-works#217, topic 3): CPU scheduling – comparison of FCFS, SJF, SRTF (shortest remaining time first), Round Robin and priority scheduling (preemptive / non-preemptive, starvation, aging, priority inversion). Process states, CPU burst / I/O burst, scheduler vs dispatcher, context switch, criteria (turnaround, waiting, response time, throughput), convoy effect, SJF optimality and exponential averaging of burst length, Gantt charts and per-process tables for one shared example, simulated mixed workload of 200 processes, Round Robin time quantum sweep with context-switch overhead, multilevel feedback queue (MLFQ), Linux CFS / EEVDF / SCHED_FIFO / SCHED_RR / SCHED_DEADLINE, Windows priority levels, quantum and priority boost. PDF: `OS_121224052_AlexOgnyanov.pdf`. Animations in `anim/`: interactive `scheduling.html` (play/pause, step, scrub, switch algorithm; offline) and 1080p MP4 videos per algorithm plus `scheduling_all.mp4` – ready queue, CPU, quantum, Gantt chart and average times animated step by step. English video `cpu_scheduling_en_4k.mp4` (4K 3840×2160, 60 fps, stereo synthesized sound effects): title grid of all six algorithms, zoom into each one with continuous pan transitions, comparison of average waiting and response time. Second 4K video `cpu_scheduling_glass_4k.mp4` in the Liquid Glass style of the Motion Graphics starter kit (frosted glass cards, Inter, kit sound effects): workload table, each algorithm with ready queue, CPU, time slice, Gantt chart, live averages and a finished checklist, results bars and takeaways. GitLab hand-in texts for issue #217 (description, submission comment, steps; they hand in the Liquid Glass video with its OneDrive link) in `gitlab-issue/`. Sources in `src/` (`sim.py` – discrete-time scheduling simulator, `build.py` – renders the PDF with headless Chrome, `anim.html` + `anim.py` – animation scene and MP4 recorder via Chrome DevTools pipe + ffmpeg, `video.html` + `video.py` – English video with sound, `glass.html` + `glass.py` + `kit/` – Liquid Glass video, kit fonts and sound effects) |
 
 <!-- /index:III-kurs/OS -->
+
+### KA: Computer Architectures
+
+Rules: [III-kurs/KA/RULES.md](III-kurs/KA/RULES.md)
+
+<!-- index:III-kurs/KA -->
+| Date | Type | Folder | Language | What's inside |
+| --- | --- | --- | --- | --- |
+| 2026.11.04 | Lab | [III-kurs/KA/2026.11.04](III-kurs/KA/2026.11.04) | CPU-OS Simulator | Lab 3 – pipeline hazards in a 5-stage linear pipeline (handout `Lab03.pdf`, two separately styled PDF reports, generator `src/build.py`). Data hazards, bubbles / stalls, NOP insertion, time diagrams, CPI and speed-up factor; operand forwarding; loop unrolling and code size; re-arranging the instruction sequence; jump prediction and the Jump Predict Table; control hazards |
+
+<!-- /index:III-kurs/KA -->
 
 <!-- /course:III-kurs -->
 
