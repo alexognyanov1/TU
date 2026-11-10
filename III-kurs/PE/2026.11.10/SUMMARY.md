@@ -1,37 +1,18 @@
-# PE Lab 4 (2026.11.10): virtual functions and virtual base classes
+# PE Lab 4 (2026.11.10): virtual functions (self-study tasks)
 
-Handout: [`Lab4_PE-GM.pdf`](Lab4_PE-GM.pdf) („Виртуални функции и виртуални класове“). It covers virtual base classes (виртуални базови класове) in multiple inheritance and virtual functions (виртуални функции), including pure virtual functions (чисто виртуални функции). It has three tasks with complete code („Задача 1–3“) and two self-study exercises („Задачи за самостоятелна работа“): explain what Задача 3 prints and check it by running the program, then add classes for a tiger and an elephant. All of them are done: the three handout programs in `task1`–`task3`, with the errors in the handout code fixed, the explanation of the output below (task3), and the Tiger/Elephant extension in `task4`. The handout code is pre-standard Borland C++, so everything is written in standard C++17.
+Handout: [`Lab4_PE-GM.pdf`](Lab4_PE-GM.pdf) („Виртуални функции и виртуални класове“). Only the two self-study exercises („Задачи за самостоятелна работа“) are implemented: explain what Задача 3 prints and check it by running the program, then add classes for a tiger and an elephant. `task3` is Задача 3, the base for both exercises, and keeps its number from the handout. `task4` adds the Tiger/Elephant extension. Задача 1 and 2 are worked examples and are not part of the exercises. The handout code is pre-standard Borland C++, so it is written in standard C++17.
 
 | File | Exercise | Main concepts |
 | --- | --- | --- |
-| [task1.cpp](task1.cpp) | Handout task 1: `vehicle` → `motorized` + `road_use` → `car` | multiple inheritance, diamond problem, virtual base class (`virtual public vehicle`), the most-derived class constructs the virtual base, `enum` |
-| [task2.cpp](task2.cpp) | Handout task 2: `area` → `rectangle` / `triangle` | pure virtual function (`= 0`), abstract class, `override`, runtime polymorphism through a base-class pointer, virtual destructor |
 | [task3.cpp](task3.cpp) | Handout task 3 + self-study 1: the zoo (`ZooAnimal` → `Bear` → `Panda`), what does it print? | virtual functions called from a base-class member function, calling the base version explicitly (`Bear::isA()`), virtual destructor, friend function, linked list through base-class pointers |
 | [task4.cpp](task4.cpp) | Self-study 2: add `Tiger` and `Elephant` | new derived classes by analogy, overriding `print()` / `isA()`, objects created with `new` and deleted through `ZooAnimal*` (virtual destructor), input validation |
 
-Build and run with `III-kurs/PE/run.sh taskN`, and test with `III-kurs/PE/run.sh --test 2026.11.10`. There are 20 test cases in [`tests/`](tests) and all of them pass with no compiler warnings (also clean under AddressSanitizer/UBSan).
+Build and run with `III-kurs/PE/run.sh task3` or `task4`, and test with `III-kurs/PE/run.sh --test 2026.11.10`. There are 8 test cases in [`tests/`](tests) and all of them pass with no compiler warnings (also clean under AddressSanitizer/UBSan).
 
-## Fixes to the handout code (all tasks)
+## Fixes to the handout code
 
 - `#include <iostream.h>` → `<iostream>`, `<string.h>` → `<cstring>`, `void main()` → `int main()`, and `cout` → `std::cout`.
-- The typographic quotes `”…”` and `’\n’` in the PDF are replaced with real `"…"` and `'\n'`.
 - Members are initialised in the constructor's initializer list, and member functions that don't change the object are `const`.
-
-## task1: virtual base class `vehicle`
-
-- `motorized` and `road_use` both inherit `vehicle` as `virtual public vehicle`, so a `car` (which inherits both) contains **one** `vehicle` part, not two. Without `virtual`, `car` would have two copies of `num_wheels` and `range`, and `showv()` called from `car` would be ambiguous.
-- With a virtual base, the **most-derived class** constructs it: `car`'s constructor calls `vehicle(w, r)` itself, and the `vehicle(w, r)` calls in the initializer lists of `motorized` and `road_use` are skipped when they are built as part of a `car`. `vehicle` has no default constructor, so `car` must call it, as the handout does.
-- **Fix:** the handout lists `motorized(m, w, r), road_use(p, w, r), vehicle(w, r)`. Virtual bases are always constructed first, so the list is written in the real order `vehicle(w, r), motorized(…), road_use(…)` (otherwise clang warns with `-Wreorder`).
-- **Fix:** the handout's first sketch `class car { ... }; : public motorized, public road_use` doesn't compile; the full program in Задача 1 has the correct form, which is used.
-- `showAsVehicle(const vehicle&)` takes the `car` as a `vehicle&`. This conversion compiles only because there is one shared `vehicle` base; with two copies it would be ambiguous.
-- `main` creates the handout's `car c(power, gas, 5, 4, 500)` and prints it in the handout's format, then reads the user's own car (steering 1–3, motor 1–3, passengers 1–50, wheels 2–30, range 1–10000) and prints it.
-
-## task2: pure virtual `getarea()`
-
-- `area` stores the two dimensions (private) and declares `virtual double getarea() const = 0;`. It has no meaningful area of its own, so it is a pure virtual function and `area` is an **abstract class**: `area a;` doesn't compile, but `area*` and `area&` can point to a `rectangle` or `triangle`.
-- `rectangle::getarea()` returns `d1 * d2` and `triangle::getarea()` returns `0.5 * d1 * d2`, both marked `override`. `p->getarea()` with `area* p` picks the version by the type of the object at run time.
-- Added: a **virtual destructor** in `area` (a polymorphic base class should have one), and `getdim()` is `const`.
-- `main` runs the handout example (`Rectangle has area: 14.85`, `Triangle has area: 10`), then a menu: choose a rectangle or a triangle, enter two sizes (greater than 0, at most 10000) and the area is printed through the base class (`printArea(const area&)`). Values are printed with the default `std::cout` format, as in the handout, so very large areas appear as `1e+08`.
 
 ## task3: the zoo and what it prints (self-study 1)
 
@@ -74,7 +55,5 @@ Animal name: Circus animal
 
 | Task | Cases |
 | --- | --- |
-| task1 | the handout car and output (`pdf-handout-car`), own car, lowest and highest values, invalid values (0, 4, -1, text, 2.5, two numbers, empty line, 51, 31, 10001), input ending early, empty input |
-| task2 | the handout areas 14.85 and 10 (`pdf-handout-areas`), a rectangle and a triangle, boundaries (10000 × 10000, 0.5 × 0.5, 0.001), invalid values (menu 3/-1/text/empty, sizes 0/-2/text/10001/empty/two numbers), input ending early |
 | task3 | the handout output (`pdf-handout-zoo`), input given to the program is ignored |
 | task4 | the handout zoo plus `Raja` and `Tembo` (`pdf-handout-zoo-with-tiger-and-elephant`), add a tiger and an elephant and show the zoo (name trimmed), boundaries (enclosure 1 and 999, weight 100 and 10000, 30-character name), invalid values (menu 4/-1/text/empty, empty/blank/31-character name, enclosure 0/1000/text, weight 99/10001/2.5), full zoo (21st animal refused), input ending early |
