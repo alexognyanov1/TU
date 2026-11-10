@@ -78,5 +78,6 @@ gh pr create --base main --fill
 
 - Don't commit build output, IDE workspace state, or OS junk (`.DS_Store`, `*.class`, `*.o`, `a.out`, `out/`, `__pycache__/`, `.idea/workspace.xml`, Office lock files `~$*`). `.gitignore` covers these.
 - Never commit secrets (`.env`, API keys).
+- Generated documents (reports, протоколи) never contain remarks such as "Липсващи данни" or notes about missing screenshots. If some data is missing, calculate the values or leave that item out, and complete everything else.
 - Commit messages: `<SUBJECT> YYYY.MM.DD: <short description>`, e.g. `PE 2026.09.29: lab 1 – arrays and pointers`.
 - Put your name in a comment at the top of a file if it's your solution to an individual assignment.

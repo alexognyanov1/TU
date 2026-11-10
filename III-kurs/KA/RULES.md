@@ -21,7 +21,7 @@
 
 ## Not allowed
 
-- Inventing measurements: values that were not captured on a screenshot are marked as missing in the report.
+- Notes about missing data or screenshots in a generated report (see R7 in the repo rules).
 
 ## Folder layout
 
