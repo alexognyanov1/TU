@@ -11,30 +11,34 @@ body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1f2a
 .slide { width: 13.333in; height: 7.5in; page-break-after: always; break-after: page; overflow: hidden; box-sizing: border-box; position: relative; counter-increment: s; background: #fff }
 .slide:last-child { page-break-after: auto; break-after: auto }
 .slide::before { content: "SATA – Компютърна периферия"; position: absolute; left: 48px; bottom: 12px; font-size: 15px; color: #64748b }
-.slide::after { content: counter(s) " / 50"; position: absolute; right: 48px; bottom: 12px; font-size: 15px; color: #64748b; font-weight: 600 }
+.slide::after { content: counter(s) " / 54"; position: absolute; right: 48px; bottom: 12px; font-size: 15px; color: #64748b; font-weight: 600 }
 .slide h2 { margin: 0; background: #0b3d63; color: #fff; font-size: 34px; font-weight: 700; padding: 20px 48px 18px; border-bottom: 6px solid #f28c28; letter-spacing: .2px }
 .slide h2 small { font-size: 20px; font-weight: 400; color: #bcd4ea; margin-left: 14px }
-.c { padding: 22px 48px 0; font-size: 22px; line-height: 1.38; height: 590px }
-.c ul { margin: 6px 0; padding-left: 28px }
-.c li { margin: 5px 0 }
+.c { padding: 26px 56px 0; font-size: 24px; line-height: 1.4; height: 590px; text-wrap: pretty; hyphens: manual }
+.c:not(.cols):not(.cols3):not(.gal) { display: flex; flex-direction: column; justify-content: center; padding-bottom: 30px }
+.c > *, .c li, .c p, .c td { text-wrap: pretty }
+.c ul { margin: 6px 0; padding-left: 30px }
+.c li { margin: 0 0 12px; padding-left: 4px }
+.c li:last-child { margin-bottom: 0 }
+.c li b, .c li .k { white-space: nowrap }
 .c li::marker { color: #f28c28 }
 .c p { margin: 6px 0 10px }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; align-items: start }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; align-content: center; padding-bottom: 30px }
 .cols.w37 { grid-template-columns: 3fr 4fr }
 .cols.w73 { grid-template-columns: 4fr 3fr }
 .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px }
-table { border-collapse: collapse; width: 100%; font-size: 19px }
+table { border-collapse: collapse; width: 100%; font-size: 20px; line-height: 1.3 }
 th { background: #0b3d63; color: #fff; text-align: left; font-weight: 600 }
 th, td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top }
 .tight td, .tight th { padding: 4px 10px }
 tr:nth-child(even) td { background: #f1f5f9 }
-.box { background: #fff6ec; border-left: 6px solid #f28c28; padding: 10px 16px; margin: 10px 0; font-size: 20px }
+.box { background: #fff6ec; border-left: 6px solid #f28c28; padding: 12px 18px; margin: 12px 0; font-size: 21px; line-height: 1.38 }
 .box.b { background: #eaf2fa; border-left-color: #0b3d63 }
 .k { color: #0b3d63; font-weight: 700 }
 .o { color: #c2610c; font-weight: 700 }
 code, .m { font-family: Menlo, "Courier New", monospace; font-size: .9em; background: #eef2f7; padding: 1px 5px; border-radius: 3px }
-.small { font-size: 18px }
-.note { font-size: 17px; color: #475569 }
+.small { font-size: 19px }
+.note { font-size: 18px; color: #475569 }
 svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans-serif }
 .title { background: linear-gradient(135deg, #0b3d63 0%, #072640 100%); color: #fff }
 .title::before, .title::after { color: #9fb7cf }
@@ -49,6 +53,25 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 .toc li { margin: 0 0 22px; break-inside: avoid }
 .toc span { color: #64748b; font-size: 18px; white-space: nowrap }
 .authors, .authors td, .authors tr { border: none !important; background: none !important; font-size: inherit !important; color: inherit !important; line-height: inherit; }
+.gal { display: grid; gap: 16px 22px; padding-bottom: 34px }
+.gal figure { margin: 0; display: flex; flex-direction: column; min-height: 0 }
+.gal img { flex: 1; min-height: 0; width: 100%; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1 }
+.gal figcaption { font-size: 17px; line-height: 1.25; margin-top: 6px }
+.gal figcaption b { display: block; color: #0b3d63 }
+.gal figcaption span { font-size: 12px; color: #64748b }
+.cursor { display: none }
+@media screen {
+  .anim .cursor { display: inline; animation: cur 8s linear infinite }
+  .anim .reveal { animation: rev 8s linear infinite }
+  .anim18 .st2 { animation: st2 8s linear infinite }
+  .anim18 .st3 { animation: st3 8s linear infinite }
+  .anim18 .addbit { animation: st4 8s linear infinite }
+}
+@keyframes cur { 0% { transform: translateX(0) } 75%, 100% { transform: translateX(var(--d)) } }
+@keyframes rev { 0% { width: 50px } 75%, 100% { width: calc(50px + var(--d)) } }
+@keyframes st2 { 0%, 20% { opacity: 0 } 28%, 100% { opacity: 1 } }
+@keyframes st3 { 0%, 42% { opacity: 0 } 50%, 100% { opacity: 1 } }
+@keyframes st4 { 0%, 62% { opacity: 0 } 70%, 100% { opacity: 1 } }
 </style>
 </head>
 <body>
@@ -79,19 +102,19 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
       <li>Увод и история на ATA <span>(3–7)</span></li>
       <li>Поколения SATA и скорости <span>(8–12)</span></li>
       <li>Архитектура и слоеве на протокола <span>(13–14)</span></li>
-      <li>Физически слой: LVDS, 8b/10b, OOB <span>(15–21)</span></li>
-      <li>Канален слой: примитиви, рамки, CRC <span>(22–25)</span></li>
-      <li>Транспортен слой: FIS <span>(26–27)</span></li>
-      <li>Команден слой: ATA команди, PIO, DMA <span>(28–30)</span></li>
-      <li>NCQ, TRIM, hot-plug <span>(31–34)</span></li>
-      <li>Управление на енергията <span>(35)</span></li>
-      <li>Кабели, конектори и форм-фактори <span>(36–40)</span></li>
-      <li>Хост контролери и AHCI <span>(41–43)</span></li>
-      <li>Port Multiplier, SAS, RAID <span>(44–46)</span></li>
-      <li>SATA срещу NVMe <span>(47)</span></li>
-      <li>Диагностика: S.M.A.R.T. <span>(48)</span></li>
-      <li>Приложение днес и бъдеще <span>(49)</span></li>
-      <li>Заключение и литература <span>(50)</span></li>
+      <li>Физически слой: LVDS, 8b/10b, OOB <span>(15–23)</span></li>
+      <li>Канален слой: примитиви, рамки, CRC <span>(24–27)</span></li>
+      <li>Транспортен слой: FIS <span>(28–29)</span></li>
+      <li>Команден слой: ATA команди, PIO, DMA <span>(30–32)</span></li>
+      <li>NCQ, TRIM, hot-plug <span>(33–36)</span></li>
+      <li>Управление на енергията <span>(37)</span></li>
+      <li>Кабели, конектори и форм-фактори <span>(38–44)</span></li>
+      <li>Хост контролери и AHCI <span>(45–47)</span></li>
+      <li>Port Multiplier, SAS, RAID <span>(48–50)</span></li>
+      <li>SATA срещу NVMe <span>(51)</span></li>
+      <li>Диагностика: S.M.A.R.T. <span>(52)</span></li>
+      <li>Приложение днес и бъдеще <span>(53)</span></li>
+      <li>Заключение и литература <span>(54)</span></li>
     </ol>
   </div>
 </section>
@@ -487,32 +510,44 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 <!-- 16 -->
 <section class="slide">
   <h2>Диференциално предаване (LVDS-подобно)</h2>
-  <div class="c cols">
+  <div class="c cols w37">
     <div>
       <ul>
-        <li>Информацията е в <span class="k">разликата</span> V+ − V−, не в абсолютното ниво</li>
-        <li>Синфазните смущения (common-mode noise) се компенсират</li>
-        <li>Диференциална амплитуда при Gen1/Gen2 предавател: прибл. <span class="k">400 – 600 mV</span> (peak-to-peak диф.)</li>
-        <li>Импеданс на линията: <span class="k">100 Ω</span> диференциално</li>
-        <li><span class="k">AC свързване</span> – кондензатори в линията, независимост от DC нивата</li>
-        <li>Gen3: <span class="k">de-emphasis / изравняване</span> за компенсиране на загубите</li>
-        <li>Ниска консумация и малко електромагнитно излъчване (EMI)</li>
+        <li>Бит = <span class="k">двойка проводници</span>: V+ носи сигнала, V− – обратния му</li>
+        <li>Приемникът гледа само <span class="k">разликата V+ − V−</span></li>
+        <li>Смущението е <span class="k">еднакво</span> в двата проводника → при изваждането се съкращава</li>
+        <li><span class="k">400 – 600 mV</span> p-p диференциално, <span class="k">100 Ω</span></li>
+        <li><span class="k">AC свързване</span> – независимост от DC нивата</li>
+        <li>Gen3: <span class="k">de-emphasis</span> срещу загубите</li>
       </ul>
     </div>
     <div>
-      <svg width="560" height="480" viewBox="0 0 560 480">
-        <text x="20" y="30" font-size="17" font-weight="700" fill="#0b3d63">Сигнали в двойката</text>
-        <polyline points="40,80 120,80 120,140 220,140 220,80 300,80 300,140 380,140 380,80 520,80" fill="none" stroke="#0b3d63" stroke-width="3"/>
-        <polyline points="40,140 120,140 120,80 220,80 220,140 300,140 300,80 380,80 380,140 520,140" fill="none" stroke="#f28c28" stroke-width="3" stroke-dasharray="7 4"/>
-        <text x="525" y="85" font-size="15" fill="#0b3d63">V+</text><text x="525" y="145" font-size="15" fill="#c2610c">V−</text>
-        <text x="20" y="200" font-size="17" font-weight="700" fill="#0b3d63">Диференциален сигнал V+ − V−</text>
-        <line x1="40" y1="290" x2="520" y2="290" stroke="#cbd5e1"/>
-        <polyline points="40,240 120,240 120,340 220,340 220,240 300,240 300,340 380,340 380,240 520,240" fill="none" stroke="#1f2a37" stroke-width="3"/>
-        <text x="60" y="232" font-size="14">„1“</text><text x="150" y="360" font-size="14">„0“</text>
-        <line x1="535" y1="240" x2="535" y2="340" stroke="#475569" stroke-width="1.5"/>
-        <text x="400" y="380" font-size="14" fill="#475569">≈ 0,4 – 0,6 V p-p</text>
-        <rect x="40" y="410" width="480" height="56" rx="8" fill="#eaf2fa"/>
-        <text x="280" y="444" font-size="16" text-anchor="middle">Смущение, наложено на V+ и V−, се изважда</text>
+      <svg class="anim" style="--d:480px" width="600" height="570" viewBox="0 0 600 570">
+        <defs>
+          <clipPath id="rv16"><rect class="reveal" x="0" y="0" width="600" height="560"/></clipPath>
+          <marker id="a16" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker>
+        </defs>
+        <text x="10" y="22" font-size="17" font-weight="700" fill="#c0392b">① Смущение n(t) – попада еднакво в двата проводника</text>
+        <line x1="50" y1="95" x2="530" y2="95" stroke="#e2e8f0"/>
+        <polyline data-step="1" data-fx="wipe" points="50,87.2 52,87.0 54,88.3 56,89.9 58,90.7 60,90.3 62,89.1 64,88.0 66,88.0 68,89.3 70,91.5 72,93.6 74,94.2 76,92.9 78,89.7 80,86.0 82,83.2 84,82.4 86,84.3 88,88.2 90,92.9 92,96.9 94,99.6 96,100.7 98,101.1 100,101.7 102,103.1 104,105.3 106,107.6 108,108.6 110,107.7 110,107.7 112,104.6 114,100.2 116,95.9 118,93.2 120,92.8 122,94.6 124,97.4 126,100.0 128,101.1 130,100.3 132,98.2 134,95.8 136,94.0 138,93.4 140,93.5 142,93.3 144,92.0 146,89.1 148,85.0 150,80.9 152,78.4 154,78.3 156,81.0 158,85.4 160,90.3 162,94.1 164,96.1 166,96.4 168,95.8 170,95.5 170,95.5 172,96.1 174,97.7 176,99.6 178,100.8 180,100.4 182,98.6 184,96.1 186,94.2 188,94.1 190,96.3 192,100.3 194,104.8 196,108.2 198,109.4 200,108.1 202,105.2 204,101.8 206,98.9 208,97.1 210,96.1 212,95.0 214,92.8 216,89.3 218,84.9 220,80.8 222,78.2 224,77.8 226,79.6 228,82.5 230,84.9 230,84.9 232,85.6 234,83.8 236,80.1 238,75.5 240,71.4 242,68.5 244,67.0 246,66.2 248,65.0 250,62.9 252,59.7 254,56.4 256,54.0 258,53.5 260,55.3 262,58.4 264,61.6 266,63.4 268,62.9 270,60.2 272,56.2 274,52.3 276,49.8 278,49.1 280,49.9 282,51.1 284,51.8 286,51.7 288,51.0 290,50.8 290,50.8 292,52.1 294,55.4 296,60.4 298,65.8 300,70.1 302,72.4 304,72.1 306,70.0 308,67.6 310,66.1 312,66.4 314,68.6 316,71.8 318,74.8 320,77.0 322,78.3 324,79.3 326,81.0 328,84.3 330,89.1 332,94.6 334,99.4 336,102.3 338,102.5 340,100.5 342,97.5 344,94.9 346,94.0 348,95.0 350,97.3 350,97.3 352,100.0 354,101.7 356,102.2 358,101.6 360,100.9 362,101.0 364,102.3 366,104.5 368,106.4 370,106.8 372,104.8 374,100.4 376,94.7 378,89.2 380,85.3 382,83.8 384,84.4 386,86.2 388,87.8 390,88.5 392,88.0 394,87.2 396,86.9 398,88.0 400,90.3 402,93.2 404,95.3 406,95.7 408,94.1 410,90.9 410,90.9 412,87.6 414,85.6 416,86.0 418,88.8 420,93.1 422,97.6 424,101.0 426,102.8 428,103.3 430,103.3 432,103.9 434,105.3 436,107.3 438,108.7 440,108.6 442,106.4 444,102.2 446,97.1 448,92.8 450,90.5 452,90.6 454,92.7 456,95.3 458,97.3 460,97.6 462,96.3 464,94.1 466,92.1 468,91.1 470,91.1 470,91.2 472,91.7 474,91.6 476,90.1 478,87.1 480,83.3 482,80.1 484,78.9 486,80.3 488,84.2 490,89.3 492,94.3 494,97.7 496,99.3 498,99.3 500,98.8 502,98.8 504,99.9 506,101.6 508,103.2 510,103.5 512,102.1 514,99.5 516,96.5 518,94.7 520,95.0 522,97.5 524,101.3 526,105.1 528,107.4 530,107.3" fill="none" stroke="#c0392b" stroke-width="2.2" clip-path="url(#rv16)"/>
+        <text data-step="1" data-fx="wipe" x="256" y="44" font-size="14" fill="#c0392b">импулс +0,3 V</text>
+        <text x="10" y="140" font-size="17" font-weight="700" fill="#0b3d63">② По кабела: V+ = 0,25 + s(t) + n(t),  V− = 0,25 − s(t) + n(t)</text>
+        <polyline data-step="2" data-fx="wipe" points="50,237.0 52,236.9 54,238.1 56,239.5 58,240.2 60,239.8 62,238.7 64,237.8 66,237.8 68,238.9 70,240.9 72,242.7 74,243.3 76,242.1 78,239.3 80,236.0 82,233.5 84,232.8 86,234.5 88,238.0 90,242.1 92,245.7 94,248.1 96,249.1 98,249.4 100,249.9 102,251.2 104,253.2 106,255.2 108,256.1 110,255.3 110,287.3 112,284.5 114,280.6 116,276.8 118,274.4 120,274.1 122,275.6 124,278.2 126,280.4 128,281.4 130,280.7 132,278.8 134,276.7 136,275.2 138,274.6 140,274.6 142,274.5 144,273.3 146,270.7 148,267.1 150,263.5 152,261.2 154,261.2 156,263.5 158,267.5 160,271.8 162,275.2 164,277.0 166,277.2 168,276.7 170,276.4 170,244.4 172,245.0 174,246.4 176,248.1 178,249.1 180,248.8 182,247.2 184,244.9 186,243.3 188,243.2 190,245.2 192,248.7 194,252.7 196,255.7 198,256.8 200,255.7 202,253.1 204,250.0 206,247.5 208,245.9 210,245.0 212,244.0 214,242.1 216,238.9 218,235.0 220,231.4 222,229.0 224,228.7 226,230.3 228,232.9 230,235.0 230,235.0 232,235.6 234,234.1 236,230.8 238,226.7 240,223.0 242,220.5 244,219.1 246,218.4 248,217.4 250,215.4 252,212.6 254,209.7 256,207.5 258,207.2 260,208.7 262,211.5 264,214.3 266,215.9 268,215.5 270,213.1 272,209.5 274,206.1 276,203.8 278,203.2 280,203.9 282,205.0 284,205.6 286,205.5 288,204.9 290,204.7 290,236.7 292,237.9 294,240.8 296,245.2 298,250.0 300,253.9 302,255.9 304,255.6 306,253.8 308,251.6 310,250.3 312,250.6 314,252.5 316,255.4 318,258.1 320,260.0 322,261.2 324,262.0 326,263.6 328,266.5 330,270.7 332,275.6 334,279.9 336,282.4 338,282.7 340,280.9 342,278.2 344,275.9 346,275.1 348,276.0 350,278.1 350,278.1 352,280.4 354,282.0 356,282.4 358,281.8 360,281.2 362,281.3 364,282.5 366,284.4 368,286.1 370,286.5 372,284.7 374,280.8 376,275.8 378,270.9 380,267.4 382,266.1 384,266.6 386,268.2 388,269.6 390,270.2 392,269.8 394,269.1 396,268.8 398,269.8 400,271.8 402,274.4 404,276.3 406,276.7 408,275.2 410,272.4 410,240.4 412,237.4 414,235.7 416,236.0 418,238.5 420,242.3 422,246.3 424,249.3 426,250.9 428,251.3 430,251.4 432,251.9 434,253.1 436,254.9 438,256.2 440,256.1 442,254.1 444,250.4 446,245.9 448,242.1 450,240.0 452,240.1 454,241.9 456,244.3 458,246.0 460,246.3 462,245.1 464,243.2 466,241.4 468,240.5 470,240.6 470,272.6 472,273.1 474,273.0 476,271.7 478,269.0 480,265.6 482,262.8 484,261.7 486,262.9 488,266.4 490,271.0 492,275.3 494,278.4 496,279.8 498,279.8 500,279.4 502,279.4 504,280.3 506,281.9 508,283.3 510,283.6 512,282.4 514,280.0 516,277.3 518,275.7 520,276.0 522,278.2 524,281.6 526,285.0 528,287.0 530,286.9" fill="none" stroke="#0b3d63" stroke-width="2.6" clip-path="url(#rv16)"/>
+        <polyline data-step="2" data-fx="wipe" points="50,269.0 52,268.9 54,270.1 56,271.5 58,272.2 60,271.8 62,270.7 64,269.8 66,269.8 68,270.9 70,272.9 72,274.7 74,275.3 76,274.1 78,271.3 80,268.0 82,265.5 84,264.8 86,266.5 88,270.0 90,274.1 92,277.7 94,280.1 96,281.1 98,281.4 100,281.9 102,283.2 104,285.2 106,287.2 108,288.1 110,287.3 110,255.3 112,252.5 114,248.6 116,244.8 118,242.4 120,242.1 122,243.6 124,246.2 126,248.4 128,249.4 130,248.7 132,246.8 134,244.7 136,243.2 138,242.6 140,242.6 142,242.5 144,241.3 146,238.7 148,235.1 150,231.5 152,229.2 154,229.2 156,231.5 158,235.5 160,239.8 162,243.2 164,245.0 166,245.2 168,244.7 170,244.4 170,276.4 172,277.0 174,278.4 176,280.1 178,281.1 180,280.8 182,279.2 184,276.9 186,275.3 188,275.2 190,277.2 192,280.7 194,284.7 196,287.7 198,288.8 200,287.7 202,285.1 204,282.0 206,279.5 208,277.9 210,277.0 212,276.0 214,274.1 216,270.9 218,267.0 220,263.4 222,261.0 224,260.7 226,262.3 228,264.9 230,267.0 230,267.0 232,267.6 234,266.1 236,262.8 238,258.7 240,255.0 242,252.5 244,251.1 246,250.4 248,249.4 250,247.4 252,244.6 254,241.7 256,239.5 258,239.2 260,240.7 262,243.5 264,246.3 266,247.9 268,247.5 270,245.1 272,241.5 274,238.1 276,235.8 278,235.2 280,235.9 282,237.0 284,237.6 286,237.5 288,236.9 290,236.7 290,204.7 292,205.9 294,208.8 296,213.2 298,218.0 300,221.9 302,223.9 304,223.6 306,221.8 308,219.6 310,218.3 312,218.6 314,220.5 316,223.4 318,226.1 320,228.0 322,229.2 324,230.0 326,231.6 328,234.5 330,238.7 332,243.6 334,247.9 336,250.4 338,250.7 340,248.9 342,246.2 344,243.9 346,243.1 348,244.0 350,246.1 350,246.1 352,248.4 354,250.0 356,250.4 358,249.8 360,249.2 362,249.3 364,250.5 366,252.4 368,254.1 370,254.5 372,252.7 374,248.8 376,243.8 378,238.9 380,235.4 382,234.1 384,234.6 386,236.2 388,237.6 390,238.2 392,237.8 394,237.1 396,236.8 398,237.8 400,239.8 402,242.4 404,244.3 406,244.7 408,243.2 410,240.4 410,272.4 412,269.4 414,267.7 416,268.0 418,270.5 420,274.3 422,278.3 424,281.3 426,282.9 428,283.3 430,283.4 432,283.9 434,285.1 436,286.9 438,288.2 440,288.1 442,286.1 444,282.4 446,277.9 448,274.1 450,272.0 452,272.1 454,273.9 456,276.3 458,278.0 460,278.3 462,277.1 464,275.2 466,273.4 468,272.5 470,272.6 470,240.6 472,241.1 474,241.0 476,239.7 478,237.0 480,233.6 482,230.8 484,229.7 486,230.9 488,234.4 490,239.0 492,243.3 494,246.4 496,247.8 498,247.8 500,247.4 502,247.4 504,248.3 506,249.9 508,251.3 510,251.6 512,250.4 514,248.0 516,245.3 518,243.7 520,244.0 522,246.2 524,249.6 526,253.0 528,255.0 530,254.9" fill="none" stroke="#f28c28" stroke-width="2.6" stroke-dasharray="7 4" clip-path="url(#rv16)"/>
+        <text x="8" y="249" font-size="16" fill="#0b3d63" font-weight="700">V+</text>
+        <text x="8" y="281" font-size="16" fill="#c2610c" font-weight="700">V−</text>
+        <rect data-step="3" data-fx="fade" x="190" y="318" width="220" height="38" rx="8" fill="#0b3d63"/>
+        <text data-step="3" data-fx="fade" x="300" y="343" font-size="17" text-anchor="middle" fill="#fff" font-weight="700">Приемник: V+ − V−</text>
+        <line data-step="3" data-fx="fade" x1="300" y1="292" x2="300" y2="316" stroke="#1f2a37" stroke-width="2" marker-end="url(#a16)"/>
+        <line data-step="3" data-fx="fade" x1="300" y1="356" x2="300" y2="376" stroke="#1f2a37" stroke-width="2" marker-end="url(#a16)"/>
+        <text x="10" y="392" font-size="17" font-weight="700" fill="#0b3d63">③ Разлика = 2·s(t) – шумът n(t) се съкращава</text>
+        <line x1="50" y1="455" x2="530" y2="455" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+        <polyline data-step="4" data-fx="wipe" points="50,415.0 52,415.0 54,415.0 56,415.0 58,415.0 60,415.0 62,415.0 64,415.0 66,415.0 68,415.0 70,415.0 72,415.0 74,415.0 76,415.0 78,415.0 80,415.0 82,415.0 84,415.0 86,415.0 88,415.0 90,415.0 92,415.0 94,415.0 96,415.0 98,415.0 100,415.0 102,415.0 104,415.0 106,415.0 108,415.0 110,415.0 110,495.0 112,495.0 114,495.0 116,495.0 118,495.0 120,495.0 122,495.0 124,495.0 126,495.0 128,495.0 130,495.0 132,495.0 134,495.0 136,495.0 138,495.0 140,495.0 142,495.0 144,495.0 146,495.0 148,495.0 150,495.0 152,495.0 154,495.0 156,495.0 158,495.0 160,495.0 162,495.0 164,495.0 166,495.0 168,495.0 170,495.0 170,415.0 172,415.0 174,415.0 176,415.0 178,415.0 180,415.0 182,415.0 184,415.0 186,415.0 188,415.0 190,415.0 192,415.0 194,415.0 196,415.0 198,415.0 200,415.0 202,415.0 204,415.0 206,415.0 208,415.0 210,415.0 212,415.0 214,415.0 216,415.0 218,415.0 220,415.0 222,415.0 224,415.0 226,415.0 228,415.0 230,415.0 230,415.0 232,415.0 234,415.0 236,415.0 238,415.0 240,415.0 242,415.0 244,415.0 246,415.0 248,415.0 250,415.0 252,415.0 254,415.0 256,415.0 258,415.0 260,415.0 262,415.0 264,415.0 266,415.0 268,415.0 270,415.0 272,415.0 274,415.0 276,415.0 278,415.0 280,415.0 282,415.0 284,415.0 286,415.0 288,415.0 290,415.0 290,495.0 292,495.0 294,495.0 296,495.0 298,495.0 300,495.0 302,495.0 304,495.0 306,495.0 308,495.0 310,495.0 312,495.0 314,495.0 316,495.0 318,495.0 320,495.0 322,495.0 324,495.0 326,495.0 328,495.0 330,495.0 332,495.0 334,495.0 336,495.0 338,495.0 340,495.0 342,495.0 344,495.0 346,495.0 348,495.0 350,495.0 350,495.0 352,495.0 354,495.0 356,495.0 358,495.0 360,495.0 362,495.0 364,495.0 366,495.0 368,495.0 370,495.0 372,495.0 374,495.0 376,495.0 378,495.0 380,495.0 382,495.0 384,495.0 386,495.0 388,495.0 390,495.0 392,495.0 394,495.0 396,495.0 398,495.0 400,495.0 402,495.0 404,495.0 406,495.0 408,495.0 410,495.0 410,415.0 412,415.0 414,415.0 416,415.0 418,415.0 420,415.0 422,415.0 424,415.0 426,415.0 428,415.0 430,415.0 432,415.0 434,415.0 436,415.0 438,415.0 440,415.0 442,415.0 444,415.0 446,415.0 448,415.0 450,415.0 452,415.0 454,415.0 456,415.0 458,415.0 460,415.0 462,415.0 464,415.0 466,415.0 468,415.0 470,415.0 470,495.0 472,495.0 474,495.0 476,495.0 478,495.0 480,495.0 482,495.0 484,495.0 486,495.0 488,495.0 490,495.0 492,495.0 494,495.0 496,495.0 498,495.0 500,495.0 502,495.0 504,495.0 506,495.0 508,495.0 510,495.0 512,495.0 514,495.0 516,495.0 518,495.0 520,495.0 522,495.0 524,495.0 526,495.0 528,495.0 530,495.0" fill="none" stroke="#1f2a37" stroke-width="3" clip-path="url(#rv16)"/>
+        <g data-step="4" data-fx="wipe" font-size="16" font-weight="700" text-anchor="middle" fill="#0b3d63"><text x="80" y="527">1</text><text x="140" y="527">0</text><text x="200" y="527">1</text><text x="260" y="527">1</text><text x="320" y="527">0</text><text x="380" y="527">0</text><text x="440" y="527">1</text><text x="500" y="527">0</text></g>
+        <text x="538" y="420" font-size="14" fill="#475569">+0,2 V</text>
+        <text x="538" y="500" font-size="14" fill="#475569">−0,2 V</text>
+        <line class="cursor" x1="50" y1="30" x2="50" y2="500" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="10" y="553" font-size="15" fill="#475569">s(t) = ±0,1 V на проводник → ±0,2 V диференциално (0,4 V p-p)</text>
       </svg>
     </div>
   </div>
@@ -520,45 +555,134 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
 
 <!-- 17 -->
 <section class="slide">
-  <h2>Кодиране 8b/10b</h2>
+  <h2>Диференциално предаване – нагледен пример</h2>
   <div class="c cols">
     <div>
-      <ul>
-        <li>Всеки байт (8 бита) се кодира с <span class="k">10-битов символ</span> (IBM, Widmer & Franaszek)</li>
-        <li><span class="k">25 % излишък</span>: 1,5 Gbit/s → 1,2 Gbit/s полезни</li>
-        <li><span class="k">DC баланс</span>: брой „1“ ≈ брой „0“ – нужно при AC свързване</li>
-        <li>Не повече от 5 еднакви бита подред → достатъчно преходи за CDR</li>
-        <li><span class="k">Running disparity (RD)</span> – всеки символ има 2 варианта (RD− / RD+)</li>
-        <li>Символи <span class="k">Dxx.y</span> (данни) и <span class="k">Kxx.y</span> (управляващи)</li>
-        <li>Грешен код или грешна disparity → откриване на грешка</li>
-      </ul>
+      <p class="small" style="margin-top:0">Покой 0,25 V; сигнал ±0,1 V на проводник. Импулсно смущение от <b>±0,3 V</b> попада в кабела при третия и четвъртия бит.</p>
+      <table class="tight" style="font-size:19px">
+        <tr><th>Бит</th><th>Шум</th><th>V+</th><th>V−</th><th>V+ − V−</th><th>Диф.</th><th>Еднопров.</th></tr>
+        <tr><td><b>1</b></td><td>0</td><td>0,35</td><td>0,15</td><td><b>+0,20</b></td><td>1 ✔</td><td>1 ✔</td></tr>
+        <tr><td><b>0</b></td><td>0</td><td>0,15</td><td>0,35</td><td><b>−0,20</b></td><td>0 ✔</td><td>0 ✔</td></tr>
+        <tr><td><b>0</b></td><td class="o">+0,30</td><td>0,45</td><td>0,65</td><td><b>−0,20</b></td><td>0 ✔</td><td style="color:#c0392b;font-weight:700">1 ✘</td></tr>
+        <tr><td><b>1</b></td><td class="o">−0,30</td><td>0,05</td><td>−0,15</td><td><b>+0,20</b></td><td>1 ✔</td><td style="color:#c0392b;font-weight:700">0 ✘</td></tr>
+        <tr><td><b>1</b></td><td>0</td><td>0,35</td><td>0,15</td><td><b>+0,20</b></td><td>1 ✔</td><td>1 ✔</td></tr>
+      </table>
+      <p class="note">Всички напрежения са във V. „Еднопров.“ – приемник, който сравнява само V+ с праг 0,25 V спрямо маса (както при паралелния ATA).</p>
+      <div class="box b">Шумът променя <b>и двата</b> проводника с една и съща стойност, затова разликата остава ±0,20 V и битът се разпознава правилно.</div>
     </div>
     <div>
-      <svg width="560" height="250" viewBox="0 0 560 250">
-        <text x="10" y="24" font-size="16" font-weight="700" fill="#0b3d63">Байт HGF EDCBA → abcdei fghj</text>
-        <g font-size="16" text-anchor="middle" font-family="Menlo, monospace">
-          <rect x="20" y="40" width="150" height="44" fill="#e2e8f0" stroke="#64748b"/><text x="95" y="68">HGF (3 b)</text>
-          <rect x="170" y="40" width="250" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="295" y="68">EDCBA (5 b)</text>
-          <rect x="20" y="150" width="300" height="44" fill="#dbeafe" stroke="#2f78b0"/><text x="170" y="178">abcdei (6 b)</text>
-          <rect x="320" y="150" width="200" height="44" fill="#e2e8f0" stroke="#64748b"/><text x="420" y="178">fghj (4 b)</text>
-        </g>
-        <line x1="295" y1="84" x2="170" y2="150" stroke="#2f78b0" stroke-width="2"/>
-        <line x1="95" y1="84" x2="420" y2="150" stroke="#64748b" stroke-width="2"/>
-        <text x="300" y="112" font-size="14" fill="#2f78b0">5b/6b</text>
-        <text x="110" y="112" font-size="14" fill="#475569">3b/4b</text>
-        <text x="20" y="230" font-size="15" fill="#475569">Dxx.y: xx = EDCBA (десетично), y = HGF</text>
+      <svg class="anim" style="--d:460px" width="560" height="500" viewBox="0 0 560 500">
+        <defs><clipPath id="rv17"><rect class="reveal" x="0" y="0" width="560" height="500"/></clipPath></defs>
+        <rect x="245" y="40" width="130" height="420" fill="#fde2e0" opacity=".7"/>
+        <text x="310" y="32" font-size="14" text-anchor="middle" fill="#c0392b" font-weight="700">смущение</text>
+        <text x="10" y="70" font-size="17" font-weight="700" fill="#0b3d63">Еднопроводен приемник (V+ спрямо маса)</text>
+        <line x1="50" y1="175" x2="510" y2="175" stroke="#c0392b" stroke-dasharray="6 4"/><text x="512" y="179" font-size="13" fill="#c0392b">праг</text>
+        <polyline data-step="1" data-fx="wipe" clip-path="url(#rv17)" points="50,155 115,155 115,195 245,195 245,135 310,135 310,215 375,215 375,155 510,155" fill="none" stroke="#0b3d63" stroke-width="3"/>
+        <g data-step="1" data-fx="wipe" font-size="16" font-weight="700" text-anchor="middle"><text x="82" y="120">1</text><text x="180" y="120">0</text><text x="278" y="120" fill="#c0392b">1 ✘</text><text x="342" y="242" fill="#c0392b">0 ✘</text><text x="442" y="120">1</text></g>
+        <text x="10" y="320" font-size="17" font-weight="700" fill="#0b3d63">Диференциален приемник (V+ − V−)</text>
+        <line x1="50" y1="400" x2="510" y2="400" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+        <polyline data-step="2" data-fx="wipe" clip-path="url(#rv17)" points="50,360 115,360 115,440 245,440 245,440 310,440 310,360 375,360 375,360 510,360" fill="none" stroke="#1f2a37" stroke-width="3"/>
+        <g data-step="2" data-fx="wipe" font-size="16" font-weight="700" text-anchor="middle" fill="#0b3d63"><text x="82" y="350">1</text><text x="180" y="465">0</text><text x="278" y="465">0 ✔</text><text x="342" y="350">1 ✔</text><text x="442" y="350">1</text></g>
+        <line class="cursor" x1="50" y1="40" x2="50" y2="460" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 3"/>
       </svg>
-      <table class="small">
-        <tr><th>Символ</th><th>RD−</th><th>RD+</th></tr>
-        <tr><td><b>K28.5</b> (comma)</td><td class="m">001111 1010</td><td class="m">110000 0101</td></tr>
-        <tr><td>D10.2</td><td class="m">010101 0101</td><td class="m">010101 0101</td></tr>
-      </table>
-      <p class="note">K28.5 съдържа уникална последователност (comma) за символно подравняване.</p>
     </div>
   </div>
 </section>
 
 <!-- 18 -->
+<section class="slide">
+  <h2>Кодиране 8b/10b</h2>
+  <div class="c cols w37">
+    <div>
+      <ul>
+        <li>Всеки байт (8 бита) се предава като <span class="k">10-битов символ</span> (IBM, Widmer & Franaszek)</li>
+        <li>Байтът се дели на 5 + 3 бита, кодирани отделно: <span class="k">5b/6b</span> и <span class="k">3b/4b</span></li>
+        <li><span class="k">25 % излишък</span>: 1,5 Gbit/s → 1,2 Gbit/s полезни</li>
+        <li><span class="k">DC баланс</span>: еднакъв брой „1“ и „0“ – нужно при AC свързване</li>
+        <li>Не повече от <span class="k">5 еднакви бита</span> подред → преходи за CDR</li>
+        <li>Символи <span class="k">Dx.y</span> (данни) и <span class="k">Kx.y</span> (управляващи, напр. K28.5)</li>
+      </ul>
+    </div>
+    <div>
+      <svg class="anim anim18" width="560" height="560" viewBox="0 0 560 560">
+        <defs><marker id="a18" viewBox="0 0 10 10" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a37"/></marker></defs>
+        <text x="10" y="24" font-size="17" font-weight="700" fill="#0b3d63">Пример: байт 53h (знакът „S“) → символ D19.2</text>
+        <text x="10" y="44" font-size="15" fill="#475569">① байтът: HGF = 010 (y = 2), EDCBA = 10011 (x = 19)</text>
+          <g><text x="110" y="62" font-size="14" text-anchor="middle" fill="#475569">H</text><rect x="87" y="70" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="110" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="156" y="62" font-size="14" text-anchor="middle" fill="#475569">G</text><rect x="133" y="70" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="156" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="202" y="62" font-size="14" text-anchor="middle" fill="#475569">F</text><rect x="179" y="70" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="202" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="266" y="62" font-size="14" text-anchor="middle" fill="#475569">E</text><rect x="243" y="70" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="266" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="312" y="62" font-size="14" text-anchor="middle" fill="#475569">D</text><rect x="289" y="70" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="312" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="358" y="62" font-size="14" text-anchor="middle" fill="#475569">C</text><rect x="335" y="70" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="358" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="404" y="62" font-size="14" text-anchor="middle" fill="#475569">B</text><rect x="381" y="70" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="404" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="450" y="62" font-size="14" text-anchor="middle" fill="#475569">A</text><rect x="427" y="70" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="450" y="97" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+        <g class="st2" data-step="1" data-fx="fade"><line x1="280" y1="118" x2="280" y2="150" stroke="#1f2a37" stroke-width="2" marker-end="url(#a18)"/>
+        <text x="10" y="166" font-size="15" fill="#475569">② подреждане по реда на предаване (младшият бит A първи)</text>
+          <g><text x="110" y="192" font-size="14" text-anchor="middle" fill="#475569">A</text><rect x="87" y="200" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="110" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="156" y="192" font-size="14" text-anchor="middle" fill="#475569">B</text><rect x="133" y="200" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="156" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="202" y="192" font-size="14" text-anchor="middle" fill="#475569">C</text><rect x="179" y="200" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="202" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="248" y="192" font-size="14" text-anchor="middle" fill="#475569">D</text><rect x="225" y="200" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="248" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="294" y="192" font-size="14" text-anchor="middle" fill="#475569">E</text><rect x="271" y="200" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="294" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="358" y="192" font-size="14" text-anchor="middle" fill="#475569">F</text><rect x="335" y="200" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="358" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="404" y="192" font-size="14" text-anchor="middle" fill="#475569">G</text><rect x="381" y="200" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="404" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="450" y="192" font-size="14" text-anchor="middle" fill="#475569">H</text><rect x="427" y="200" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="450" y="227" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+        </g><g class="st3" data-step="2" data-fx="fade"><line x1="280" y1="248" x2="280" y2="280" stroke="#1f2a37" stroke-width="2" marker-end="url(#a18)"/>
+        <text x="10" y="296" font-size="15" fill="#475569">③ 5b/6b и 3b/4b: копира се, добавя се по един бит (i, j)</text>
+          <g><text x="64" y="322" font-size="14" text-anchor="middle" fill="#475569">a</text><rect x="41" y="330" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="64" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="110" y="322" font-size="14" text-anchor="middle" fill="#475569">b</text><rect x="87" y="330" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="110" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="156" y="322" font-size="14" text-anchor="middle" fill="#475569">c</text><rect x="133" y="330" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="156" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="202" y="322" font-size="14" text-anchor="middle" fill="#475569">d</text><rect x="179" y="330" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="202" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="248" y="322" font-size="14" text-anchor="middle" fill="#475569">e</text><rect x="225" y="330" width="46" height="40" rx="3" fill="#dbeafe" stroke="#2f78b0"/><text x="248" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g class="addbit" data-step="3" data-fx="fade"><text x="294" y="322" font-size="14" text-anchor="middle" fill="#475569">i</text><rect x="271" y="330" width="46" height="40" rx="3" fill="#f28c28" stroke="#c2610c"/><text x="294" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#fff">0</text></g>
+          <g><text x="358" y="322" font-size="14" text-anchor="middle" fill="#475569">f</text><rect x="335" y="330" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="358" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g><text x="404" y="322" font-size="14" text-anchor="middle" fill="#475569">g</text><rect x="381" y="330" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="404" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">1</text></g>
+          <g><text x="450" y="322" font-size="14" text-anchor="middle" fill="#475569">h</text><rect x="427" y="330" width="46" height="40" rx="3" fill="#e2e8f0" stroke="#64748b"/><text x="450" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#1f2a37">0</text></g>
+          <g class="addbit" data-step="3" data-fx="fade"><text x="496" y="322" font-size="14" text-anchor="middle" fill="#475569">j</text><rect x="473" y="330" width="46" height="40" rx="3" fill="#f28c28" stroke="#c2610c"/><text x="496" y="357" font-size="19" text-anchor="middle" font-family="Menlo, monospace" font-weight="700" fill="#fff">1</text></g></g>
+        <g class="addbit" data-step="3" data-fx="fade">
+        <text x="10" y="412" font-size="16" fill="#1f2a37"><tspan font-weight="700" fill="#c2610c">i = 0</tspan>: abcde = 11001 има 3 единици и 2 нули → i = 0 дава 3/3</text>
+        <text x="10" y="440" font-size="16" fill="#1f2a37"><tspan font-weight="700" fill="#c2610c">j = 1</tspan>: fgh = 010 има 1 единица и 2 нули → j = 1 дава 2/2</text>
+        <rect x="10" y="462" width="540" height="50" rx="8" fill="#eaf2fa"/>
+        <text x="280" y="494" font-size="18" text-anchor="middle" font-weight="700" fill="#0b3d63">D19.2 = 110010 0101 – 5 единици и 5 нули</text>
+        </g>
+        <g font-size="14"><rect x="10" y="530" width="16" height="16" fill="#dbeafe" stroke="#2f78b0"/><text x="32" y="543">копиран бит (5b)</text><rect x="170" y="530" width="16" height="16" fill="#e2e8f0" stroke="#64748b"/><text x="192" y="543">копиран бит (3b)</text><rect x="330" y="530" width="16" height="16" fill="#f28c28"/><text x="352" y="543">добавен бит</text></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <h2>8b/10b – как се определят добавените битове i и j</h2>
+  <div class="c cols">
+    <div>
+      <ol style="margin:0;padding-left:30px">
+        <li><b>Копиране:</b> abcde = ABCDE, fgh = FGH</li>
+        <li><b>Балансиране:</b> добавеният бит изравнява единиците и нулите в подблока:
+          <ul class="small" style="margin-top:4px">
+            <li>abcde с 2 единици → <b>i = 1</b>; с 3 единици → <b>i = 0</b></li>
+            <li>fgh с 1 единица → <b>j = 1</b>; с 2 единици → <b>j = 0</b></li>
+          </ul></li>
+        <li><b>Таблица:</b> когато един бит не стига (напр. abcde = 10000), стандартът дава код с 4 единици и неговия <b>инверсен</b> код с 2 единици</li>
+        <li><b>Running disparity (RD):</b> при RD− се изпраща кодът с повече единици, при RD+ – с повече нули; след такъв код RD сменя знака</li>
+      </ol>
+      <p class="note">Правило 2 важи за 18 от 32-те стойности на 5b/6b и за 4 от 8-те на 3b/4b. Останалите се вземат от таблицата: или не могат да се балансират с един бит, или са изключения (D7, D24, Dx.3, Dx.4), за да няма повече от 5 еднакви бита подред.</p>
+    </div>
+    <div>
+      <p class="k" style="margin:0 0 8px">Пример: низът „SATA“ (начално RD−)</p>
+      <table class="tight" style="font-size:19px">
+        <tr><th>Знак</th><th>Байт</th><th>Символ</th><th>RD</th><th>abcdei</th><th>fghj</th><th>RD след</th></tr>
+        <tr data-step="1" data-fx="fade"><td><b>S</b></td><td>53h</td><td>D19.2</td><td>−</td><td class="m">11001<b class="o">0</b></td><td class="m">010<b class="o">1</b></td><td>−</td></tr>
+        <tr data-step="2" data-fx="fade"><td><b>A</b></td><td>41h</td><td>D1.2</td><td>−</td><td class="m">011101</td><td class="m">010<b class="o">1</b></td><td><b>+</b></td></tr>
+        <tr data-step="3" data-fx="fade"><td><b>T</b></td><td>54h</td><td>D20.2</td><td>+</td><td class="m">00101<b class="o">1</b></td><td class="m">010<b class="o">1</b></td><td>+</td></tr>
+        <tr data-step="4" data-fx="fade"><td><b>A</b></td><td>41h</td><td>D1.2</td><td>+</td><td class="m">100010</td><td class="m">010<b class="o">1</b></td><td><b>−</b></td></tr>
+      </table>
+      <div class="box" data-step="5" data-fx="fade">Буквата <b>A</b> (abcde = 10000, само 1 единица) не може да се балансира с един бит. Затова първият път се изпраща <span class="m">011101</span> (4 единици, RD− → RD+), а вторият път – инверсният <span class="m">100010</span> (2 единици, RD+ → RD−). Така средно броят на „1“ и „0“ остава равен.</div>
+      <p class="note">Оранжево – добавен бит по правило 2. K28.5 = <span class="m">001111 1010</span> / <span class="m">110000 0101</span> съдържа comma за подравняване.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
 <section class="slide">
   <h2>Примитиви на каналния слой</h2>
   <div class="c cols w73">
@@ -595,7 +719,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 19 -->
+<!-- 21 -->
 <section class="slide">
   <h2>OOB сигнализация <small>COMRESET · COMINIT · COMWAKE</small></h2>
   <div class="c">
@@ -632,7 +756,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 20 -->
+<!-- 22 -->
 <section class="slide">
   <h2>Инициализация на връзката и договаряне на скоростта</h2>
   <div class="c cols">
@@ -669,7 +793,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 21 -->
+<!-- 23 -->
 <section class="slide">
   <h2>Scrambling и Spread-Spectrum Clocking</h2>
   <div class="c cols">
@@ -703,7 +827,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 22 -->
+<!-- 24 -->
 <section class="slide">
   <h2>Канален слой (Link Layer) – функции</h2>
   <div class="c cols">
@@ -738,7 +862,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 23 -->
+<!-- 25 -->
 <section class="slide">
   <h2>Структура на рамка (frame)</h2>
   <div class="c">
@@ -767,7 +891,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 24 -->
+<!-- 26 -->
 <section class="slide">
   <h2>Предаване на рамка – последователност (handshake)</h2>
   <div class="c cols w73">
@@ -807,7 +931,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 25 -->
+<!-- 27 -->
 <section class="slide">
   <h2>Управление на потока: HOLD / HOLDA</h2>
   <div class="c cols">
@@ -854,7 +978,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 26 -->
+<!-- 28 -->
 <section class="slide">
   <h2>Транспортен слой – типове FIS</h2>
   <div class="c">
@@ -873,7 +997,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 27 -->
+<!-- 29 -->
 <section class="slide">
   <h2>Register – Host to Device FIS (27h)</h2>
   <div class="c">
@@ -917,7 +1041,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 28 -->
+<!-- 30 -->
 <section class="slide">
   <h2>Команден слой – основни ATA команди</h2>
   <div class="c">
@@ -939,7 +1063,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 29 -->
+<!-- 31 -->
 <section class="slide">
   <h2>PIO протокол – последователност от FIS</h2>
   <div class="c cols">
@@ -974,7 +1098,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 30 -->
+<!-- 32 -->
 <section class="slide">
   <h2>DMA протокол</h2>
   <div class="c cols">
@@ -1015,7 +1139,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 31 -->
+<!-- 33 -->
 <section class="slide">
   <h2>NCQ (Native Command Queuing) – принцип</h2>
   <div class="c cols">
@@ -1059,7 +1183,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 32 -->
+<!-- 34 -->
 <section class="slide">
   <h2>NCQ – последователност на протокола</h2>
   <div class="c cols w73">
@@ -1099,7 +1223,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 33 -->
+<!-- 35 -->
 <section class="slide">
   <h2>TRIM и SSD</h2>
   <div class="c cols">
@@ -1134,7 +1258,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 34 -->
+<!-- 36 -->
 <section class="slide">
   <h2>Hot-plug и staggered spin-up</h2>
   <div class="c cols">
@@ -1161,7 +1285,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 35 -->
+<!-- 37 -->
 <section class="slide">
   <h2>Управление на енергията</h2>
   <div class="c cols">
@@ -1188,7 +1312,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 36 -->
+<!-- 38 -->
 <section class="slide">
   <h2>Кабел и конектор за данни (7 пина)</h2>
   <div class="c cols">
@@ -1226,7 +1350,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 37 -->
+<!-- 39 -->
 <section class="slide">
   <h2>Захранващ конектор (15 пина)</h2>
   <div class="c cols">
@@ -1270,7 +1394,19 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 38 -->
+<!-- 40 -->
+<section class="slide">
+  <h2>Реални компоненти: кабели и конектори</h2>
+  <div class="c gal" style="grid-template-columns: 1.15fr 0.85fr 1.25fr; grid-template-rows: 1fr 1fr">
+      <figure><img src="img/sata-cables.jpg" alt="SATA кабели"><figcaption><b>Кабели за данни – прав и ъглов накрайник</b><span>Снимка: Gpkp, CC BY-SA 4.0, Wikimedia Commons</span></figcaption></figure>
+      <figure style="grid-row: span 2"><img src="img/sata-motherboard-ports.jpg" alt="SATA портове"><figcaption><b>Кабел и SATA портове на дънна платка</b><span>Снимка: Berkut, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/sata-power-plug.jpg" alt="Захранващ конектор"><figcaption><b>Захранващ конектор (15 пина): 12 V, 5 V, 3,3 V</b><span>Снимка: Afrank99, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/sata-data-cable.jpg" alt="Конектор за данни" style="object-fit: contain; background: #c9bfb6"><figcaption><b>Конектор за данни (7 пина) с L-ключ</b><span>Снимка: „SATA Data Cable“, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/sata-data-power-connectors.jpg" alt="Конектори на диск"><figcaption><b>Конектори за данни и захранване на диск</b><span>Снимка: Bubba73, CC BY-SA 4.0, Wikimedia Commons</span></figcaption></figure>
+  </div>
+</section>
+
+<!-- 41 -->
 <section class="slide">
   <h2>Разновидности: Slimline, micro SATA, eSATA, eSATAp</h2>
   <div class="c">
@@ -1286,7 +1422,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 39 -->
+<!-- 42 -->
 <section class="slide">
   <h2>mSATA и M.2</h2>
   <div class="c cols">
@@ -1323,7 +1459,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 40 -->
+<!-- 43 -->
 <section class="slide">
   <h2>SATA Express и U.2</h2>
   <div class="c cols">
@@ -1350,7 +1486,20 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 41 -->
+<!-- 44 -->
+<section class="slide">
+  <h2>Реални компоненти: форм-фактори и контролери</h2>
+  <div class="c gal" style="grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr">
+      <figure><img src="img/msata-m2.jpg" alt="mSATA (вляво) и M.2 SATA SSD"><figcaption><b>mSATA (вляво) и M.2 SATA SSD</b><span>Снимка: Anand Lal Shimpi, CC BY-SA 4.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/esata-port.jpg" alt="eSATA порт – без L-ключ, екраниран"><figcaption><b>eSATA порт – без L-ключ, екраниран</b><span>Снимка: Joshuaek, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/sata-express-connectors.jpg" alt="SATA Express конектори на дънна платка"><figcaption><b>SATA Express конектори на дънна платка</b><span>Снимка: Dsimic, CC BY-SA 4.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/drives-connectors.jpg" alt="2,5" и 3,5" SATA диск – еднакви конектори"><figcaption><b>2,5" и 3,5" SATA диск – еднакви конектори</b><span>Снимка: Dsimic, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/pcie-sata-controller.jpg" alt="SATA 6 Gbit/s контролер – PCIe карта"><figcaption><b>SATA 6 Gbit/s контролер – PCIe карта</b><span>Снимка: Dsimic, CC BY-SA 3.0, Wikimedia Commons</span></figcaption></figure>
+      <figure><img src="img/port-multiplier-card.jpg" alt="Контролер с вградени Port Multiplier-и"><figcaption><b>Контролер с вградени Port Multiplier-и</b><span>Снимка: Dsimic, CC BY-SA 4.0, Wikimedia Commons</span></figcaption></figure>
+  </div>
+</section>
+
+<!-- 45 -->
 <section class="slide">
   <h2>Хост контролери: IDE (legacy), AHCI, RAID</h2>
   <div class="c">
@@ -1373,7 +1522,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 42 -->
+<!-- 46 -->
 <section class="slide">
   <h2>AHCI – структури в паметта</h2>
   <div class="c">
@@ -1427,7 +1576,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 43 -->
+<!-- 47 -->
 <section class="slide">
   <h2>AHCI – регистри на порт и SStatus / SControl / SError</h2>
   <div class="c cols">
@@ -1468,7 +1617,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 44 -->
+<!-- 48 -->
 <section class="slide">
   <h2>Port Multiplier и Port Selector</h2>
   <div class="c cols">
@@ -1511,7 +1660,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 45 -->
+<!-- 49 -->
 <section class="slide">
   <h2>SATA и SAS – съвместимост</h2>
   <div class="c cols">
@@ -1544,7 +1693,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 46 -->
+<!-- 50 -->
 <section class="slide">
   <h2>RAID със SATA дискове</h2>
   <div class="c">
@@ -1570,7 +1719,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 47 -->
+<!-- 51 -->
 <section class="slide">
   <h2>SATA за HDD и SSD; сравнение с NVMe</h2>
   <div class="c cols">
@@ -1596,7 +1745,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 48 -->
+<!-- 52 -->
 <section class="slide">
   <h2>Диагностика: S.M.A.R.T. и инструменти</h2>
   <div class="c cols">
@@ -1631,7 +1780,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 49 -->
+<!-- 53 -->
 <section class="slide">
   <h2>Приложение днес и бъдеще на SATA</h2>
   <div class="c cols">
@@ -1658,7 +1807,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
   </div>
 </section>
 
-<!-- 50 -->
+<!-- 54 -->
 <section class="slide end">
   <div style="padding:46px 70px 0">
     <h1 style="font-size:40px;margin:0 0 6px">Заключение</h1>
@@ -1674,6 +1823,7 @@ svg { display: block; margin: 0 auto; font-family: "Helvetica Neue", Arial, sans
           <li>INCITS T13, <i>ATA/ATAPI-7</i> (Volume 3 – Serial Transport)</li>
           <li>Wikipedia, „Serial ATA“, „Advanced Host Controller Interface“, „8b/10b encoding“</li>
           <li>Учебни материали по „Компютърна периферия“, ТУ – София, ФКСТ</li>
+          <li>Снимки на компонентите: Wikimedia Commons (CC BY-SA 3.0 / 4.0), авторите са посочени под всяка снимка</li>
         </ol>
       </div>
       <div style="display:flex;align-items:center;justify-content:center">
