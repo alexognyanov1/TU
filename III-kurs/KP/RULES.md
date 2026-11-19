@@ -18,6 +18,7 @@
 
 - Google Chrome (headless `--print-to-pdf`), `pdftotext` (poppler) for the table-of-contents pass, Python 3 standard library.
 - Diagrams are inline SVG inside the HTML. Animations are CSS-only and play in the browser; `build.py --video` renders them to MP4 with headless Chrome + `ffmpeg`.
+- A PowerPoint version is generated from the same HTML with `build_pptx.py` (`python-pptx` in a virtualenv): native title bar, footer and slide numbers, slide bodies as pictures rendered by Chrome, and native entrance animations for the elements marked `data-step="N" data-fx="wipe|fade"` in the HTML. Never edit the `.pptx` by hand; change the HTML and rebuild. Check the result by converting it to PDF with LibreOffice and comparing with the Chrome PDF.
 - Photos of real components are allowed when they are freely licensed (e.g. Wikimedia Commons, CC BY-SA): store them locally in `src/img/` and credit the author and licence under each photo.
 - Commit both the HTML source (`src/`) and the rendered PDFs, so classmates can read them on GitHub without building.
 
@@ -36,4 +37,5 @@
 ```sh
 python3 III-kurs/KP/SATA/src/build.py           # renders SATA_referat.pdf and SATA_prezentatsia.pdf
 python3 III-kurs/KP/SATA/src/build.py --video   # also renders SATA_animatsiya.mp4 (needs ffmpeg)
+<venv>/bin/python III-kurs/KP/SATA/src/build_pptx.py   # renders SATA_prezentatsia.pptx (pip install python-pptx)
 ```
