@@ -1,0 +1,8 @@
+Your vectors
+a * b = (4, 6, 6, 0)
+a / b: division by zero
+a + f = (1, 2, 3, 4)
+a * f = (0, 0, 0, 0)
+a / f: division by zero
+f / a = (0, 0, 0, 0)
+a = (2, 2, 3, 4)

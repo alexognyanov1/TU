@@ -1,0 +1,14 @@
+smallBox < mediumBox: yes
+smallBox == mediumBox: no
+mediumBox < smallBox: no
+mediumBox > smallBox: yes
+smallBox < 8: no
+smallBox == 8: yes
+8 == smallBox: yes
+mediumBox < 100: yes
+100 < mediumBox: no
+aBox - smallBox dimensions are 10 4 2
+aBox - smallBox == mediumBox: yes
+bBox - aBox - smallBox dimensions are 10 4 2
+smallBox - mediumBox dimensions are 4 2 0
+smallBox - mediumBox == 0: yes
