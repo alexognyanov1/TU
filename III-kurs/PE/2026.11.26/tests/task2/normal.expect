@@ -1,0 +1,25 @@
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> [LoggedPtr] -> access
+Student: 250.5 lv
+> [LoggedPtr] -> access
+Student: 350.5 lv
+> host = localhost
+> host = localhost
+port = 5432
+> host = localhost
+port = 6000
+> port = "6000"
+> missing = ""
+> [1]
+> [2, 1]
+> [3, 2, 1]
+> buf[0] = 3
+> buf[2] = 1
+> Student: 350.5 lv
+host = localhost
+port = 6000
+missing = 
+[3, 2, 1]
+> Bye
+[BankAccount] the account of Student is deleted

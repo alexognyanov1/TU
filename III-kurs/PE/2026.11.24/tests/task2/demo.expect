@@ -1,0 +1,13 @@
+a = 17, b = 5, c = 0
++a = 17
+-a = -17
+a + b = 22
+a - b = 12
+a * b = 85
+a / b = 3
+a + 3 = 20
+3 - a = -14
+c = -(a + b) * 2 / (b - 1) = -11
+a / (b - 5): division by zero
+max + 1: the result does not fit in an int
+Input ended

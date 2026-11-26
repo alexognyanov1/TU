@@ -1,0 +1,51 @@
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> k1 = 1
+> k1 = 1
+k2 = 2
+> k1 = 1
+k2 = 2
+k3 = 3
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+k5 = 5
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+k5 = 5
+k6 = 6
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+k5 = 5
+k6 = 6
+k7 = 7
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+k5 = 5
+k6 = 6
+k7 = 7
+k8 = 8
+> Error: the map is full (8 keys)
+> Error: the map is full (8 keys)
+> k1 = 1
+k2 = 2
+k3 = 3
+k4 = 4
+k5 = 5
+k6 = 6
+k7 = 7
+k8 = changed
+> k8 = "changed"
+> Bye
+[BankAccount] the account of Student is deleted

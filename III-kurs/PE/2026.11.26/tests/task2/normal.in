@@ -1,0 +1,14 @@
+deposit 250.5
+deposit 100
+set host localhost
+set port 5432
+set port 6000
+get port
+get missing
+push 1
+push 2
+push 3
+at 0
+at 2
+show
+q

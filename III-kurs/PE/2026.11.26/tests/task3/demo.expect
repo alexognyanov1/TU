@@ -1,0 +1,19 @@
+DynArray: a dynamic array of numbers
+a = [1, 2, 3]
+b = [4, 5.5]
+a[1] = 2
+a after a[1] = 20: [1, 20, 3]
+a + b = [1, 20, 3, 4, 5.5]
+b + a = [4, 5.5, 1, 20, 3]
+a == b: false
+c = a: [1, 20, 3]
+a == c: true
+after c[0] = 100: c = [100, 20, 3], a = [1, 20, 3]
+a == c: false
+a after a = a: [1, 20, 3]
+d = e = b: d = [4, 5.5], e = [4, 5.5]
+a[3]: index 3 is outside the 3 stored elements
+second push into DynArray(1): the array is full (capacity 1)
+Your arrays
+Array a (0 to 8 numbers on one line): 
+Input ended

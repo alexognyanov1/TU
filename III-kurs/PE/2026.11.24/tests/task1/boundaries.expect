@@ -1,0 +1,9 @@
+A dimensions are 0.01 0.01 0.01
+B dimensions are 1000 1000 1000
+A volume: 1e-06, B volume: 1e+09
+A < B: yes
+A < 0: no
+0 < A: yes
+B == 0: no
+A + B dimensions are 1000 1000 1000.01
+B - A dimensions are 1000 1000 999.99

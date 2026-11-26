@@ -1,0 +1,4 @@
+A + B dimensions are 2 2 8
+A - B dimensions are 2 2 0
+B - A dimensions are 2 2 2
+A + B - B == A: yes

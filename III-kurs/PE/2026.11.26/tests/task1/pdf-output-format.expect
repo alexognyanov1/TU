@@ -1,0 +1,13 @@
+Complex numbers
+z1 (a+bi or a-bi): z2 (a+bi or a-bi): z1 = 3.5+2i
+z2 = 3.5-2i
+z1 + z2 = 7+0i
+z1 - z2 = 0+4i
+z1 * z2 = 16.25+0i
+z1 / z2 = 0.507692+0.861538i
+-z1 = -3.5-2i
+(z1 + z2) * (-z1) = -24.5-14i
+|z1| = 4.03113
+|z2| = 4.03113
+z1 == z2: false
+z1 != z2: true

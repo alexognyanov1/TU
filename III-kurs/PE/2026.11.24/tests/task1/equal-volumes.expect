@@ -1,0 +1,10 @@
+A volume: 24, B volume: 24
+A < B: no
+A == B: yes
+A > B: no
+A == 24: yes
+24 == B: yes
+A + B dimensions are 6 2 6
+A - B dimensions are 3 2 2
+B - A dimensions are 6 2 0
+A + B - B == A: no

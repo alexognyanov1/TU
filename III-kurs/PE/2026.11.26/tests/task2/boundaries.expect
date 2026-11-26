@@ -1,0 +1,12 @@
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> [LoggedPtr] -> access
+Student: 1e+06 lv
+> [LoggedPtr] -> access
+Student: 1e+06 lv
+> [-1e+06]
+> [1e+06, -1e+06]
+> buf[0] = 1e+06
+> buf[1] = -1e+06
+> Bye
+[BankAccount] the account of Student is deleted
