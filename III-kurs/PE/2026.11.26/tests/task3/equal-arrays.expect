@@ -1,0 +1,8 @@
+Your arrays
+Array a (0 to 8 numbers on one line): Array b (0 to 8 numbers on one line): a = [1.5, -2, 3]
+b = [1.5, -2, 3]
+a + b = [1.5, -2, 3, 1.5, -2, 3]
+a == b: true
+Index and new value for a: a = [1.5, -2, 3]
+a + b = [1.5, -2, 3, 1.5, -2, 3]
+a == b: true

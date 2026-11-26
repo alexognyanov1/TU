@@ -1,0 +1,42 @@
+LoggedPtr
+[LoggedPtr] -> access
+[LoggedPtr] -> access
+Ivan: 1500 lv
+(*p).describe(): Ivan: 1500 lv
+q = std::move(p)
+[BankAccount] the account of Maria is deleted
+p is nullptr: yes, q is nullptr: no
+[LoggedPtr] -> access
+Ivan: 1500 lv
+p->describe(): the pointer is nullptr
+end of the scope of q
+[BankAccount] the account of Ivan is deleted
+ConfigMap
+host = localhost
+port = 5432
+db = mydb
+port after cfg["port"] = "5433": 5433
+missing key user: ""
+copy after copy["host"] = "example.org":
+host = example.org
+port = 5433
+db = mydb
+user = 
+the original:
+host = localhost
+port = 5433
+db = mydb
+user = 
+other["db"]: mydb
+CircularBuffer
+after pushing 1 to 7 into capacity 5: [7, 6, 5, 4, 3]
+buf[0] = 7, expected 7: correct
+buf[4] = 3, expected 3: correct
+after buf[0] = 70: [70, 6, 5, 4, 3]
+the copy made before it: [7, 6, 5, 4, 3]
+buf[5]: index 5 is outside the 5 stored elements
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> 
+Input ended
+[BankAccount] the account of Student is deleted

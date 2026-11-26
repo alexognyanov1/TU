@@ -1,0 +1,21 @@
+
+foo
+deposit
+deposit abc
+deposit 0
+deposit -5
+deposit 1000001
+deposit 5 6
+set onlykey
+set a b c
+get
+push
+push x
+push 1000001
+at
+at 0
+at 1.5
+at x
+show now
+q now
+q

@@ -1,0 +1,8 @@
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> [LoggedPtr] -> access
+Student: 10 lv
+> a = b
+> 
+Input ended
+[BankAccount] the account of Student is deleted

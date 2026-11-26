@@ -1,0 +1,26 @@
+Your turn
+Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> [LoggedPtr] -> access
+Error: the amount must be above 0 and at most 1000000
+> [LoggedPtr] -> access
+Error: the amount must be above 0 and at most 1000000
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Error: index 0 is outside the 0 stored elements
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Commands: deposit AMOUNT | set KEY VALUE | get KEY | push NUMBER | at INDEX | show | q
+> Bye
+[BankAccount] the account of Student is deleted

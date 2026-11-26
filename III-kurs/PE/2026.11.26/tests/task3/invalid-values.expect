@@ -1,0 +1,8 @@
+Your arrays
+Array a (0 to 8 numbers on one line): Enter at most 8 numbers from -1e+06 to 1e+06: Enter at most 8 numbers from -1e+06 to 1e+06: Enter at most 8 numbers from -1e+06 to 1e+06: Enter at most 8 numbers from -1e+06 to 1e+06: Array b (0 to 8 numbers on one line): Enter at most 8 numbers from -1e+06 to 1e+06: a = [1, 2]
+b = [3]
+a + b = [1, 2, 3]
+a == b: false
+Index and new value for a: Enter a whole index and a number from -1e+06 to 1e+06: Enter a whole index and a number from -1e+06 to 1e+06: Enter a whole index and a number from -1e+06 to 1e+06: Enter a whole index and a number from -1e+06 to 1e+06: Enter a whole index and a number from -1e+06 to 1e+06: Enter a whole index and a number from -1e+06 to 1e+06: a = [1, 7]
+a + b = [1, 7, 3]
+a == b: false

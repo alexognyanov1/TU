@@ -1,0 +1,8 @@
+Your arrays
+Array a (0 to 8 numbers on one line): Array b (0 to 8 numbers on one line): a = [1, 2, 3, 4, 5, 6, 7, 8]
+b = [-1e+06, 1e+06]
+a + b = [1, 2, 3, 4, 5, 6, 7, 8, -1e+06, 1e+06]
+a == b: false
+Index and new value for a: a = [1, 2, 3, 4, 5, 6, 7, 0]
+a + b = [1, 2, 3, 4, 5, 6, 7, 0, -1e+06, 1e+06]
+a == b: false
